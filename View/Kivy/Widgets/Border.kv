@@ -1,0 +1,11 @@
+<Border@BoxLayout>:
+    orientation: 'vertical'
+    border_color: (1, 1, 1, 1)
+    border_width: 1
+
+    canvas.before:
+        Color:
+            rgba: self.border_color
+        Line:
+            rectangle: (self.x, self.y, self.width, self.height)
+            width: self.border_width

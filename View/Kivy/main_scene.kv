@@ -1,0 +1,189 @@
+<MainScene>:
+
+    orientation: "vertical"
+    canvas.before:
+        Color:
+            rgba: (0, 0, 0, 1)  
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: dp(20)
+            padding: dp(20), dp(40), dp(20), dp(20)
+
+            Label:
+                text: "Anotar Dextro"
+                size_hint_y: None
+                height: dp(40)
+                bold: True
+                font_size: dp(32)
+
+            GridLayout:
+                cols: 4
+                rows: 1
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: dp(35)
+                spacing: dp(10)
+                
+                # Data + Horário
+                Label:
+                    text: "Data:"
+                    bold: True
+                    size_hint_x: 0.1
+                
+                BoxLayout:
+                        
+                    Label:
+                        id: data_input
+                    Button:
+                        id: date_button
+                        text: "Escolher Data"
+                        color: (1, 1, 1, 1)
+                        on_release: root.choose_date()
+
+                Label:
+                    text: "Horário:"
+                    bold: True 
+                    size_hint_x: 0.13
+                Spinner:
+                    id: horario_spinner
+                    text: "Horário:"
+                    size_hint_x: 0.2
+
+            #Dextro
+            BoxLayout:
+                size_hint_y: None
+                height: dp(40)
+                spacing: dp(10)
+                Label:
+                    text: "Dextro:"
+                    bold: True
+                    size_hint_x: 0.18
+                TextInput:
+                    id: dextro_input
+                    multiline: False
+            
+            GridLayout:
+                cols: 2
+                rows: 2
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: dp(35)
+                spacing: dp(10)
+
+                # Lenta + Rápida
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(40)
+                    spacing: dp(10)
+                    Label:
+                        text: "Lenta:"
+                        bold: True
+                        size_hint_x: 0.12
+                    TextInput:
+                        id: lenta_input
+                        multiline: False
+                        padding: dp(5), dp(5), dp(5), dp(5)
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(40)
+                    spacing: dp(10)
+                    Label:
+                        text: "Rápida:"
+                        bold: True
+                        size_hint_x: 0.12
+                        padding: dp(5), dp(5), dp(5), dp(5)
+                    TextInput:
+                        id: rapida_input
+                        multiline: False
+                # Exercício + Refeição
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(40)
+                    spacing: dp(10)
+                    Label:
+                        text: "Exercício:"
+                        bold: True
+                        size_hint_x: 0.15
+                    TextInput:
+                        id: exercicio_input
+                        multiline: False
+                        padding: dp(5), dp(5), dp(5), dp(5)
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(40)
+                    spacing: dp(10)
+                    Label:
+                        text: "Refeição:"
+                        bold: True
+                        size_hint_x: 0.14
+                        padding: dp(5), dp(5), dp(5), dp(5)
+                    TextInput:
+                        id: refeicao_input
+                        multiline: False
+            #Observação
+            BoxLayout:
+                size_hint_y: None
+                height: dp(115)
+                spacing: dp(5)
+                orientation: 'vertical'
+                Label:
+                    text: "Observação:"
+                    bold: True
+                    height: dp(30)
+                    size_hint_y: None
+                    halign: 'center'
+                    text_size: self.size
+                TextInput:
+                    id: observacao_input
+                    height: dp(80)
+                    size_hint_y: None
+                    multiline: True
+
+            # Botão Salvar
+            Button:
+                text: "Salvar"
+                size_hint_y: None
+                height: dp(44)
+                on_press: root.save_card()
+
+            Label:
+                text: "Dextros por dia e horário"
+                bold: True
+                size_hint_y: None
+                height: dp(48)
+                halign: 'center'
+                text_size: self.size
+                font_size: dp(32)
+
+            # Container do Gráfico
+            Border:
+                size_hint_y: None
+                height: dp(300)
+
+                ScrollView:
+                    do_scroll_x: True
+                    do_scroll_y: True
+                    size_hint: (1, None)
+                    height: dp(300)
+                    
+                    GridLayout:
+                        id: graph_layout
+                        cols: 25
+                        size_hint: (None, None)
+                        size: self.minimum_size
+                        spacing: dp(2)
+                        row_default_height: dp(44)
+                        col_default_width: dp(90)
+                        col_force_default: True
+                        row_force_default: True
+    

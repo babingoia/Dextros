@@ -1,0 +1,141 @@
+<CardWidget>:
+    orientation: "vertical"
+    padding: dp(15)
+    spacing: dp(10)
+
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: self.minimum_height 
+            spacing: dp(15)
+
+            GridLayout: 
+                cols: 2
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: dp(35)
+                row_force_default: True
+                spacing: dp(10)
+
+                # Data
+                BoxLayout:
+                    Label:
+                        text: "Data:"
+                        bold: True
+                        halign: "right"
+                        text_size: self.size
+                        valign: "middle"
+                    Label:
+                        id: data_value
+                        text: ""
+                # Horario
+                BoxLayout:
+                    Label:
+                        text: "Horário:"
+                        bold: True
+                        halign: "right"
+                        text_size: self.size
+                        valign: "middle"
+                    Label:
+                        id: horario_value
+                        text: ""
+                # Insulina Lenta
+                BoxLayout:  
+                    Label:
+                        text: "Lenta:"
+                        bold: True
+                        halign: "right"
+                        text_size: self.size
+                        valign: "middle"
+                    Label:
+                        id: lenta_value
+                        text: ""
+                # Insulina Rápida
+                BoxLayout:
+                    Label:
+                        text: "Rápida:"
+                        bold: True
+                        halign: "right"
+                        text_size: self.size
+                        valign: "middle"
+                    Label:
+                        id: rapida_value
+                        text: ""
+                # Exercício
+                BoxLayout:
+                    Label:
+                        text: "Exercício:"
+                        bold: True
+                        halign: "right"
+                        text_size: self.size
+                        valign: "middle"
+                    Label:
+                        id: exercicio_value
+                        text: ""
+                # Refeição
+                BoxLayout:
+                    Label:
+                        text: "Refeição:"
+                        bold: True
+                        halign: "right"
+                        text_size: self.size
+                        valign: "middle"
+                    Label:
+                        id: refeicao_value
+                        text: ""
+
+            # Dextro
+            BoxLayout:
+                size_hint_y: None
+                height: dp(40)
+                Label:
+                    text: "Dextro:"
+                    bold: True
+                    size_hint_x: 0.25
+                    halign: "right"
+                    text_size: self.size
+                    valign: "middle"
+                Label:
+                    id: dextro_value
+                    text: ""
+                    size_hint_x: 0.75
+                    color: (0.2, 0.8, 0.2, 1)
+
+            # Observação
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: dp(100)
+                Label:
+                    text: "Observação:"
+                    bold: True
+                    size_hint_y: None
+                    height: dp(30)
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                Label:
+                    id: observacao_value
+                    text: ""
+                    text_size: self.size
+                    halign: "left"
+                    valign: "top"
+
+    # Botões
+    BoxLayout:
+        size_hint_y: None
+        height: dp(45)
+        spacing: dp(15)
+
+        Button:
+            text: "Excluir"
+            background_color: (0.8, 0.2, 0.2, 1)
+            on_press: root.delete_card()
+
+        Button:
+            text: "Voltar"
+            on_press: root.popup.dismiss()
