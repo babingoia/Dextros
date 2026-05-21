@@ -1,4 +1,4 @@
-from .json_handler import JsonHandler
+from infrastructure.json_handler import JsonHandler
 
 
 class SessionCache:

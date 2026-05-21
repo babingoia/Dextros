@@ -1,5 +1,4 @@
-from kivy.app import App
-from View.Kivy.MainScene import MainScene
+from presentation.kivy.ui.MainScene import MainScene
 from kivymd.app import MDApp
 
 class DextroApp(MDApp):

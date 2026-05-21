@@ -1,6 +1,6 @@
 # json_handler.py
 import json as js
-from Models.Cards import Card
+from core.value_objects.Card import Card
 
 def get_save_path():
     from kivy.app import App

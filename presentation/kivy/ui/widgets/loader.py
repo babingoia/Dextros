@@ -1,8 +1,8 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
-from Models.SessionCache import SessionCache
-from Handlers.Funcs import get_asset_path
+from core.SessionCache import SessionCache
+from infrastructure.path_provider import get_asset_path
 
 Builder.load_file(get_asset_path('View/Kivy/Widgets/Border.kv'))
 Builder.load_file(get_asset_path('View/Kivy/Widgets/Card.kv'))

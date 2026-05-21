@@ -6,16 +6,18 @@ from kivy.lang import Builder
 from kivy.uix.popup import Popup
 from kivy.metrics import dp
 from kivy.core.window import Window
-from Handlers.Funcs import get_asset_path
 
 #My files
-from Handlers.Funcs import show_error
-from Models.Date import Date
-from Models.Time import Time
-from Models.Cards import Card
-from View.Kivy.configs import CELL_W, CELL_H, BORDER_WIDTH
-from View.Kivy.Widgets.loader import Border, CardWidget
-from Models.SessionCache import SessionCache
+from presentation.kivy.ui.widgets.error import show_error
+from presentation.kivy.ui.pickers.date_picker import DatePicker
+from presentation.kivy.ui.configs import CELL_W, CELL_H, BORDER_WIDTH
+from presentation.kivy.ui.widgets.loader import Border, CardWidget
+from infrastructure.path_provider import get_asset_path
+from core.value_objects.Time import Time
+from core.value_objects.Card import Card
+from core.SessionCache import SessionCache
+from core.value_objects.Date import Date
+
 
 # Carrega os arquivos Kivy
 Builder.load_file(get_asset_path('View/Kivy/main_scene.kv'))
@@ -36,8 +38,9 @@ class MainScene(BoxLayout):
         self.ids.horario_spinner.values = self.horarios.get_horarios()
         self.ids.horario_spinner.text = self.horarios.get_horario_now()
 
-        self.date = Date()
-        self.ids.data_input.text = self.date.date.strftime("%Y-%m-%d")
+        self.date_picker = DatePicker()
+        self.ids.data_input.text = self.date_picker.date.to_string()
+        self.date_picker = DatePicker(on_date_selected=self.atualizar_data_input)
 
         cards_on_session.bind("on_add", self.atualizar_grafico)
         cards_on_session.bind("on_remove", self.atualizar_grafico)
@@ -47,7 +50,11 @@ class MainScene(BoxLayout):
 
 
     def choose_date(self):
-        self.date.show_date_picker(self)
+        self.date_picker.show_date_picker()
+
+
+    def atualizar_data_input(self, date: Date):
+        self.ids.data_input.text = date.to_string()
 
 
     def save_card(self) -> None:
