@@ -4,8 +4,8 @@ from kivy.lang import Builder
 from core.SessionCache import SessionCache
 from infrastructure.path_provider import get_asset_path
 
-Builder.load_file(get_asset_path('View/Kivy/Widgets/Border.kv'))
-Builder.load_file(get_asset_path('View/Kivy/Widgets/Card.kv'))
+Builder.load_file(get_asset_path('presentation/kivy/ui/widgets/Border.kv'))
+Builder.load_file(get_asset_path('presentation/kivy/ui/widgets/Card.kv'))
 
 cards_on_session = SessionCache()
 

@@ -19,11 +19,7 @@ class Date():
 
 
     def set_date(self, value):
-        self.date = self.parse_date(value)
-
-
-    def get_date(self) -> date:
-        return self.date
+        self._date = self.parse_date(value)
 
 
     @staticmethod

@@ -9,7 +9,7 @@ from kivy.core.window import Window
 
 #My files
 from presentation.kivy.ui.widgets.error import show_error
-from presentation.kivy.ui.pickers.date_picker import DatePicker
+from presentation.kivy.ui.widgets.pickers.date_picker import DatePicker
 from presentation.kivy.ui.configs import CELL_W, CELL_H, BORDER_WIDTH
 from presentation.kivy.ui.widgets.loader import Border, CardWidget
 from infrastructure.path_provider import get_asset_path
@@ -17,10 +17,11 @@ from core.value_objects.Time import Time
 from core.value_objects.Card import Card
 from core.SessionCache import SessionCache
 from core.value_objects.Date import Date
+from presentation.kivy.ui.widgets.graphs.DateHourMatrix import DateHourMatrix
 
 
 # Carrega os arquivos Kivy
-Builder.load_file(get_asset_path('View/Kivy/main_scene.kv'))
+Builder.load_file(get_asset_path('presentation/kivy/ui/main_scene.kv'))
 
 #Global variables
 cards_on_session = SessionCache()
@@ -37,16 +38,18 @@ class MainScene(BoxLayout):
         self.horarios_para_colunas = self.horarios.get_horario_colunas()
         self.ids.horario_spinner.values = self.horarios.get_horarios()
         self.ids.horario_spinner.text = self.horarios.get_horario_now()
-
-        self.date_picker = DatePicker()
-        self.ids.data_input.text = self.date_picker.date.to_string()
+        
+        # DatePicker
         self.date_picker = DatePicker(on_date_selected=self.atualizar_data_input)
-
+        self.ids.data_input.text = self.date_picker.date.to_string()
+        
+        # Cache 
         cards_on_session.bind("on_add", self.atualizar_grafico)
         cards_on_session.bind("on_remove", self.atualizar_grafico)
 
-        # Desenha o gráfico inicial
-        self.draw_graph()
+        # Gráfico em Matrix de date e horário
+        self.date_hour_matrix = DateHourMatrix(self.ids.graph_layout, self.horarios)
+        self.ids.graph_layout.add_widget(self.date_hour_matrix)
 
 
     def choose_date(self):
@@ -55,6 +58,11 @@ class MainScene(BoxLayout):
 
     def atualizar_data_input(self, date: Date):
         self.ids.data_input.text = date.to_string()
+
+
+    def atualizar_grafico(self):
+        self.date_hour_matrix.date = self.date_picker.date
+        self.date_hour_matrix.draw_self()
 
 
     def save_card(self) -> None:
@@ -82,63 +90,4 @@ class MainScene(BoxLayout):
         )
 
         cards_on_session.add_card(card)
-
-
-    def draw_graph(self) -> None:
-        graph = self.ids.graph_layout
-        graph.clear_widgets()
-
-        cards = Card.order_by_date_and_horario(cards_on_session.get_cards())
-        if not cards:
-            return
-
-        date_map, unique_dates = Card.organize_cards(cards)
-
-        # Linha de cabeçalho (horários)
-        graph.add_widget(Label(text="", size_hint=(None, None), size=(CELL_W, CELL_H)))
-        for horario in self.horarios.get_horarios():
-            border = Border(border_width=BORDER_WIDTH)
-            graph.add_widget(border)
-            border.add_widget(Label(text=horario, size_hint=(None, None), size=(CELL_W, CELL_H), bold=True))
-
-        # Linhas de dados
-        for date in unique_dates:
-            date_border = Border(border_width=BORDER_WIDTH)
-            graph.add_widget(date_border)
-            date_border.add_widget(Label(text=date, size_hint=(None, None), size=(CELL_W, CELL_H), bold=True))
-            for horario in self.horarios.get_horarios():
-                if horario in date_map[date]:
-                    card_border = Border(border_width=BORDER_WIDTH)
-                    graph.add_widget(card_border)
-                    card = date_map[date][horario]
-                    btn = Button(
-                        text=str(card.dextro),
-                        size_hint=(None, None),
-                        size=(CELL_W, CELL_H),
-                    )
-                    btn.bind(on_press=lambda _inst, c=card: self.show_card_details(c))
-                    card_border.add_widget(btn)
-                else:
-                    card_border = Border(border_color=(1, 0, 0, 1), border_width=BORDER_WIDTH)
-                    graph.add_widget(card_border)
-                    card_border.add_widget(Label(text="X", size_hint=(None, None), size=(CELL_W, CELL_H)))
-
-
-    def show_card_details(self, card: Card) -> None:
-        content = CardWidget(card)
-
-        width = min(dp(500), Window.width * 0.9)
-        height = min(dp(450), Window.height * 0.9)
-
-        popup = Popup(title="Card Details",
-                     content=content, 
-                     size_hint=(None, None),
-                     size=(width, height)
-                     )
-
-        content.popup = popup
-        popup.open()
     
-
-    def atualizar_grafico(self):
-        self.draw_graph()

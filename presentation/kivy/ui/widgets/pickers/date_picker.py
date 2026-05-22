@@ -23,13 +23,12 @@ class DatePicker(MDDatePicker):
         if value == [] or not value:
             return
 
-        print(f"Selected date: {value}")
-        date_str = value.strftime("%Y-%m-%d")
-        self.date.set_date(date_str)
+        self.date.set_date(value)
         self.on_date_selected(self.date)
         self.dismiss()
+        print(f"Selected date: {self.date.to_string()}")
 
 
     def on_cancel(self, instance, *args):
-        print(self.date.get_date())
+        print(self.date.to_string())
         self.dismiss()
