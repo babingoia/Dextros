@@ -2,7 +2,7 @@ from datetime import datetime
 
 
 class Time():
-    HORARIOS = [f"{h:02}:00" for h in range(24)]  # Gera os horários automaticamente
+    HORARIOS = [f"{h:02}:00" for h in list(range(6, 24)) + list(range(0, 6))] 
 
 
     def __init__(self, **kwargs):

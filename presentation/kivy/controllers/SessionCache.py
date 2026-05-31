@@ -1,4 +1,11 @@
+"""Controla o cache de cartões na sessão, garantindo que as alterações
+    sejam refletidas em toda a aplicação."""
+from __future__ import annotations
 from infrastructure.json_handler import JsonHandler
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.value_objects.Card import Card
 
 
 class SessionCache:
@@ -38,7 +45,7 @@ class SessionCache:
         self._emit("on_remove")
 
 
-    def get_cards(self):
+    def get_cards(self) -> list[Card]:
         return self.cards_on_session
     
 

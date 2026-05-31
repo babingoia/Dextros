@@ -1,7 +1,7 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
-from core.SessionCache import SessionCache
+from presentation.kivy.controllers.SessionCache import SessionCache
 from infrastructure.path_provider import get_asset_path
 
 Builder.load_file(get_asset_path('presentation/kivy/ui/widgets/Border.kv'))

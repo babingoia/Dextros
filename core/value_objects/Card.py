@@ -1,3 +1,6 @@
+from core.DataClasses import DateHourGrid
+
+
 
 class Card:
     def __init__(self, data, horario, dextro, lenta, rapida, exercicio, refeicao, observacao):
@@ -41,8 +44,10 @@ class Card:
 
 
     @staticmethod
-    def organize_cards(cards: list["Card"]) -> tuple[dict[str, dict[str, "Card"]], list[str]]:
-        """Organiza os cards por data e horário."""
+    def organize_cards(cards: list["Card"]) -> DateHourGrid:
+        """Organiza os cards por data e horário. Retorna um DateHourGrid
+          com um mapa de data para horário e uma lista de datas únicas."""
+        
         date_map: dict[str, dict[str, Card]] = {}
         unique_dates: list[str] = []
 
@@ -53,7 +58,7 @@ class Card:
 
             date_map[card.data][card.horario] = card
 
-        return date_map, unique_dates
+        return DateHourGrid(date_map=date_map, unique_dates=unique_dates)
 
 
     @staticmethod
