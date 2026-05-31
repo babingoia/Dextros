@@ -7,8 +7,6 @@ from infrastructure.path_provider import get_asset_path
 Builder.load_file(get_asset_path('presentation/kivy/ui/widgets/Border.kv'))
 Builder.load_file(get_asset_path('presentation/kivy/ui/widgets/Card.kv'))
 
-cards_on_session = SessionCache()
-
 
 class Border(BoxLayout):
     border_color = ObjectProperty((1, 1, 1, 1))
@@ -16,8 +14,9 @@ class Border(BoxLayout):
 
 
 class CardWidget(BoxLayout):
-    def __init__(self, card_data, **kwargs):
+    def __init__(self, card_data, cards_on_session = SessionCache(), **kwargs):
         super().__init__(**kwargs)
+        self.cards_on_session = cards_on_session
         self.card_data = card_data
         self.ids.data_value.text = card_data.data
         self.ids.horario_value.text = card_data.horario
@@ -31,7 +30,7 @@ class CardWidget(BoxLayout):
 
     def delete_card(self):
         # Remove o card da sessão
-        cards_on_session.remove_card(self.card_data)
+        self.cards_on_session.remove_card(self.card_data)
 
         # Fecha o popup
         self.popup.dismiss()

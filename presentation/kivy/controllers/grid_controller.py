@@ -20,16 +20,20 @@ class MatrixController:
         self.cards_date: DateHourGrid = self.getDatesCard()
         self.time_data = time_data
 
+        self._subscribe()
         self.atualizar_grafico()
 
 
     def _subscribe(self):
-        self.cards_on_session.bind("on_add", self.atualizar_grafico())
-        self.cards_on_session.bind("on_remove", self.atualizar_grafico())
+        self.cards_on_session.bind("on_add", self.atualizar_grafico)
+        self.cards_on_session.bind("on_remove", self.atualizar_grafico)
 
 
     def atualizar_grafico(self):
-        self.grid_view.draw_self(self.time_data, self.cards_date)    
+        self.cards_date = self.getDatesCard()
+        self.grid_view.draw_self(self.cards_on_session.get_cards(),
+                                 self.time_data,
+                                 self.cards_date)    
 
     
     def getDatesCard(self) -> DateHourGrid:

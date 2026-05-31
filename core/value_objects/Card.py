@@ -1,7 +1,6 @@
 from core.DataClasses import DateHourGrid
 
 
-
 class Card:
     def __init__(self, data, horario, dextro, lenta, rapida, exercicio, refeicao, observacao):
         self.data = data
@@ -50,6 +49,8 @@ class Card:
         
         date_map: dict[str, dict[str, Card]] = {}
         unique_dates: list[str] = []
+
+        cards = Card.order_by_date(cards)
 
         for card in cards:
             if card.data not in date_map:

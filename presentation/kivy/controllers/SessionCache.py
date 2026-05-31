@@ -11,20 +11,23 @@ if TYPE_CHECKING:
 class SessionCache:
     _instance = None
 
-    def __new__(cls):
+    def __new__(cls, json_handler=None):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.cards_on_session = None
             cls._instance._listeners = {"on_add": [], "on_remove": []}
-            return cls._instance
-        else:
-            return cls._instance
+            cls._instance.json_handler = None
+        
+        if json_handler is not None:
+            cls._instance.json_handler = json_handler
+        
+        return cls._instance
     
 
     @property
     def cards_on_session(self):
         if self._cards is None:
-            self._cards = JsonHandler.load_from_json()  # carrega só quando alguém pedir
+            self._cards = self.json_handler.load_from_json()
         return self._cards
     
 
@@ -35,13 +38,13 @@ class SessionCache:
 
     def add_card(self, card):
         self.cards_on_session.append(card)
-        JsonHandler.save_to_json(self.cards_on_session)
+        self.json_handler.save_to_json(self.cards_on_session)
         self._emit("on_add")
     
 
     def remove_card(self, card):
         self.cards_on_session = [c for c in self.cards_on_session if not (c.data == card.data and c.horario == card.horario)]
-        JsonHandler.save_to_json(self.cards_on_session)
+        self.json_handler.save_to_json(self.cards_on_session)
         self._emit("on_remove")
 
 
@@ -57,5 +60,6 @@ class SessionCache:
     
 
     def _emit(self, event_name):
+        print("Emitindo sinal...", event_name)
         for callback in self._listeners[event_name]:
             callback()

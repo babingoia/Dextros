@@ -1,3 +1,4 @@
+from kivy.uix.settings import ConfigParser
 #Libs
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
@@ -10,21 +11,20 @@ from core.value_objects.Time import Time
 from core.value_objects.Card import Card
 from presentation.kivy.controllers.SessionCache import SessionCache
 from core.value_objects.Date import Date
-from presentation.kivy.ui.widgets.graphs.DateHourMatrix import DateHourMatrix
 from presentation.kivy.controllers.grid_controller import MatrixController
 
 # Carrega os arquivos Kivy
 Builder.load_file(get_asset_path('presentation/kivy/ui/main_scene.kv'))
 
-#Global variables
-cards_on_session = SessionCache()
-
 
 #MainView
 class MainScene(BoxLayout):
 
-    def __init__(self, **kwargs):
+    def __init__(self, cards_on_session=SessionCache(), **kwargs):
         super().__init__(**kwargs)
+
+        #Configs
+        self.cards_on_session = cards_on_session
 
         # Usa Time para gerenciar horários
         self.horarios = Time()
@@ -72,5 +72,5 @@ class MainScene(BoxLayout):
             observacao=self.ids.observacao_input.text,
         )
 
-        cards_on_session.add_card(card)
+        self.cards_on_session.add_card(card)
     

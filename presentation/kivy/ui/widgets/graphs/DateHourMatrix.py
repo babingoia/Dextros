@@ -14,8 +14,6 @@ if TYPE_CHECKING:
     from core.value_objects.Time import Time
     from core.DataClasses import DateHourGrid
 
-cards_on_session = SessionCache()
-
 
 class DateHourMatrix(RecycleView):
     def __init__(self, id, card_creator=CardCreator(), **kwargs):
@@ -24,11 +22,10 @@ class DateHourMatrix(RecycleView):
         self.card_creator = card_creator
 
 
-    def draw_self(self, horarios: Time, dates_data: DateHourGrid) -> None:
+    def draw_self(self, cards: list[Card], horarios: Time, dates_data: DateHourGrid) -> None:
         print("Drawing DateHourMatrix...", dates_data)
         self._container.clear_widgets()
 
-        cards = Card.order_by_date_and_horario(cards_on_session.get_cards())
         if not cards:
             return
 
