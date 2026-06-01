@@ -25,11 +25,6 @@ class Time():
         return f"{now.hour:02}:00"
 
 
-    def get_horario_colunas(self):
-        """Retorna o mapeamento de horários para colunas."""
-        return {horario: index + 1 for index, horario in enumerate(self.HORARIOS)}
-
-
     def is_valid_horario(self, horario: str) -> bool:
         """Valida se o horário está na lista de horários disponíveis."""
         return horario in self.get_horarios()

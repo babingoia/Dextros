@@ -168,4 +168,3 @@ cython_debug/
 *.db
 /.buildozer/android
 /kivy_venv
-diario.txt

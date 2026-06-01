@@ -1,0 +1,19 @@
+ANOTACOES
+
+
+AFAZERES
+-> Adicionar um sistema de logging
+    -> Estudar biblioteca de logging do python
+
+-> Transformar o widget do card em um botão alterável
+-> Lançar uma mensagem de erro caso não caia em nenhum if do card_creator
+-> Criar a função do alterar card do card creator.
+
+-> Modularizar as funções do draw_self do DateHourMatrix
+-> Otimizar a DateHourMatrix.
+
+
+-> Atualizar as classes de domínio
+-> Adicionar testes
+
+-> Adicionar configurações de tamanho padronizadas pros kv.

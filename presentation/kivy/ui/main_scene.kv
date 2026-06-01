@@ -1,4 +1,4 @@
-<MainScene>:
+<MainView>:
 
     orientation: "vertical"
     canvas.before:
@@ -56,7 +56,8 @@
                     size_hint_x: 0.13
                 Spinner:
                     id: horario_spinner
-                    text: "Horário:"
+                    values: root.horarios_disponiveis
+                    text: root.horario_atual
                     size_hint_x: 0.2
 
             #Dextro
@@ -154,7 +155,7 @@
                 text: "Salvar"
                 size_hint_y: None
                 height: dp(44)
-                on_press: root.save_card()
+                on_press: root.dispatch('on_save_request')
 
             Label:
                 text: "Dextros por dia e horário"
