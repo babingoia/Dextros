@@ -1,34 +1,42 @@
 from kivymd.uix.pickers import MDDatePicker
-from core.value_objects.Date import Date
+from datetime import date
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class DatePicker(MDDatePicker):
-    def __init__(self, on_date_selected, **kwargs):
+
+    __events__ = ("on_date_save",)
+
+    def __init__(self, selected_date, on_date_selected, **kwargs):
+        logger.debug(f"Initializing DatePicker with selected_date: {selected_date}")
         super().__init__(**kwargs)
-        self.title = "Select Date"
-        self.date = Date()
+        self.title = "Escolha a Data"
+        self.selected_date = selected_date
         self.on_date_selected = on_date_selected
 
            
     def show_date_picker(self):
-        self.bind(on_save=self.on_save, on_cancel=self.on_cancel)
+        self.bind(on_save=self.on_date_save, on_cancel=self.on_cancel)
         self.open()
 
     
     def on_date_selected(self, date_str):
-        self.date.set_date(date_str)
+        logger.debug(f"Date selected callback: {date_str}")
 
 
-    def on_save(self, instance, value, *args):
+    def on_date_save(self, instance, value: date, *args):
+        logger.debug(f"Date selected: {value}")
+
         if value == [] or not value:
             return
 
-        self.date.set_date(value)
-        self.on_date_selected(self.date)
+        self.selected_date = value.strftime("%Y-%m-%d")
+        self.on_date_selected(self.selected_date)
         self.dismiss()
-        print(f"Selected date: {self.date.to_string()}")
 
 
     def on_cancel(self, instance, *args):
-        print(self.date.to_string())
+        logger.debug("Date selection cancelled.")
         self.dismiss()

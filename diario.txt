@@ -1,9 +1,13 @@
 ANOTACOES
-
+-> CardWidget tá muito estranho. Ele tá segurando uma instancia de Cache e se deletando.
 
 AFAZERES
 -> Adicionar um sistema de logging
     -> Estudar biblioteca de logging do python
+
+-> Botar Docstring em tudo.
+-> Desacoplar os dados do datepicker e simplificar, jogando na main view.
+-> Criar um OrganizeCardsService que lida com aqueles métodos estáticos do card.
 
 -> Transformar o widget do card em um botão alterável
 -> Lançar uma mensagem de erro caso não caia em nenhum if do card_creator
@@ -17,3 +21,13 @@ AFAZERES
 -> Adicionar testes
 
 -> Adicionar configurações de tamanho padronizadas pros kv.
+
+-> Adicionar um sistema pro SessionCache não ficar salvando e puxando do json toda hora.
+
+MUITO PRA FRENTE
+
+-> Calculadora que leva a fórmula da pessoa para calcular quantidade de insulina rápida 
+a partir do dextro e da quantidade de carboidratos consumida.
+
+-> Gráfico em linha que mostra a média de dextro por horário em determinada quantidade de
+dias.

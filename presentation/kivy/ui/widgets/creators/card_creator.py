@@ -9,6 +9,7 @@ from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.metrics import dp
 from kivy.core.window import Window
+from logging import getLogger
 
 
 from presentation.kivy.ui.widgets.loader import Border
@@ -22,16 +23,18 @@ if TYPE_CHECKING:
 
 NONE_CARD = "none_card"
 CARD = "card"
+logger = getLogger(__name__)
 
 
 class CardCreator():
     def __init__(self):
-        pass
+        logger.info("CardCreator initialized")
 
     def create_card(self, card_type: str, data: Card):
         new_widget = None
 
         if card_type == CARD:
+            logger.debug(f"Creating card with data: {data.to_dict()}")
             new_widget = self._card(data)
         
         elif card_type == NONE_CARD:
@@ -41,7 +44,7 @@ class CardCreator():
 
 
     def alter_card(self):
-        pass
+        logger.debug("Alter card method called - currently not implemented.")
 
 
     def _card(self, data: Card) -> Widget:
@@ -63,6 +66,8 @@ class CardCreator():
 
 
     def _show_card_details(self, card: Card) -> None:
+        logger.debug(f"Showing details for card: {card}")
+        
         content = CardWidget(card)
 
         width = min(dp(500), Window.width * 0.9)

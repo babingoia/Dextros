@@ -3,6 +3,7 @@ from __future__ import annotations
 from kivy.uix.label import Label
 from kivy.uix.recycleview import RecycleView
 from typing import TYPE_CHECKING
+from logging import getLogger
 
 from core.value_objects.Card import Card
 from presentation.kivy.controllers.SessionCache import SessionCache
@@ -15,15 +16,19 @@ if TYPE_CHECKING:
     from core.DataClasses import DateHourGrid
 
 
+logger = getLogger(__name__)
+
+
 class DateHourMatrix(RecycleView):
     def __init__(self, id, card_creator=CardCreator(), **kwargs):
+        logger.info("Initializing DateHourMatrix")
         super().__init__(**kwargs)
         self._container = id
         self.card_creator = card_creator
 
 
     def draw_self(self, cards: list[Card], horarios: Time, dates_data: DateHourGrid) -> None:
-        print("Drawing DateHourMatrix...", dates_data)
+        logger.info(f"Drawing DateHourMatrix with {len(cards)} cards, {len(horarios.get_horarios())} horarios, and {len(dates_data.unique_dates)} unique dates.")
         self._container.clear_widgets()
 
         if not cards:

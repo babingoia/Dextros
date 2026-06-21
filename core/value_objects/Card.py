@@ -1,8 +1,14 @@
 from core.DataClasses import DateHourGrid
+from logging import getLogger
+
+
+logger = getLogger(__name__)
 
 
 class Card:
     def __init__(self, data, horario, dextro, lenta, rapida, exercicio, refeicao, observacao):
+        logger.debug(f"Creating Card with data: {data}, horario: {horario}, dextro: {dextro}, lenta: {lenta}, rapida: {rapida}, exercicio: {exercicio}, refeicao: {refeicao}, observacao: {observacao}")
+        
         self.data = data
         self.horario = horario
         self.dextro = dextro
@@ -16,6 +22,8 @@ class Card:
     @classmethod
     def from_dict(cls, data: dict) -> "Card":
         """Cria um card a partir de um dicionário."""
+        logger.debug(f"Creating Card from dict: {data}")
+
         return cls(
             data=data.get("data", ""),
             horario=data.get("horario", ""),
@@ -30,6 +38,8 @@ class Card:
 
     def to_dict(self):
         """Converte o card para um dicionário."""
+        logger.debug(f"Converting Card to dict: {self.__dict__}")
+
         return {
             "data": self.data,
             "horario": self.horario,
@@ -46,7 +56,8 @@ class Card:
     def organize_cards(cards: list["Card"]) -> DateHourGrid:
         """Organiza os cards por data e horário. Retorna um DateHourGrid
           com um mapa de data para horário e uma lista de datas únicas."""
-        
+        logger.debug(f"Organizing {len(cards)} cards into DateHourGrid")
+
         date_map: dict[str, dict[str, Card]] = {}
         unique_dates: list[str] = []
 
@@ -65,16 +76,21 @@ class Card:
     @staticmethod
     def order_by_date(cards: list["Card"]) -> list["Card"]:
         """Ordena os cards por data."""
+        logger.debug(f"Ordering {len(cards)} cards by date")
+
         return sorted(cards, key=lambda card: card.data)
 
 
     @staticmethod
     def order_by_horario(cards: list["Card"]) -> list["Card"]:
         """Ordena os cards por horário."""
+        logger.debug(f"Ordering {len(cards)} cards by horario")
         return sorted(cards, key=lambda card: card.horario)
 
 
     @staticmethod
     def order_by_date_and_horario(cards: list["Card"]) -> list["Card"]:
         """Ordena os cards por data e horário."""
+        logger.debug(f"Ordering {len(cards)} cards by date and horario")
+        
         return sorted(cards, key=lambda card: (card.data, card.horario))

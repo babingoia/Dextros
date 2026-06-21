@@ -1,8 +1,14 @@
 from datetime import date, datetime
+from logging import getLogger
+
+
+logger = getLogger(__name__)
 
 
 class Date():
     def __init__(self, value=None):
+        logger.debug(f"Initializing Date with value: {value}")
+
         if value is None:
             self._date: date = date.today()
         else:
@@ -19,6 +25,8 @@ class Date():
 
 
     def set_date(self, value):
+        logger.debug(f"Setting date with value: {value}")
+
         self._date = self.parse_date(value)
 
 
@@ -28,6 +36,8 @@ class Date():
         Aceita datetime.date, datetime.datetime ou string 'YYYY-MM-DD'.
         Retorna datetime.date ou lança ValueError/TypeError.
         """
+        logger.debug(f"Parsing date from value: {value}")
+
         if isinstance(value, date) and not isinstance(value, datetime):
             return value
         if isinstance(value, datetime):
@@ -43,6 +53,8 @@ class Date():
     @staticmethod
     def is_valid_date(date_str: str) -> bool:
         """Valida se a string é uma data válida no formato YYYY-MM-DD."""
+        logger.debug(f"Validating date string: {date_str}")
+        
         try:
             datetime.strptime(date_str, "%Y-%m-%d")
             return True

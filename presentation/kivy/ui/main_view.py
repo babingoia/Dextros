@@ -1,22 +1,20 @@
 from kivy.uix.accordion import StringProperty
 from kivy.uix.accordion import ListProperty
-#Libs
+from datetime import date
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-
+from logging import getLogger
 
 #My files
-from core.value_objects.Time import Time
 from presentation.kivy.ui.widgets.pickers.date_picker import DatePicker
 from infrastructure.path_provider import get_asset_path
-from presentation.kivy.controllers.SessionCache import SessionCache
-from core.value_objects.Date import Date
 
 
 Builder.load_file(get_asset_path('presentation/kivy/ui/main_scene.kv'))
+logger = getLogger(__name__)
 
 
 class MainView(BoxLayout):
@@ -25,28 +23,31 @@ class MainView(BoxLayout):
 
     horarios_disponiveis = ListProperty([])
     horario_atual = StringProperty("Horário:")
+    date_display = StringProperty()
 
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        
-        self.date_picker = DatePicker(on_date_selected=self.atualizar_data_input)
-        self.ids.data_input.text = self.date_picker.date.to_string()
+        logger.info("MainView initialized")
+        self.date_picker = DatePicker(self.date_display, on_date_selected=self.atualizar_data_input)
 
 
     def on_save_request(self, *args):
-        print("save resquest got")
+        logger.debug("Save request event triggered with data: %s", args)
 
 
     def choose_date(self) -> None:
+        logger.debug("Date picker opened")
         self.date_picker.show_date_picker()
 
 
-    def atualizar_data_input(self, date: Date) -> None:
-        self.ids.data_input.text = date.to_string()
+    def atualizar_data_input(self, date: str) -> None:
+        logger.debug("Updating date input with selected date: %s", date)
+        self.ids.data_input.text = date
     
 
     def show_error(message: str, title: str="ERRO") -> None:
+        logger.error("Error popup displayed with message: %s", message)
         content = BoxLayout(orientation="vertical", padding=10, spacing=10)
         content.add_widget(Label(text=message))
         close_btn = Button(text="OK", size_hint_y=None, height=40)
@@ -57,6 +58,7 @@ class MainView(BoxLayout):
 
 
     def get_data(self) -> dict[str, str]:
+        logger.debug("Retrieving data from input fields")
         data = {
             'data': self.ids.data_input.text,
             'horario': self.ids.horario_spinner.text,
