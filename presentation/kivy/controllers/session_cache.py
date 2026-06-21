@@ -7,7 +7,7 @@ from infrastructure.json_handler import JsonHandler
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from core.value_objects.Card import Card
+    from core.value_objects.card import Card
 
 
 logger = getLogger(__name__)
@@ -18,7 +18,7 @@ class SessionCache:
 
     def __new__(cls, json_handler=None):
         if cls._instance is None:
-            logger.info("Criando nova instância de SessionCache")
+            logger.info("Criando nova instância de SessionCache...")
 
             cls._instance = super().__new__(cls)
             cls._instance.cards_on_session = None
@@ -26,7 +26,7 @@ class SessionCache:
             cls._instance.json_handler = None
         
         if json_handler is not None:
-            logger.info("Atribuindo JsonHandler à instância de SessionCache")
+            logger.info("Atribuindo JsonHandler à instância de SessionCache...")
             cls._instance.json_handler = json_handler
         
         logger.debug(f"Returning: SessionCache instância: {cls._instance}, JsonHandler: {cls._instance.json_handler}")

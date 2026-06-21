@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from kivy.uix.label import Label
 from kivy.uix.recycleview import RecycleView
+from kivy.uix.recyclegridlayout import RecycleGridLayout
 from typing import TYPE_CHECKING
 from logging import getLogger
 
-from core.value_objects.Card import Card
-from presentation.kivy.controllers.SessionCache import SessionCache
+from core.value_objects.card import Card
 from presentation.kivy.ui.configs import CELL_W, CELL_H, BORDER_WIDTH
-from presentation.kivy.ui.widgets.loader import Border, CardWidget
+from presentation.kivy.ui.widgets.loader import Border
 from presentation.kivy.ui.widgets.creators.card_creator import CardCreator, NONE_CARD, CARD
 
 if TYPE_CHECKING:
-    from core.value_objects.Time import Time
-    from core.DataClasses import DateHourGrid
+    from core.value_objects.time import Time
+    from core.data_classes import DateHourGrid
 
 
 logger = getLogger(__name__)

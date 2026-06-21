@@ -1,12 +1,12 @@
 from logging import getLogger
 
 
-from presentation.kivy.controllers.SessionCache import SessionCache
-from core.value_objects.Time import Time
-from core.value_objects.Card import Card
+from presentation.kivy.controllers.session_cache import SessionCache
+from core.value_objects.time import Time
+from core.value_objects.card import Card
 from presentation.kivy.controllers.matrix_controller import MatrixController
 from presentation.kivy.ui.main_view import MainView
-from core.value_objects.Date import Date
+from core.value_objects.date import Date
 
 
 logger = getLogger(__name__)

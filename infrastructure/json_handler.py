@@ -2,7 +2,7 @@
 from logging import getLogger
 
 import json as js
-from core.value_objects.Card import Card
+from core.value_objects.card import Card
 
 
 logger = getLogger(__name__)

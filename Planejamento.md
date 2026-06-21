@@ -1,18 +1,26 @@
 # ANOTACOES
+    -> Eu tenho que reciclar os botões do datehourmatrix. Então a minha data precisa ter info pra botões.
+    -> O card_creator então passa o template dos widgets em forma de dict e a matrix passa os dados.
+# Padrões do Projeto
+### Arquivos e Classes
+    -> Arquivos nomeados sempre em letra minúscula e com espaços em forma de underscore.
+    -> Classes nomeadas em letra maiúscula sem espaço.
+    -> Main.py sem underscore.
+
+    -> Nomes de variáveis e docstrings em inglês.
+
 
 # Tasks pequenas
+
+-> Modularizar as funções do draw_self do DateHourMatrix
+-> Otimizar a DateHourMatrix.
 
 -> Tirar a manipulação de cache do CardWidget
 -> Botar Docstring em tudo.
 -> Desacoplar os dados do datepicker e simplificar, jogando na main view.
--> Criar um OrganizeCardsService que lida com aqueles métodos estáticos do card.
 
 -> Transformar o widget do card em um botão alterável
--> Lançar uma mensagem de erro caso não caia em nenhum if do card_creator
 -> Criar a função do alterar card do card creator.
-
--> Modularizar as funções do draw_self do DateHourMatrix
--> Otimizar a DateHourMatrix.
 
 -> Adicionar configurações de tamanho padronizadas pros kv.
 -> Adicionar um sistema pro SessionCache não ficar salvando e puxando do json toda hora.

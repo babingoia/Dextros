@@ -9,7 +9,7 @@ from kivymd.app import MDApp
 
 from infrastructure.json_handler import JsonHandler
 from presentation.kivy.controllers.main_controller import MainController
-from presentation.kivy.controllers.SessionCache import SessionCache
+from presentation.kivy.controllers.session_cache import SessionCache
 from infrastructure import log_config
 
 

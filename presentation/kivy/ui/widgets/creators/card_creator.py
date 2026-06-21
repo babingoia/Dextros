@@ -18,7 +18,7 @@ from presentation.kivy.ui.widgets.loader import CardWidget
 
 
 if TYPE_CHECKING:
-    from core.value_objects.Card import Card
+    from core.value_objects.card import Card
 
 
 NONE_CARD = "none_card"
@@ -30,7 +30,8 @@ class CardCreator():
     def __init__(self):
         logger.info("CardCreator initialized")
 
-    def create_card(self, card_type: str, data: Card):
+
+    def create_card(self, card_type: str, data: Card) -> Widget:
         new_widget = None
 
         if card_type == CARD:
@@ -40,7 +41,11 @@ class CardCreator():
         elif card_type == NONE_CARD:
             new_widget = self._none_card()
         
-        return new_widget
+        if new_widget is not None:
+            logger.debug(f"Card widget created successfully for type: {card_type}")
+            return new_widget
+        
+        logger.warning(f"Card widget cannot be created for type: {card_type}")
 
 
     def alter_card(self):

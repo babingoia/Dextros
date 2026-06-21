@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from core.value_objects.Card import Card
+    from core.value_objects.card import Card
 
 
 @dataclass

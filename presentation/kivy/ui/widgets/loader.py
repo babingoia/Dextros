@@ -1,7 +1,7 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
-from presentation.kivy.controllers.SessionCache import SessionCache
+from presentation.kivy.controllers.session_cache import SessionCache
 from infrastructure.path_provider import get_asset_path
 from logging import getLogger
 
@@ -17,10 +17,10 @@ class Border(BoxLayout):
 
 
 class CardWidget(BoxLayout):
-    def __init__(self, card_data, cards_on_session = SessionCache(), **kwargs):
+    def __init__(self, card_data, **kwargs):
         logger.debug(f"Initializing CardWidget with card_data: {card_data}")
         super().__init__(**kwargs)
-        self.cards_on_session = cards_on_session
+        self.cards_on_session = SessionCache()
         self.card_data = card_data
         self.ids.data_value.text = card_data.data
         self.ids.horario_value.text = card_data.horario
@@ -33,9 +33,8 @@ class CardWidget(BoxLayout):
     
 
     def delete_card(self):
-        logger.debug(f"Deleting card with data: {self.card_data.data} | horario: {self.card_data.horario}")
+        """Event of card exclusion. Triggered by the delete button in the card."""
+        logger.debug(f"Delete card event triggered for card_data: {self.card_data}")
         self.cards_on_session.remove_card(self.card_data)
-
-        # Fecha o popup
         self.popup.dismiss()
 
