@@ -1,5 +1,5 @@
-from kivy.uix.accordion import StringProperty
-from kivy.uix.accordion import ListProperty
+from kivy.properties import StringProperty
+from kivy.properties import ListProperty
 from datetime import date
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
@@ -10,7 +10,7 @@ from logging import getLogger
 
 #My files
 from presentation.kivy.ui.widgets.pickers.date_picker import DatePicker
-from infrastructure.path_provider import get_asset_path
+from infrastructure.path_provider_service import get_asset_path
 
 
 Builder.load_file(get_asset_path('presentation/kivy/ui/main_scene.kv'))
@@ -21,32 +21,32 @@ class MainView(BoxLayout):
 
     __events__ = ("on_save_request",)
 
-    horarios_disponiveis = ListProperty([])
-    horario_atual = StringProperty("Horário:")
+    available_time = ListProperty([])
+    actual_time = StringProperty("Horário:")
     date_display = StringProperty()
 
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         logger.info("MainView initialized")
-        self.date_picker = DatePicker(self.date_display, on_date_selected=self.atualizar_data_input)
+        self.date_picker = DatePicker(self.date_display, on_date_selected=self._update_data_input)
 
 
     def on_save_request(self, *args):
         logger.debug("Save request event triggered with data: %s", args)
 
 
-    def choose_date(self) -> None:
+    def _choose_date(self) -> None:
         logger.debug("Date picker opened")
         self.date_picker.show_date_picker()
 
 
-    def atualizar_data_input(self, date: str) -> None:
+    def _update_data_input(self, date: str) -> None:
         logger.debug("Updating date input with selected date: %s", date)
         self.ids.data_input.text = date
     
 
-    def show_error(message: str, title: str="ERRO") -> None:
+    def _show_error(self, message: str, title: str="ERRO") -> None:
         logger.error("Error popup displayed with message: %s", message)
         content = BoxLayout(orientation="vertical", padding=10, spacing=10)
         content.add_widget(Label(text=message))
@@ -68,7 +68,7 @@ class MainView(BoxLayout):
             'exercicio': self.ids.exercicio_input.text,
             'refeicao': self.ids.refeicao_input.text,
             'observacao': self.ids.observacao_input.text,
-            'date_hour_matrix': self.ids.graph_layout
+            'date_hour_matrix': self.ids.matrix_container
         }
 
         return data

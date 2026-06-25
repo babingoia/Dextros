@@ -1,0 +1,22 @@
+<MatrixCell>:
+    border_color: (1, 0, 0, 1) if root.is_empty else (1, 1, 1, 1)
+    
+    FloatLayout:
+            
+        # LABEL: Aparece apenas se for vazio OU cabeçalho
+        Label:
+            text: root.dextro_text if root.is_empty or root.is_header else ""
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            opacity: 1 if root.is_empty or root.is_header else 0
+            
+        # BUTTON: Aparece apenas se for um CARD real
+        Button:
+            text: root.dextro_text if not root.is_empty and not root.is_header else ""
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            
+            # Esconde e desativa se não for um card
+            opacity: 1 if not root.is_empty and not root.is_header else 0
+            disabled: root.is_empty or root.is_header
+            
+            # Chama a função nativamente, resolvendo o bug do clique!
+            on_release: root._show_card_details()

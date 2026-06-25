@@ -49,7 +49,7 @@
                         id: date_button
                         text: "Escolher Data"
                         color: (1, 1, 1, 1)
-                        on_release: root.choose_date()
+                        on_release: root._choose_date()
 
                 Label:
                     text: "Horário:"
@@ -57,8 +57,8 @@
                     size_hint_x: 0.13
                 Spinner:
                     id: horario_spinner
-                    values: root.horarios_disponiveis
-                    text: root.horario_atual
+                    values: root.available_time
+                    text: root.actual_time
                     size_hint_x: 0.2
 
             #Dextro
@@ -169,23 +169,7 @@
 
             # Container do Gráfico
             Border:
+                id: matrix_container
                 size_hint_y: None
                 height: dp(300)
-
-                ScrollView:
-                    do_scroll_x: True
-                    do_scroll_y: True
-                    size_hint: (1, None)
-                    height: dp(300)
-                    
-                    GridLayout:
-                        id: graph_layout
-                        cols: 25
-                        size_hint: (None, None)
-                        size: self.minimum_size
-                        spacing: dp(2)
-                        row_default_height: dp(44)
-                        col_default_width: dp(90)
-                        col_force_default: True
-                        row_force_default: True
     

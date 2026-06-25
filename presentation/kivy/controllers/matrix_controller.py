@@ -4,8 +4,8 @@ from logging import getLogger
 """
 Classe que controla a matriz de cartas, atualizando a interface gráfica conforme necessário.
 """
-from presentation.kivy.ui.widgets.graphs.DateHourMatrix import DateHourMatrix
-from presentation.kivy.controllers.session_cache import SessionCache
+from presentation.kivy.ui.widgets.graphs.date_hour_matrix import DateHourMatrix
+from presentation.kivy.controllers.session_controller import SessionController
 from infrastructure.organize_cards_service import OrganizeCardsService
 from core.data_classes import DateHourGrid
 from core.value_objects.time import Time
@@ -15,10 +15,10 @@ logger = getLogger(__name__)
 
 
 class MatrixController:
-    def __init__(self, grid_id, time_data=Time(), cards_on_session=SessionCache()):
+    def __init__(self, grid_id, time_data=Time(), cards_on_session=SessionController()):
         logger.info("Initializing MatrixController...")
 
-        self.grid_view = DateHourMatrix(grid_id)
+        self.grid_view = DateHourMatrix()
         self.grid_id = grid_id
         grid_id.add_widget(self.grid_view)
 

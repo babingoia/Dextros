@@ -2,8 +2,6 @@
     sejam refletidas em toda a aplicação."""
 from __future__ import annotations
 from logging import getLogger
-
-from infrastructure.json_handler import JsonHandler
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -13,7 +11,7 @@ if TYPE_CHECKING:
 logger = getLogger(__name__)
 
 
-class SessionCache:
+class SessionController:
     _instance = None
 
     def __new__(cls, json_handler=None):

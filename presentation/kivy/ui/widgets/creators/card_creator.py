@@ -31,59 +31,36 @@ class CardCreator():
         logger.info("CardCreator initialized")
 
 
-    def create_card(self, card_type: str, data: Card) -> Widget:
-        new_widget = None
+    def create_card(self, card_type: str, data: Card) -> dict:
+        template = None
 
         if card_type == CARD:
             logger.debug(f"Creating card with data: {data.to_dict()}")
-            new_widget = self._card(data)
+            template = self._card(data)
         
         elif card_type == NONE_CARD:
-            new_widget = self._none_card()
+            template = self._none_card()
         
-        if new_widget is not None:
-            logger.debug(f"Card widget created successfully for type: {card_type}")
-            return new_widget
+        if template is not None:
+            logger.debug(f"Card widget created successfully for type: {card_type} with data: {template}")
+            return template
         
         logger.warning(f"Card widget cannot be created for type: {card_type}")
 
 
-    def alter_card(self):
-        logger.debug("Alter card method called - currently not implemented.")
+    def _card(self, data: Card) -> dict:
+        return {
+            "is_empty": False,
+            "is_header": False,
+            "dextro_text": data.dextro,
+            "card_reference": data
+        }
 
 
-    def _card(self, data: Card) -> Widget:
-        new_widget = Border(border_width=BORDER_WIDTH)
-        btn = Button(
-            text=str(data.dextro),
-            size_hint=(None, None),
-            size=(CELL_W, CELL_H),
-        )
-        btn.bind(on_press=lambda _inst, c=data: self._show_card_details(c))
-        new_widget.add_widget(btn)
-        return new_widget
-
-
-    def _none_card(self) -> Widget:
-        new_widget = Border(border_color=(1, 0, 0, 1), border_width=BORDER_WIDTH)
-        new_widget.add_widget(Label(text="X", size_hint=(None, None), size=(CELL_W, CELL_H)))
-        return new_widget
-
-
-    def _show_card_details(self, card: Card) -> None:
-        logger.debug(f"Showing details for card: {card}")
-        
-        content = CardWidget(card)
-
-        width = min(dp(500), Window.width * 0.9)
-        height = min(dp(450), Window.height * 0.9)
-
-        popup = Popup(title="Card Details",
-                     content=content, 
-                     size_hint=(None, None),
-                     size=(width, height)
-                     )
-
-        content.popup = popup
-        popup.open()
-
+    def _none_card(self) -> dict:
+        return {
+            "is_empty": True,
+            "is_header": False,
+            "dextro_text": "x",
+            "card_reference": None
+        }

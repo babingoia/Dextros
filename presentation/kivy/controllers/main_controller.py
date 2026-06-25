@@ -1,7 +1,7 @@
 from logging import getLogger
 
 
-from presentation.kivy.controllers.session_cache import SessionCache
+from presentation.kivy.controllers.session_controller import SessionController
 from core.value_objects.time import Time
 from core.value_objects.card import Card
 from presentation.kivy.controllers.matrix_controller import MatrixController
@@ -14,7 +14,7 @@ logger = getLogger(__name__)
 
 class MainController():
 
-    def __init__(self, cards_on_session=SessionCache(), **kwargs):
+    def __init__(self, cards_on_session=SessionController(), **kwargs):
         logger.info("Initializing MainController")
         
         super().__init__(**kwargs)
@@ -22,12 +22,12 @@ class MainController():
         self.cards_on_session = cards_on_session
 
         self.main_view = MainView()
-        self.matrix_controller = MatrixController(self.main_view.get_data()['date_hour_matrix'])
+        self.matrix_controller = MatrixController(self.main_view.ids.matrix_container)
 
         # Horarios
         self.time = Time()
-        self.main_view.horarios_disponiveis = self.time.get_horarios()
-        self.main_view.horario_atual = self.time.get_horario_now()
+        self.main_view.available_time = self.time.get_horarios()
+        self.main_view.actual_time = self.time.get_horario_now()
 
         # Data
         self.date: Date = Date()

@@ -1,8 +1,8 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
-from presentation.kivy.controllers.session_cache import SessionCache
-from infrastructure.path_provider import get_asset_path
+from presentation.kivy.controllers.session_controller import SessionController
+from infrastructure.path_provider_service import get_asset_path
 from logging import getLogger
 
 
@@ -20,7 +20,7 @@ class CardWidget(BoxLayout):
     def __init__(self, card_data, **kwargs):
         logger.debug(f"Initializing CardWidget with card_data: {card_data}")
         super().__init__(**kwargs)
-        self.cards_on_session = SessionCache()
+        self.cards_on_session = SessionController()
         self.card_data = card_data
         self.ids.data_value.text = card_data.data
         self.ids.horario_value.text = card_data.horario

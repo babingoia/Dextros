@@ -1,0 +1,19 @@
+<DateHourMatrix>:
+    # 1. Avisa qual é o widget molde
+    viewclass: 'MatrixCell' 
+    
+    # 2. Habilita rolagem para os dois lados
+    do_scroll_x: True
+    do_scroll_y: True
+
+    # 3. O gerenciador exclusivo da RecycleView
+    RecycleGridLayout:
+        cols: 25
+        spacing: dp(4)
+        default_size: dp(90), dp(44)
+        default_size_hint: None, None
+        
+        # Isso força o grid a crescer o suficiente para habilitar o scroll
+        size_hint: None, None
+        width: self.minimum_width
+        height: self.minimum_height

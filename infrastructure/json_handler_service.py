@@ -9,7 +9,7 @@ logger = getLogger(__name__)
 
 
 class JsonHandler:
-    def __init__(self, save_path):
+    def __init__(self, save_path=None):
         logger.debug(f"Initializing JsonHandler with save_path: {save_path}")
 
         self.save_path = save_path
