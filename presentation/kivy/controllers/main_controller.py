@@ -51,14 +51,14 @@ class MainController():
         logger.debug(f"Creating card from data: {data}")
 
         new_card = Card(
-            data=data['data'],
-            horario=data['horario'],
-            dextro=data['dextro'],
-            lenta=data['lenta'],
-            rapida=data['rapida'],
-            exercicio=data['exercicio'],
-            refeicao=data['refeicao'],
-            observacao=data['observacao']
+            date=data['data'],
+            time=data['horario'],
+            glycemia=data['dextro'],
+            long_acting_insulin=data['lenta'],
+            short_acting_insulin=data['rapida'],
+            exercise=data['exercicio'],
+            meal=data['refeicao'],
+            obs=data['observacao']
         )
 
         return new_card

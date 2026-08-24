@@ -13,7 +13,7 @@ from logging import getLogger
 
 
 from presentation.kivy.ui.widgets.loader import Border
-from presentation.kivy.ui.configs import CELL_H, CELL_W, BORDER_WIDTH
+from presentation.kivy.ui.app_theme import CELL_H, CELL_W, BORDER_WIDTH
 from presentation.kivy.ui.widgets.loader import CardWidget
 
 
@@ -52,7 +52,7 @@ class CardCreator():
         return {
             "is_empty": False,
             "is_header": False,
-            "dextro_text": data.dextro,
+            "dextro_text": data.glycemia,
             "card_reference": data
         }
 

@@ -1,0 +1,43 @@
+from uuid import uuid4
+
+from usecases.IRepository import ICardRepository
+from core.value_objects.card import Card
+from usecases.dtos.cardDTO import CardDTOInput
+from logging import getLogger
+
+logger = getLogger(__name__)
+
+
+class CreateCardUseCase:
+    
+    def __init__(self, repository: ICardRepository):
+        self.repository = repository
+
+
+    def execute(self, cardDTO: CardDTOInput) -> Card:
+        """Cria um card a partir de um dicionário."""
+
+        if cardDTO == None:
+            logger.warning(f"CardDTO missing.")
+            return
+
+        if cardDTO.card_id == None:
+            cardDTO.card_id = uuid4()
+
+        
+        
+
+        logger.debug(f"Creating Card from dict: {cardDTO}")
+        
+   
+        return Card(
+            card_id=cardDTO.card_id,
+            date=cardDTO.date,
+            time=cardDTO.time,
+            glycemia=cardDTO.glycemia,
+            long_acting_insulin=cardDTO.long_acting_insulin,
+            short_acting_insulin=cardDTO.short_acting_insulin,
+            exercise=cardDTO.exercise,
+            meal=cardDTO.meal,
+            obs=cardDTO.obs
+        )

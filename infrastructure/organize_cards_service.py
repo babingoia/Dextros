@@ -22,11 +22,11 @@ class OrganizeCardsService:
         cards = OrganizeCardsService.order_by_date(cards)
 
         for card in cards:
-            if card.data not in date_map:
-                date_map[card.data] = {}
-                unique_dates.append(card.data)
+            if card.date not in date_map:
+                date_map[card.date] = {}
+                unique_dates.append(card.date)
 
-            date_map[card.data][card.horario] = card
+            date_map[card.date][card.time] = card
 
         return DateHourGrid(date_map=date_map, unique_dates=unique_dates)
 
@@ -36,14 +36,14 @@ class OrganizeCardsService:
         """Ordena os cards por data."""
         logger.debug(f"Ordering {len(cards)} cards by date")
 
-        return sorted(cards, key=lambda card: card.data)
+        return sorted(cards, key=lambda card: card.date)
 
 
     @staticmethod
     def order_by_horario(cards: list["Card"]) -> list["Card"]:
         """Ordena os cards por horário."""
         logger.debug(f"Ordering {len(cards)} cards by horario")
-        return sorted(cards, key=lambda card: card.horario)
+        return sorted(cards, key=lambda card: card.time)
 
 
     @staticmethod
@@ -51,4 +51,4 @@ class OrganizeCardsService:
         """Ordena os cards por data e horário."""
         logger.debug(f"Ordering {len(cards)} cards by date and horario")
         
-        return sorted(cards, key=lambda card: (card.data, card.horario))
+        return sorted(cards, key=lambda card: (card.date, card.time))

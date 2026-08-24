@@ -7,12 +7,15 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from logging import getLogger
+from kivy.factory import Factory
+from kivy.uix.screenmanager import Screen
 
 #My files
 from presentation.kivy.ui.widgets.pickers.date_picker import DatePicker
 from infrastructure.path_provider_service import get_asset_path
 
 
+Builder.load_file(get_asset_path('presentation/kivy/ui/ui_components.kv'))
 Builder.load_file(get_asset_path('presentation/kivy/ui/main_scene.kv'))
 logger = getLogger(__name__)
 
@@ -72,3 +75,50 @@ class MainView(BoxLayout):
         }
 
         return data
+
+
+    def add_graph_screen(self, name, title, graph_widget):
+        """
+        Adiciona uma nova tela de gráfico e um novo botão na navbar lateral.
+
+        :param name: nome interno da Screen, ex.: "grafico_mensal"
+        :param title: título exibido na navbar e no cabeçalho
+        :param graph_widget: widget do gráfico já pronto
+        """
+        sm = self.ids.screens
+
+        if sm.has_screen(name):
+            sm.current = name
+            return
+
+        # Cria a nova tela
+        screen = Screen(name=name)
+
+        # Container visual padrão
+        content = Factory.GraphScreenContent()
+
+        # Cabeçalho
+        header = Factory.ScreenHeader(text=title)
+        content.add_widget(header)
+
+        # Painel do gráfico
+        panel = Factory.Panel()
+        panel.add_widget(graph_widget)
+        content.add_widget(panel)
+
+        screen.add_widget(content)
+        sm.add_widget(screen)
+
+        # Cria o botão na navbar lateral
+        button = Factory.NavButton(text=title, group="nav")
+        button.bind(
+            on_release=lambda *args, screen_name=name: self._navigate_to(screen_name)
+        )
+
+        self.ids.nav_items.add_widget(button)
+
+    def _navigate_to(self, name):
+        self.ids.screens.current = name
+
+        # Em celular, fecha a navbar lateral após navegar
+        self.ids.nav_toggle.state = "normal"

@@ -13,7 +13,7 @@ from infrastructure import log_service
 # Infrastructure Initial Load
 log_service.configure_logging(console_level=log_service.logging.DEBUG)
 logger = log_service.get_logger(__name__)
-DB = "cards.json"  
+DB = "cards_populated.json"  
 # "cards_populated.json" para fins de teste de performance
 # "cards.json" mais leve
 

@@ -1,13 +1,12 @@
 # ANOTACOES
-    -> Eu tenho que reciclar os botões do datehourmatrix. Então a minha data precisa ter info pra botões.
-    -> O card_creator então passa o template dos widgets em forma de dict e a matrix passa os dados.
+-> Os valores de hipoglicemia e hiperglicemia da classe dextros foram feitos com base na diretriz da associação de diabetes do brasil: https://diretriz.diabetes.org.br/metas-no-tratamento-do-diabetes/
 
 # Tasks pequenas
-
+-> Botar um botão de confirmação na hora de excluir um card
+-> Limpar os dados do formulário na hora de salvar um card
 -> Arrumar a ordem de carregamento das coisas.
 -> Tirar o sistema manual de eventos e usar o EventDispatcher do Kivy.
--> Modularizar as funções do draw_self do DateHourMatrix
--> Otimizar a DateHourMatrix.
+
 
 -> Tirar a manipulação de cache do CardWidget
 -> Botar Docstring em tudo.
@@ -23,11 +22,9 @@
 -> Atualizar as classes de domínio
     *Data:
 
-    *Horário: Carrega uma constante de todos os horários do dia e daquele dextro e valida o formato. Útil pra deixar formatado
-    de que jeito os horários vão aparecer na view depois.
+    *Horário: Carrega uma constante de todos os horários do dia e daquele dextro e valida o formato. Útil pra deixar formatado de que jeito os horários vão aparecer na view depois.
 
-    *Refeição: carrega refições pré-definidas que depois vão ser mostradas em um picker e pode receber quantidade de
-    carboidratos consumida.
+    *Refeição: carrega refições pré-definidas que depois vão ser mostradas em um picker e pode receber quantidade de carboidratos consumida.
     
     *Dextro: carrega o próprio valor, validação, e estado: se é normal, hipoglicemia ou hiperglicemia.
     

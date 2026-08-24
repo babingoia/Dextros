@@ -18,26 +18,24 @@ class MatrixController:
     def __init__(self, grid_id, time_data=Time(), cards_on_session=SessionController()):
         logger.info("Initializing MatrixController...")
 
-        self.grid_view = DateHourMatrix()
-        self.grid_id = grid_id
-        grid_id.add_widget(self.grid_view)
+        self.grid_view = DateHourMatrix(grid_id)
 
         self.cards_on_session = cards_on_session
         self.cards_date: DateHourGrid = self.getDatesCard()
         self.time_data = time_data
 
         self._subscribe()
-        self.atualizar_grafico()
+        self._atualizar_grafico()
 
 
     def _subscribe(self):
         logger.debug("Subscribing to SessionCache events for card updates...")
 
-        self.cards_on_session.bind("on_add", self.atualizar_grafico)
-        self.cards_on_session.bind("on_remove", self.atualizar_grafico)
+        self.cards_on_session.bind("on_add", self._atualizar_grafico)
+        self.cards_on_session.bind("on_remove", self._atualizar_grafico)
 
 
-    def atualizar_grafico(self):
+    def _atualizar_grafico(self):
         logger.debug("Updating matrix graph with current session data...")
         
         self.cards_date = self.getDatesCard()

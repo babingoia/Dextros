@@ -10,7 +10,7 @@ from logging import getLogger
 
 from presentation.kivy.ui.widgets.graphs.matrix_cell import MatrixCell
 from core.value_objects.card import Card
-from presentation.kivy.ui.configs import CELL_W, CELL_H, BORDER_WIDTH
+from presentation.kivy.ui.app_theme import CELL_W, CELL_H, BORDER_WIDTH
 from presentation.kivy.ui.widgets.loader import Border
 from presentation.kivy.ui.widgets.creators.card_creator import CardCreator, NONE_CARD, CARD
 
@@ -24,10 +24,12 @@ logger = getLogger(__name__)
 
 
 class DateHourMatrix(RecycleView):
-    def __init__(self, card_creator=CardCreator(), **kwargs):
+    def __init__(self, container: str, card_creator=CardCreator(), **kwargs):
         logger.info("Initializing DateHourMatrix")
         super().__init__(**kwargs)
         self.card_creator = card_creator
+        self._container = container
+        self._container.add_widget(self)
 
 
     def draw_self(self, cards: list[Card], horarios: Time, dates_data: DateHourGrid) -> None:

@@ -27,10 +27,3 @@ def get_data_path(relative_path):
     
     logger.debug(f"Base path: {base}")
     return os.path.join(base, relative_path)
-
-
-def save_file(filename):
-    """Caminho correto em todas as plataformas para arquivos de escrita."""
-    from kivy.app import App
-    logger.debug(f"Getting save file path for: {filename}")
-    return os.path.join(App.get_running_app().user_data_dir, filename)

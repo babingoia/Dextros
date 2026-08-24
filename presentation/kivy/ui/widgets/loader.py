@@ -22,14 +22,14 @@ class CardWidget(BoxLayout):
         super().__init__(**kwargs)
         self.cards_on_session = SessionController()
         self.card_data = card_data
-        self.ids.data_value.text = card_data.data
-        self.ids.horario_value.text = card_data.horario
-        self.ids.dextro_value.text = card_data.dextro
-        self.ids.lenta_value.text = card_data.lenta
-        self.ids.rapida_value.text = card_data.rapida
-        self.ids.exercicio_value.text = card_data.exercicio
-        self.ids.refeicao_value.text = card_data.refeicao
-        self.ids.observacao_value.text = card_data.observacao
+        self.ids.data_value.text = card_data.date
+        self.ids.horario_value.text = card_data.time
+        self.ids.dextro_value.text = card_data.glycemia
+        self.ids.lenta_value.text = card_data.long_acting_insulin
+        self.ids.rapida_value.text = card_data.short_acting_insulin
+        self.ids.exercicio_value.text = card_data.exercise
+        self.ids.refeicao_value.text = card_data.meal
+        self.ids.observacao_value.text = card_data.obs
     
 
     def delete_card(self):

@@ -58,7 +58,7 @@ class SessionController:
     def remove_card(self, card):
         logger.debug(f"Removendo card: {card}")
 
-        self.cards_on_session = [c for c in self.cards_on_session if not (c.data == card.data and c.horario == card.horario)]
+        self.cards_on_session = [c for c in self.cards_on_session if not (c.date == card.date and c.time == card.time)]
         self.json_handler.save_to_json(self.cards_on_session)
         self._emit("on_remove")
 
