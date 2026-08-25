@@ -54,4 +54,22 @@ class CardID:
         except (ValueError, TypeError) as err:
             raise ValueError(f"CardID inválido a partir de int: {value!r}") from err
         return cls(parsed)
- 
+    
+
+    def __eq__(self, other):
+        # Se estiver comparando com outro CardID
+        if isinstance(other, CardID):
+            return self.card_id == other.card_id
+        
+        # Se estiver comparando com uma string (ex: a que vem do JSON/Repo)
+        if isinstance(other, str):
+            try:
+                return self.card_id == UUID(other)
+            except ValueError:
+                return False # Se a string não for um UUID válido, não é igual
+        
+        # Se estiver comparando direto com um objeto UUID
+        if isinstance(other, UUID):
+            return self.card_id == other
+            
+        return NotImplemented

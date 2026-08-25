@@ -13,7 +13,7 @@ from core.value_objects.meal import MealPeriod
 from core.value_objects.observation import Observation
 from core.value_objects.card import Card
 
-from .conftest import make_card
+from tests.conftest import make_card
 
 
 # ---------------------------------------------------------------------------

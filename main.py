@@ -4,7 +4,7 @@ os.environ["KIVY_LOG_MODE"] = "MIXED" # Precisa vir antes de qualquer import do 
 from kivymd.app import MDApp
 
 
-from infrastructure.json_handler_service import JsonHandler
+from Frameworks.json_handler_service import JsonHandler
 from presentation.kivy.controllers.main_controller import MainController
 from presentation.kivy.controllers.session_controller import SessionController
 from infrastructure import log_service
