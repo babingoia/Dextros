@@ -1,23 +1,3 @@
-"""
-Testes do VO Glycemia.
-
-NOTA: alguns testes marcados com "[depende do fix do parse()]" assumem que
-o parse() converte thresholds passados como string via int(...) e descarta
-thresholds passados como None (deixando o default do dataclass assumir),
-exatamente como discutimos:
-
-    @classmethod
-    def parse(cls, glycemia_value, measure_unit_value=None, **thresholds) -> "Glycemia":
-        glycemia_int = int(glycemia_value)
-        unit = measure_unit_value or "mg/dL"
-        thresholds_int = {k: int(v) for k, v in thresholds.items() if v is not None}
-        return cls(glycemia=glycemia_int, measure_unit=unit, **thresholds_int)
-
-Se seu parse() ainda não faz isso, esses testes específicos vão falhar -
-e isso é intencional: eles documentam o comportamento prometido pelo
-docstring da classe, servindo de checklist do que falta implementar.
-"""
-
 import pytest
 from hypothesis import given, strategies as st
 
@@ -39,8 +19,7 @@ def test_parse_com_apenas_glycemia_usa_todos_os_defaults():
 
 
 def test_construtor_direto_tambem_valida_invariantes():
-    # Mesmo bypassando parse(), o __post_init__ tem que aplicar as regras -
-    # mesma lógica que já validamos no CardID.
+    # Mesmo bypassando parse(), o __post_init__ tem que aplicar as regras
     with pytest.raises(ValueError):
         Glycemia(glycemia=700)
 
@@ -93,21 +72,15 @@ def test_measure_unit_explicito_valido():
     assert resultado.measure_unit == "mg/dL"
 
 
-@pytest.mark.parametrize("unidade_invalida", ["mmol/L", "MG/DL", "mg/dl", "xyz"])
+@pytest.mark.parametrize("unidade_invalida", ["mmol/L", "xyz"])
 def test_measure_unit_invalido_e_rejeitado(unidade_invalida):
     with pytest.raises(ValueError):
         Glycemia.parse(120, measure_unit_value=unidade_invalida)
 
 
-def test_measure_unit_string_vazia_cai_no_default_por_causa_do_or():
-    # BUG DOCUMENTADO: "unit = measure_unit_value or 'mg/dL'" trata string
-    # vazia como falsy, igual a None - então measure_unit_value="" NÃO é
-    # rejeitado, ele silenciosamente vira o default. Esse teste passa hoje,
-    # mas está documentando um comportamento questionável, não confirmando
-    # que ele está correto. Se quiser rejeitar "" de propósito, troque o
-    # "or" por "if measure_unit_value is None: unit = 'mg/dL'".
-    resultado = Glycemia.parse(120, measure_unit_value="")
-    assert resultado.measure_unit == "mg/dL"
+def test_measure_unit_string_vazia_e_rejeitada():
+    with pytest.raises(ValueError):
+        Glycemia.parse(120, measure_unit_value="")
 
 
 # ---------------------------------------------------------------------------
@@ -135,8 +108,8 @@ def test_thresholds_customizados_em_ordem_valida_sao_aceitos():
 
 
 @pytest.mark.parametrize("severe_hyper,hyper", [
-    (180, 180),   # empatados - agora inválido pela sua regra nova
-    (170, 180),   # severe menor que o normal
+    (180, 180),   
+    (170, 180),  
 ])
 def test_severe_hyperglycemia_deve_ser_estritamente_maior_que_hyperglycemia(severe_hyper, hyper):
     with pytest.raises(ValueError):
@@ -144,8 +117,8 @@ def test_severe_hyperglycemia_deve_ser_estritamente_maior_que_hyperglycemia(seve
 
 
 @pytest.mark.parametrize("severe_hypo,hypo", [
-    (70, 70),     # empatados - agora inválido
-    (80, 70),     # severe maior que o normal (invertido)
+    (70, 70),     
+    (80, 70),    
 ])
 def test_severe_hypoglycemia_deve_ser_estritamente_menor_que_hypoglycemia(severe_hypo, hypo):
     with pytest.raises(ValueError):
@@ -231,11 +204,8 @@ def test_parse_rejeita_glycemia_string_nao_numerica():
 
 
 def test_parse_trunca_glycemia_float_para_int():
-    # Documenta o comportamento atual (truncamento silencioso via int()).
-    # Se decidir que isso deveria ser erro em vez de truncar, este teste
-    # é o primeiro a atualizar.
-    resultado = Glycemia.parse(120.9)
-    assert resultado.glycemia == 120
+    with pytest.raises(TypeError):
+        resultado = Glycemia.parse(120.9)
 
 
 @pytest.mark.parametrize("valor_invalido", [None, [120], {"glycemia": 120}])

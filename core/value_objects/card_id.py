@@ -11,6 +11,7 @@ class CardID:
     card_id: UUID
  
     def __post_init__(self):
+        """Método reservado. Usar parse para criar entidades como entry point."""
         if self.card_id.version != 4:
             raise ValueError(f"CardID precisa ser UUID versão 4, recebeu: {self.card_id}")
  

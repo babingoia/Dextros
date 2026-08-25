@@ -1,6 +1,6 @@
 from logging import getLogger
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date
 
 from core.value_objects.card_id import CardID
 from core.value_objects.date import Date
@@ -19,8 +19,8 @@ logger = getLogger(__name__)
 class Card:
     
     card_id: CardID
-    date: Date
-    time: Time
+    card_date: Date
+    card_time: Time
     glycemia: Glycemia
     long_acting_insulin: LongActingInsulin
     short_acting_insulin: ShortActingInsulin
@@ -29,6 +29,5 @@ class Card:
     obs: Observation
 
     def __post_init__(self):
-        combined = datetime.combine(self.date._date, self.time._time)
-        if combined > datetime.now():
-            raise ValueError(f"Card date/time invalid, can you travel in time?: {combined}")
+        if self.card_date._date > date.today():
+            raise ValueError(f"Card não pode ter data no futuro: {self.card_date._date}")

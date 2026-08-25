@@ -26,7 +26,7 @@ class Date:
             case None:
                 return cls._new()
             case _:
-                raise TypeError(f"Invalid Type for CardID: {type(value)}")
+                raise TypeError(f"Invalid Type for Date: {type(value)}")
     
 
     @classmethod
@@ -44,6 +44,6 @@ class Date:
     @classmethod
     def _from_string(cls, value: str):
         try:
-            return cls(datetime.strptime(value, "%Y-%m-%d").date())
+            return cls(datetime.strptime(value.strip(), "%Y-%m-%d").date())
         except (ValueError, TypeError) as err:
-            raise ValueError(f"Error trying to create date from string value: {value}")
+            raise ValueError(f"Error trying to create date from string value: {value}") from err

@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-from typing import TypedDict
-
 
 # Constantes para validação interna
 _MAX_GLYCEMIA = 600
@@ -25,6 +23,7 @@ class Glycemia:
     severe_hyperglycemia_threshold: int = 250
 
     def __post_init__(self):
+        """Método reservado. Usar parse para criar entidades como entry point."""
         if self.glycemia > _MAX_GLYCEMIA or self.glycemia <  _MIN_GLYCEMIA:
             raise ValueError(f"Invalid glycemia input: {self.glycemia}\n"
                              f"If this is not an error, please go to a doctor imediatly!")
@@ -49,6 +48,9 @@ class Glycemia:
 
     @classmethod
     def parse(cls, glycemia_value, measure_unit_value=None, **thresholds) -> "Glycemia":
+        if not isinstance(glycemia_value, int | str | None):
+            raise TypeError(f"Invalid type for glycemia: {type(glycemia_value)}")
+        
         glycemia_int = int(glycemia_value)
 
         if measure_unit_value is None:

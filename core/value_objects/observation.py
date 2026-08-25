@@ -12,10 +12,11 @@ class Observation:
 
 
     def __post_init__(self):
+        """Método reservado. Usar parse para criar entidades como entry point."""
         if self.observation is None:
             return
         
-        if len(self.observation) == "":
+        if self.observation == "":
             raise ValueError(f"Observation text with 0 characters: {self.observation}")
         
         if len(self.observation) > 240:
@@ -29,7 +30,7 @@ class Observation:
         
         obs_value = obs_value.strip()
         
-        if len(obs_value) == 0:
+        if obs_value == "":
             obs_value = None
         
         return cls(obs_value)

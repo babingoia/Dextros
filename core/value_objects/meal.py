@@ -16,6 +16,7 @@ class MealPeriod:
 
     
     def __post_init__(self):
+        """Método reservado. Usar parse para criar entidades como entry point."""
         if self.meal_period is None:
             return
         
@@ -25,6 +26,9 @@ class MealPeriod:
 
     @classmethod
     def parse(cls, meal_period_value: str | None = None) -> "MealPeriod":
+        if not isinstance(meal_period_value, str | None):
+            raise TypeError(f"Invalid time for MealPeriod: {type(meal_period_value)}")
+        
         if meal_period_value is None:
             return cls()
         

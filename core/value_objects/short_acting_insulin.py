@@ -14,8 +14,13 @@ class ShortActingInsulin:
     quantity: int | None
 
     def __post_init__(self):
+        """Método reservado. Usar parse para criar entidades como entry point."""
+        if self.quantity == None:
+            return
+        
         if self.quantity == 0:
             object.__setattr__(self, "quantity", None)
+            return
         
         if self.quantity < 0:
             raise ValueError(f"Negativa invalid Short-Actin Insulin value: {self.quantity}")
