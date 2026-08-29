@@ -1,48 +1,19 @@
 from logging import getLogger
-
-from adapters.controllers.dtos.time_view_model import TimeList
-from usecases.dtos.meal_list import MealList
-from adapters.controllers.dtos.card_view_model import CardViewModel
-from adapters.controllers.dtos.matrix_data_view_model import MatrixDataViewModel
+from typing import Dict, Any
+from adapters.exceptions import RouteError
+from adapters.gateways.i_router import IRouter
+from adapters.controllers.i_controller import IController
 
 logger = getLogger(__name__)
 
-class KivyRouter:
-    """
-    Classe que roteia requests do kivy para os controllers corretos.
-    """
-    def __init__(self, time_controller,
-                date_hour_matrix_controller,
-                meal_controller,
-                save_request_controller,
-                delete_card_controller
-                ):
-        self.time_controller = time_controller
-        self.date_hour_matrix_controller = date_hour_matrix_controller
-        self.meal_controller = meal_controller
-        self.save_request_controller = save_request_controller
-        self.delete_card_controller = delete_card_controller
+class KivyRouter(IRouter):
+    def __init__(self, controllers: Dict[str, IController]):
+        self._controllers = controllers
 
+    def navigate(self, route: str, request_data: Any = None) -> Any:
+        controller = self._controllers.get(route)
+        
+        if not controller:
+            raise RouteError(f"Route '{route}' not found")
 
-    def get_meal_list(self) -> MealList:
-        return self.meal_controller.get_meal_list()
-
-
-    def get_time_list(self) -> TimeList:
-        logger.debug("Getting time list...")
-        return self.time_controller.get_time_list()
-    
-
-    def save_card(self, data) -> None:
-        logger.debug(f"Saving card: {data}")
-        return self.save_request_controller.save_card(data)
-    
-
-    def get_hour_date_matrix_data(self) -> MatrixDataViewModel:
-        logger.debug(f"Getting data for matrix")
-        return self.date_hour_matrix_controller.get_data()
-    
-
-    def delete_card(self, data) -> None:
-        logger.debug(f"Routing to card deletion...")
-        return self.delete_card_controller.delete_card(data)
+        return controller.execute(request_data)

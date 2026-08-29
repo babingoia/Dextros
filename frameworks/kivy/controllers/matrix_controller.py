@@ -3,6 +3,7 @@ from frameworks.kivy.ui.widgets.graphs.generic_matrix_graph import GenericMatrix
 from frameworks.kivy.ui.widgets.creators.card_creator import CardCreator, CARD, NONE_CARD
 from adapters.controllers.dtos.matrix_data_view_model import MatrixDataViewModel
 from adapters.controllers.dtos.card_view_model import CardViewModel
+from adapters.gateways.i_router import IRouter
 
 logger = getLogger(__name__)
 
@@ -13,9 +14,10 @@ class MatrixController:
     e solicitar dados ao KivyRouter quando a tela for exibida (Lazy Load).
     """
 
-    def __init__(self, grid_id, router):
+    def __init__(self, grid_id, router: IRouter, data_souce: str):
         logger.info("Initializing MatrixController...")
 
+        self.data_source = data_souce
         self.router = router
         self.grid_view = GenericMatrixGraph(grid_id)
         self.card_creator = CardCreator()
@@ -34,7 +36,7 @@ class MatrixController:
     def _update_view(self):
         """Converte o MatrixDataViewModel em dicionários para o RecycleView."""
         logger.debug("Updating GenericMatrixGraph with new data...")
-        matrix_vm: MatrixDataViewModel = self.router.get_hour_date_matrix_data()
+        matrix_vm: MatrixDataViewModel = self.router.navigate(self.data_source)
 
         def cell_factory(row_idx: int, col_idx: int, payload: CardViewModel):
             # Como o mapper nunca retorna None, basta checar se o card_id está preenchido
@@ -57,5 +59,5 @@ class MatrixController:
     def _handle_delete_card(self, card_id: str):
         """Captura o evento e deleta o card."""
         logger.info(f"Controller intercepting delete for card_id: {card_id}")
-        self.router.delete_card(card_id)
+        self.router.navigate("delete_card", card_id)
         self._update_view()

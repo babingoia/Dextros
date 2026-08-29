@@ -3,4 +3,4 @@ from usecases.dtos.meal_list import MealList
 
 class GetMealListUseCase:
     def execute(self) -> MealList:
-        return MealList(_VALID_MEAL_VALUES) 
+        return MealList(_VALID_MEAL_VALUES.copy()) 

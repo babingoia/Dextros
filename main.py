@@ -1,5 +1,6 @@
 import os
 os.environ["KIVY_LOG_MODE"] = "MIXED"
+from typing import Dict
 
 from kivymd.app import MDApp
 from infrastructure import log_service
@@ -14,10 +15,11 @@ from infrastructure.path_provider_service import get_data_path, get_asset_path
 # Use Cases
 from usecases.Factories.card_creator import CardCreator
 from usecases.get_time_list_use_case import GetTimeListUseCase
-from usecases.get_hour_date_matrix_data import GetHourDateMatrixUseCase
+from usecases.get_matrix_data.get_hour_date_matrix_data import GetHourDateMatrixUseCase
 from usecases.get_meal_list_use_case import GetMealListUseCase
 from usecases.create_card_use_case import CreateCardUseCase
 from usecases.delete_card_by_id_use_case import DeleteCardByIDUseCase
+from usecases.get_matrix_data.get_meal_date_matrix_data import GetMealDateMatrixUseCase
 
 # Controllers (adapters)
 from adapters.controllers.time_controller import TimeController
@@ -25,6 +27,8 @@ from adapters.controllers.date_hour_matrix_controller import DateHourMatrixContr
 from adapters.controllers.meal_controller import MealController
 from adapters.controllers.save_request_controller import SaveRequestController
 from adapters.controllers.delete_card_request_controller import DeleteCardRequestController
+from adapters.controllers.date_meal_matrix_controller import DateMealMatrixController
+from adapters.controllers.i_controller import IController
 
 # Gateway
 from adapters.gateways.kivy_router import KivyRouter
@@ -35,7 +39,7 @@ from frameworks.kivy.controllers.main_controller import MainController
 log_service.configure_logging(console_level=log_service.logging.DEBUG)
 logger = log_service.get_logger(__name__)
 
-DB = "db/cards_v2.json"
+DB = "db/cards_populated.json"
 
 
 class DextroApp(MDApp):
@@ -74,21 +78,29 @@ class DextroApp(MDApp):
         create_card_uc = CreateCardUseCase(card_repository, card_creator)
         delete_card_by_id_uc = DeleteCardByIDUseCase(card_repository=card_repository)
 
+        get_date_meal_matrix_uc = GetMealDateMatrixUseCase(get_meal_list=get_meal_list_uc,
+                                                           repository=card_repository)
+
         # 3. Controllers (use cases injetados)
         time_controller = TimeController(get_time_list_uc)
-        matrix_controller = DateHourMatrixController(get_matrix_uc)
+        date_hour_matrix_controller = DateHourMatrixController(get_matrix_uc)
         meal_controller = MealController(get_meal_list_uc)
         save_request_controller = SaveRequestController(create_card_uc)
         delete_card_id_controller = DeleteCardRequestController(delete_card_by_id_uc)
+        date_meal_matrix_controller = DateMealMatrixController(get_date_meal_matrix_uc)
 
-        # 4. Router (controllers injetados)
-        router = KivyRouter(
-            time_controller=time_controller,
-            date_hour_matrix_controller=matrix_controller,
-            meal_controller=meal_controller,
-            save_request_controller=save_request_controller,
-            delete_card_controller=delete_card_id_controller
-        )
+        # 4. Commands
+        routes: Dict[str, IController] = {
+            "get_time_list": time_controller,
+            "get_meal_list": meal_controller,
+            "get_hour_date_matrix_data": date_hour_matrix_controller,
+            "get_meal_date_matrix_data": date_meal_matrix_controller,
+            
+            # Queries
+            "save_card": save_request_controller,
+            "delete_card": delete_card_id_controller,
+        }
+        router = KivyRouter(routes)
 
         # 5. Kivy (router injetado)
         self.controller = MainController(router=router)
@@ -105,3 +117,4 @@ class DextroApp(MDApp):
 
 if __name__ == "__main__":
     DextroApp().run()
+

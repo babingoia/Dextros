@@ -3,3 +3,7 @@ class CardNotFoundError(Exception):
 
 class InvalidCardFormat(Exception):
     pass
+
+
+class RouteError(Exception):
+    pass

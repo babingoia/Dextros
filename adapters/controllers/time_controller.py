@@ -1,7 +1,12 @@
+from typing import Any
+
 from adapters.controllers.dtos.time_view_model import TimeList
+from adapters.controllers.i_controller import IController
 from usecases.dtos.time_output import TimeOutput
 
-class TimeController:
+
+
+class TimeController(IController[Any, TimeList]):
     def __init__(self, get_time_list_use_case):
         self.get_time_list_use_case = get_time_list_use_case
 
@@ -15,7 +20,7 @@ class TimeController:
         return time_list
 
 
-    def get_time_list(self) -> TimeList:
+    def execute(self, request: Any = None) -> TimeList:
         time_list = self.get_time_list_use_case.execute()
         parsed_time_list: TimeList = self._parse_output_view_model(time_list)
         

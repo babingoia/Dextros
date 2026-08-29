@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from kivy.properties import NumericProperty
 from kivy.uix.recycleview import RecycleView
 from kivy.lang import Builder
 from typing import Callable, Any, Optional
@@ -13,6 +14,9 @@ logger = getLogger(__name__)
 
 
 class GenericMatrixGraph(RecycleView):
+    
+    matrix_cols = NumericProperty(1)
+
     def __init__(self, container: Optional[Any] = None, **kwargs):
         logger.info("Initializing GenericMatrixGraph")
         super().__init__(**kwargs)
@@ -64,6 +68,7 @@ class GenericMatrixGraph(RecycleView):
                 cell_dict = cell_factory(row_idx, col_idx, payload)
                 flat_data.append(cell_dict)
 
+        self.matrix_cols = len(col_headers) + 1
         logger.info("Injecting data into RecycleView.")
         self.data = flat_data
 

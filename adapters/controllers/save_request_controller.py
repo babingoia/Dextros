@@ -1,23 +1,25 @@
 from logging import getLogger
+from adapters.controllers.i_controller import IController
 from adapters.controllers.dtos.card_view_model import CardViewModel
 from adapters.controllers.mappers.mappers import view_model_to_input, strip_view_model
 
-
 logger = getLogger(__name__)
 
-
-class SaveRequestController:
+class SaveRequestController(IController[CardViewModel, None]):
     def __init__(self, save_card_use_case):
         self.save_card_use_case = save_card_use_case
 
 
-    def save_card(self, data: CardViewModel) -> None:
-        logger.debug(f"Save request got: {data}")
+    def execute(self, request: CardViewModel) -> None:
+        logger.debug(f"Save request got: {request}")
 
         try:
-            data = strip_view_model(data)
-            input_data = view_model_to_input(data)
+            logger.debug("Striping data")
+            stripped_data = strip_view_model(request)
+            logger.debug("Converting view model to input")
+            input_data = view_model_to_input(stripped_data)
+            logger.debug("Calling use case save card")
             self.save_card_use_case.execute(input_data)
 
-        except Exception:
-            raise TypeError(f"Malformed data for saving request: {data}")
+        except Exception as e:
+            raise TypeError(f"Malformed data for saving request: {request}") from e

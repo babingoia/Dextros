@@ -89,16 +89,21 @@
                 spacing: app_theme.space("xs")
 
                 NavButton:
-                    text: "Adicionar card"
+                    text: "Adicionar Novo Registro"
                     state: "down"
                     on_release:
                         screens.current = "add_card"
                         nav_toggle.state = "normal"
 
                 NavButton:
-                    text: "Gráfico"
+                    text: "Dia x Hora"
                     on_release:
                         screens.current = "chart"
+                        nav_toggle.state = "normal"
+                NavButton:
+                    text: "Dia x Refeição"
+                    on_release:
+                        screens.current = "meal_date_chart"
                         nav_toggle.state = "normal"
 
         # Espaço para empurrar futuros itens para o topo
@@ -147,7 +152,7 @@
 
             Label:
                 id: appbar_title
-                text: "Adicionar card"
+                text: "Adicionar Novo Registro"
                 font_size: app_theme.font("title")
                 bold: True
                 color: app_theme.color("text_primary")
@@ -162,7 +167,7 @@
             id: screens
 
             on_current:
-                appbar_title.text = "Adicionar card" if self.current == "add_card" else "Gráfico" if self.current == "chart" else self.current.replace("_", " ").capitalize()
+                appbar_title.text = appbar_title.text = "Adicionar Novo Registro" if self.current == "add_card" else "Gráfico" if self.current == "chart" else "Refeição x Dia" if self.current == "meal_date_chart" else self.current.replace("_", " ").capitalize()
 
             # ==============================================
             # TELA: ADICIONAR CARD
@@ -336,3 +341,14 @@
                     Panel:
                         Border:
                             id: date_hour_matrix_container
+            
+            GraphScreen:
+                name: "meal_date_chart"
+
+                GraphScreenContent:
+                    ScreenHeader:
+                        text: "Dextros por refeição e dia"
+
+                    Panel:
+                        Border:
+                            id: meal_date_matrix_container
