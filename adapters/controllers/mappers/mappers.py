@@ -25,7 +25,7 @@ def empty_to_none(value):
 
 def int_or_none(value):
     value = empty_to_none(value)
-    return int(value) if value is not None else None
+    return int(value) if value is not None or value is not 0 else None
 
 
 def view_model_to_input(card: CardViewModel) -> CardDTOInput:

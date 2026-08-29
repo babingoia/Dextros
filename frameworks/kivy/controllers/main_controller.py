@@ -27,7 +27,7 @@ class MainController():
         # Horarios
         self.time: TimeList = self.router.get_time_list()
         self.main_view.available_time = self.time.not_datetime_time
-        self.main_view.actual_time = datetime.now().time().strftime("%H:%M:%S")
+        self.main_view.actual_time = datetime.now().time().strftime("%H:%M")
 
         # Data
         self.date: date = datetime.now().date()

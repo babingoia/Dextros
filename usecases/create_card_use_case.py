@@ -26,5 +26,7 @@ class CreateCardUseCase:
         logger.debug(f"Creating Card from dto: {cardDTO}")
 
         new_card = self.card_creator.create_card(cardDTO)    
+
+        logger.debug(f"Adding card to repository: {new_card}")
         self.repository.add_card(new_card)
         return new_card
