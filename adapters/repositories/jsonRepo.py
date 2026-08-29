@@ -6,7 +6,7 @@ from adapters.repositories.i_import_handler import ICardImportHandler
 from usecases.Factories.I_card_creator import ICardCreator
 from usecases.dtos.cardDTOInput import CardDTOInput
 from adapters.parsers.icard_parser import ICardParser
-from tests.exceptions import CardNotFoundError
+from adapters.exceptions import CardNotFoundError
 from adapters.repositories.DTOs.card_data_model import CardDataModel
 
 logger = getLogger(__name__)

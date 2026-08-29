@@ -17,10 +17,9 @@ class MatrixCell(Border):
     is_empty = BooleanProperty(True)
     is_header = BooleanProperty(False)
     dextro_text = StringProperty("")
+    delete_callback = ObjectProperty(None, allownone=True)
     card_reference = ObjectProperty(None, allownone=True)
 
-    # Declara o evento customizado que vai borbulhar para o Controller
-    __events__ = ("on_delete_request",)
 
     def _show_card_details(self):
         # Só abre popup se for um card real
@@ -48,10 +47,17 @@ class MatrixCell(Border):
         content.popup = popup
         popup.open()
 
+
     def _on_delete_clicked(self, card_id: str):
-        """Recebe o clique do CardWidget e dispara o evento para fora da RecycleView."""
-        logger.debug(f"MatrixCell dispatching delete request for card_id: {card_id}")
-        self.dispatch("on_delete_request", card_id)
+        """Recebe o clique do CardWidget e dispara o callback do Controller."""
+        logger.debug(f"MatrixCell calling delete callback for card_id: {card_id}")
+        
+        if self.delete_callback:
+            # Chama o _handle_delete_card do MatrixController
+            self.delete_callback(card_id)
+        else:
+            logger.warning("Delete callback não foi injetado na MatrixCell!")
+
 
     def on_delete_request(self, card_id: str):
         """Handler padrão obrigatório para eventos Kivy. O Controller vai interceptar."""

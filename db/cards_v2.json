@@ -57,30 +57,16 @@
       }
     },
     {
-      "card_id": "b4ab09c7-907f-43b8-944c-5ae89afb5cfe",
+      "card_id": "025a526b-f61f-449b-b576-61fb097c4a64",
       "card_date": "2026-08-29",
-      "card_time": "00:00",
-      "glycemia": 148,
-      "long_acting_insulin": null,
-      "short_acting_insulin": null,
-      "meal": null,
+      "card_time": "11:00",
+      "glycemia": 179,
+      "long_acting_insulin": 40,
+      "short_acting_insulin": 16,
+      "meal": "jejum",
       "observation": null,
       "exercise": {
-        "exercise_name": "qan2",
-        "intensity": null
-      }
-    },
-    {
-      "card_id": "7f12900b-45b4-4692-8e7a-432047a42a59",
-      "card_date": "2026-08-29",
-      "card_time": "00:00",
-      "glycemia": 148,
-      "long_acting_insulin": null,
-      "short_acting_insulin": null,
-      "meal": null,
-      "observation": "er dfhb",
-      "exercise": {
-        "exercise_name": "wredghn",
+        "exercise_name": null,
         "intensity": null
       }
     }

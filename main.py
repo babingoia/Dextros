@@ -17,12 +17,14 @@ from usecases.get_time_list_use_case import GetTimeListUseCase
 from usecases.get_hour_date_matrix_data import GetHourDateMatrixUseCase
 from usecases.get_meal_list_use_case import GetMealListUseCase
 from usecases.create_card_use_case import CreateCardUseCase
+from usecases.delete_card_by_id_use_case import DeleteCardByIDUseCase
 
 # Controllers (adapters)
 from adapters.controllers.time_controller import TimeController
 from adapters.controllers.date_hour_matrix_controller import DateHourMatrixController
 from adapters.controllers.meal_controller import MealController
 from adapters.controllers.save_request_controller import SaveRequestController
+from adapters.controllers.delete_card_request_controller import DeleteCardRequestController
 
 # Gateway
 from adapters.gateways.kivy_router import KivyRouter
@@ -70,19 +72,22 @@ class DextroApp(MDApp):
         get_matrix_uc = GetHourDateMatrixUseCase(card_repository)
         get_meal_list_uc = GetMealListUseCase()
         create_card_uc = CreateCardUseCase(card_repository, card_creator)
+        delete_card_by_id_uc = DeleteCardByIDUseCase(card_repository=card_repository)
 
         # 3. Controllers (use cases injetados)
         time_controller = TimeController(get_time_list_uc)
         matrix_controller = DateHourMatrixController(get_matrix_uc)
         meal_controller = MealController(get_meal_list_uc)
         save_request_controller = SaveRequestController(create_card_uc)
+        delete_card_id_controller = DeleteCardRequestController(delete_card_by_id_uc)
 
         # 4. Router (controllers injetados)
         router = KivyRouter(
             time_controller=time_controller,
             date_hour_matrix_controller=matrix_controller,
             meal_controller=meal_controller,
-            save_request_controller=save_request_controller
+            save_request_controller=save_request_controller,
+            delete_card_controller=delete_card_id_controller
         )
 
         # 5. Kivy (router injetado)

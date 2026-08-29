@@ -20,8 +20,6 @@ class MatrixController:
         self.grid_view = GenericMatrixGraph(grid_id)
         self.card_creator = CardCreator()
 
-        self.grid_view.bind(on_delete_request=self._handle_delete_card)
-
 
     def on_screen_enter(self):
         """
@@ -30,21 +28,21 @@ class MatrixController:
         """
         logger.debug("Matrix screen entered. Requesting data from Router...")
 
-        # 1. Pede a matriz formatada para o Router
-        matrix_vm: MatrixDataViewModel = self.router.get_hour_date_matrix_data()
-
-        # 2. Atualiza a view
-        self._update_view(matrix_vm)
+        self._update_view()
 
 
-    def _update_view(self, matrix_vm: MatrixDataViewModel):
+    def _update_view(self):
         """Converte o MatrixDataViewModel em dicionários para o RecycleView."""
         logger.debug("Updating GenericMatrixGraph with new data...")
+        matrix_vm: MatrixDataViewModel = self.router.get_hour_date_matrix_data()
 
         def cell_factory(row_idx: int, col_idx: int, payload: CardViewModel):
             # Como o mapper nunca retorna None, basta checar se o card_id está preenchido
             if payload["card_id"]:
-                return self.card_creator.create_cell_dict(CARD, payload)
+                cell_dict = self.card_creator.create_cell_dict(CARD, payload)
+                cell_dict['delete_callback'] = self._handle_delete_card
+                
+                return cell_dict
             else:
                 return self.card_creator.create_cell_dict(NONE_CARD, payload)
 
@@ -56,8 +54,8 @@ class MatrixController:
         )
     
 
-    def _handle_delete_card(self, instance, card_id: str):
-        """Captura o evento vindo do MatrixCell dentro da RecycleView."""
+    def _handle_delete_card(self, card_id: str):
+        """Captura o evento e deleta o card."""
         logger.info(f"Controller intercepting delete for card_id: {card_id}")
-
-        # Precisa implementar
+        self.router.delete_card(card_id)
+        self._update_view()
