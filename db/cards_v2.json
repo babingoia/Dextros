@@ -69,6 +69,20 @@
         "exercise_name": "qan2",
         "intensity": null
       }
+    },
+    {
+      "card_id": "7f12900b-45b4-4692-8e7a-432047a42a59",
+      "card_date": "2026-08-29",
+      "card_time": "00:00",
+      "glycemia": 148,
+      "long_acting_insulin": null,
+      "short_acting_insulin": null,
+      "meal": null,
+      "observation": "er dfhb",
+      "exercise": {
+        "exercise_name": "wredghn",
+        "intensity": null
+      }
     }
   ]
 }

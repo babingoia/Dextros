@@ -23,21 +23,6 @@ class CardCreator(ICardCreator):
     
     def create_card(self, data: CardDTOInput) -> Card:
         try:
-            logger.debug(f'Creating card: {data}')
-            logger.debug(f'Adjusting datetime...')
-
-            raw_datetime = f"{data.card_date.strip()} {data.card_time.strip()}"
-            dt = datetime.strptime(raw_datetime, "%Y-%m-%d %H:%M")
-
-            if dt.minute > 30:
-                dt += timedelta(hours=1)
-
-            dt = dt.replace(minute=0, second=0)
-
-            data.card_date = dt.strftime("%Y-%m-%d")
-            data.card_time = dt.strftime("%H:%M")
-
-            logger.debug(f'DateTime Adjusted.')
             new_card_id = CardID.parse(data.card_id)
             new_card_date = Date.parse(data.card_date)
             new_card_time = Time.parse(data.card_time)
