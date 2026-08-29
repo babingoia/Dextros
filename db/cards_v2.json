@@ -1,0 +1,32 @@
+{
+  "cards": [
+    {
+      "card_id": "55dd2b35-0c16-4d78-8e34-fc4c3d4cc035",
+      "card_date": "2026-08-28",
+      "card_time": "22:00",
+      "glycemia": 123,
+      "long_acting_insulin": 40,
+      "short_acting_insulin": 12,
+      "meal": "jejum",
+      "observation": "dsa",
+      "exercise": {
+        "exercise_name": "caminhada",
+        "intensity": null
+      }
+    },
+    {
+      "card_id": "702bc596-667a-47b6-8c65-f40f07b0862d",
+      "card_date": "2026-08-28",
+      "card_time": "20:00",
+      "glycemia": 324,
+      "long_acting_insulin": null,
+      "short_acting_insulin": null,
+      "meal": null,
+      "observation": null,
+      "exercise": {
+        "exercise_name": "corrida",
+        "intensity": null
+      }
+    }
+  ]
+}

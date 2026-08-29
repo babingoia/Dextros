@@ -1,4 +1,7 @@
+from logging import getLogger
 from dataclasses import dataclass
+
+logger = getLogger(__name__)
 
 @dataclass(frozen=True)
 class LongActingInsulin:
@@ -25,11 +28,12 @@ class LongActingInsulin:
 
     @classmethod
     def parse(cls, quantity_value: int | str | None = None) -> "LongActingInsulin":
+        logger.debug(f"Criando insulina lenta: {type(quantity_value)}")
         match quantity_value:
-            case str():
-                return cls._from_string(quantity_value)
             case None:
                 return cls(quantity_value)
+            case str():
+                return cls._from_string(quantity_value)
             case int():
                 return cls(quantity_value)
             case _:
@@ -38,9 +42,10 @@ class LongActingInsulin:
 
     @classmethod
     def _from_string(cls, quantity_value: str) -> "LongActingInsulin":
-        quantity_value = int(quantity_value.strip())
+        quantity_value = quantity_value.strip()
         
         if quantity_value == "":
             quantity_value = None
-        
-        return cls(quantity_value)
+            return cls()
+
+        return cls(int(quantity_value))

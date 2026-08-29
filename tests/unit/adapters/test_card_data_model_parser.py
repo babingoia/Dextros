@@ -1,7 +1,7 @@
 import pytest
 from hypothesis import given, strategies as st, settings, HealthCheck
 from adapters.parsers.card_data_model_parser import CardDataModelParser
-from adapters.DTOs.card_data_model import CardDataModel
+from adapters.repositories.DTOs.card_data_model import CardDataModel
 
 # Estratégias do Hypothesis para gerar dados aleatórios válidos
 uuid_strategy = st.uuids(version=4).map(str)

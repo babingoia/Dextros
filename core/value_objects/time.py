@@ -45,7 +45,11 @@ class Time():
     def _from_string(cls, value: str):
         try:
             parsed_value = value.strip().lower()
-            value_hour, value_minute = map(int, parsed_value.split(":"))
+            value_hour, value_minute = map(int, parsed_value.split(":")[:2])
+
+            if value_minute >= 30:
+                value_hour = (value_hour + 1) % 24
+                
             parsed_time = time(hour=value_hour, minute=value_minute)
             return cls(parsed_time)
         except (ValueError, TypeError):

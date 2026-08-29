@@ -4,10 +4,10 @@ from usecases.IRepository import ICardRepository
 from core.value_objects.card import Card
 from adapters.repositories.i_import_handler import ICardImportHandler
 from usecases.Factories.I_card_creator import ICardCreator
-from usecases.dtos.cardDTO import CardDTOInput
+from usecases.dtos.cardDTOInput import CardDTOInput
 from adapters.parsers.icard_parser import ICardParser
 from tests.exceptions import CardNotFoundError
-from adapters.DTOs.card_data_model import CardDataModel
+from adapters.repositories.DTOs.card_data_model import CardDataModel
 
 logger = getLogger(__name__)
 
@@ -23,6 +23,7 @@ class JsonRepository(ICardRepository):
 
 
     def _import_cards(self) -> list[Card]:
+        logger.debug("Importing cards to repository...")
         data = self.handler.load()
         
         parsed_data: list[CardDTOInput] = []
@@ -36,6 +37,7 @@ class JsonRepository(ICardRepository):
         for card in parsed_data:
             cards.append(self.card_creator.create_card(card))
         
+        logger.debug(f"Cards imported: {cards}")
         return cards
 
 
@@ -64,7 +66,7 @@ class JsonRepository(ICardRepository):
 
 
     def get_all_cards(self) -> list[Card]:
-        logger.debug(f"Loading cards from JSON...")
+        logger.debug(f"Loading cards from JSON... {self.cards_on_session}")
         return list(self.cards_on_session)
 
     

@@ -5,7 +5,7 @@ from typing import Iterable
 
 
 from adapters.repositories.i_import_handler import ICardImportHandler
-from adapters.DTOs.card_data_model import CardDataModel
+from adapters.repositories.DTOs.card_data_model import CardDataModel
 
 
 logger = logging.getLogger(__name__)
@@ -30,7 +30,19 @@ class JsonHandler(ICardImportHandler):
             with open(self.save_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
-            return [CardDataModel(card) for card in data.get("cards", [])]
+            # Compatibilidade retroativa:
+            # - arquivos legados são uma lista pura de cards: [...]
+            # - formato atual é um dict: {"cards": [...]}
+            if isinstance(data, list):
+                raw_cards = data
+            elif isinstance(data, dict):
+                raw_cards = data.get("cards", [])
+            else:
+                raise ValueError(
+                    f"Unexpected JSON structure in {self.save_path}: {type(data).__name__}"
+                )
+
+            return [CardDataModel(card) for card in raw_cards]
 
         except FileNotFoundError:
             logger.debug("JSON file not found: %s. Returning empty list.", self.save_path)

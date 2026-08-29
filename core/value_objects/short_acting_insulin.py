@@ -41,9 +41,10 @@ class ShortActingInsulin:
 
     @classmethod
     def _from_string(cls, quantity_value: str) -> "ShortActingInsulin":
-        quantity_value = int(quantity_value.strip())
+        quantity_value = quantity_value.strip()
         
         if quantity_value == "":
             quantity_value = None
+            return cls(quantity_value)
         
-        return cls(quantity_value)
+        return cls(int(quantity_value))

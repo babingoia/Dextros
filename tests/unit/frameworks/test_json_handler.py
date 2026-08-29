@@ -2,7 +2,7 @@ import pytest
 import json
 from pathlib import Path
 from frameworks.json_handler_service import JsonHandler
-from adapters.DTOs.card_data_model import CardDataModel
+from adapters.repositories.DTOs.card_data_model import CardDataModel
 
 class TestJsonHandlerInit:
     def test_init_sets_path_object(self, tmp_path):

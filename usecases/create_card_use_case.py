@@ -3,7 +3,7 @@ from logging import getLogger
 
 from tests.exceptions import DomainExceptionError
 from usecases.IRepository import ICardRepository
-from usecases.dtos.cardDTO import CardDTOInput
+from usecases.dtos.cardDTOInput import CardDTOInput
 from core.value_objects.card import Card
 from usecases.Factories.I_card_creator import ICardCreator
 

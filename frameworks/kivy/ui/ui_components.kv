@@ -1,0 +1,243 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+
+
+# ==========================================================
+# TEXTOS / TÍTULOS
+# ==========================================================
+<ScreenHeader@Label>:
+    size_hint_y: None
+    height: app_theme.widget("header_height")
+    font_size: app_theme.font("headline")
+    bold: True
+    color: app_theme.color("text_primary")
+    text_size: self.size
+    halign: "left"
+    valign: "middle"
+    shorten: True
+
+
+<SectionTitle@Label>:
+    size_hint_y: None
+    height: app_theme.widget("section_title_height")
+    font_size: app_theme.font("title")
+    bold: True
+    color: app_theme.color("text_primary")
+    text_size: self.size
+    halign: "left"
+    valign: "middle"
+    shorten: True
+
+
+<FieldLabel@Label>:
+    size_hint_y: None
+    height: app_theme.widget("field_label_height")
+    font_size: app_theme.font("caption")
+    color: app_theme.color("text_secondary")
+    text_size: self.size
+    halign: "left"
+    valign: "middle"
+    shorten: True
+
+
+# ==========================================================
+# CAMPOS
+# ==========================================================
+<ReadOnlyField@Label>:
+    size_hint_y: None
+    height: app_theme.widget("input_height")
+    font_size: app_theme.font("field")
+    color: app_theme.color("text_primary")
+    text_size: self.size
+    halign: "left"
+    valign: "middle"
+    padding_x: app_theme.space("md")
+    shorten: True
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("field_bg")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("md")]
+        Color:
+            rgba: app_theme.color("border")
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
+            width: app_theme.border("thin")
+
+
+<AppTextInput@TextInput>:
+    size_hint_y: None
+    height: app_theme.widget("input_height")
+    multiline: False
+    font_size: app_theme.font("field")
+    foreground_color: app_theme.color("text_primary")
+    cursor_color: app_theme.color("primary")
+    hint_text_color: app_theme.color("text_hint")
+    background_normal: ""
+    background_active: ""
+    background_color: 0, 0, 0, 0
+    padding: [app_theme.space("md"), max(0, (self.height - self.line_height) / 2)]
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("field_bg")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("md")]
+        Color:
+            rgba: app_theme.color("border_focus") if self.focus else app_theme.color("border")
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
+            width: app_theme.border("focus") if self.focus else app_theme.border("thin")
+
+
+<AppSpinner@Spinner>:
+    size_hint_y: None
+    height: app_theme.widget("input_height")
+    font_size: app_theme.font("field")
+    color: app_theme.color("text_primary")
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    text_size: self.size
+    halign: "left"
+    valign: "middle"
+    padding_x: app_theme.space("md")
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("field_bg")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("md")]
+        Color:
+            rgba: app_theme.color("border_focus") if self.state == "down" else app_theme.color("border")
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
+            width: app_theme.border("thin")
+
+
+# ==========================================================
+# BOTÕES
+# ==========================================================
+<PrimaryButton@Button>:
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    color: app_theme.color("on_primary")
+    font_size: app_theme.font("button")
+    bold: True
+    text_size: self.size
+    halign: "center"
+    valign: "middle"
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("primary_pressed") if self.state == "down" else app_theme.color("primary")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("md")]
+
+
+<SecondaryButton@Button>:
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    color: app_theme.color("text_primary")
+    font_size: app_theme.font("button")
+    text_size: self.size
+    halign: "center"
+    valign: "middle"
+    shorten: True
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("surface_alt") if self.state == "down" else app_theme.color("field_bg")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("md")]
+        Color:
+            rgba: app_theme.color("border")
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
+            width: app_theme.border("thin")
+
+
+<NavButton@ToggleButton>:
+    group: "nav"
+    allow_no_selection: False
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    size_hint_y: None
+    height: app_theme.widget("nav_item_height")
+    font_size: app_theme.font("body")
+    color: app_theme.color("nav_active_text") if self.state == "down" else app_theme.color("nav_text")
+    text_size: self.size
+    halign: "left"
+    valign: "middle"
+    padding_x: app_theme.space("md")
+    shorten: True
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("nav_active_bg") if self.state == "down" else app_theme.color("transparent")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("md")]
+
+
+# ==========================================================
+# CONTAINERS
+# ==========================================================
+<Card@BoxLayout>:
+    orientation: "vertical"
+    size_hint_y: None
+    height: self.minimum_height
+    padding: [app_theme.space("lg"), app_theme.space("lg"), app_theme.space("lg"), app_theme.space("lg")]
+    spacing: app_theme.space("md")
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("card")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("lg")]
+        Color:
+            rgba: app_theme.color("border")
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("lg")
+            width: app_theme.border("thin")
+
+
+<Panel@BoxLayout>:
+    orientation: "vertical"
+    padding: [app_theme.space("lg"), app_theme.space("lg"), app_theme.space("lg"), app_theme.space("lg")]
+    spacing: app_theme.space("md")
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("card")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("lg")]
+        Color:
+            rgba: app_theme.color("border")
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("lg")
+            width: app_theme.border("thin")
+
+
+<GraphScreenContent@BoxLayout>:
+    orientation: "vertical"
+    padding: [app_theme.space("lg"), app_theme.space("lg"), app_theme.space("lg"), app_theme.space("xl")]
+    spacing: app_theme.space("lg")

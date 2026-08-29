@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from usecases.dtos.cardDTO import CardDTOInput
-from adapters.DTOs.card_data_model import CardDataModel
+from usecases.dtos.cardDTOInput import CardDTOInput
+from adapters.repositories.DTOs.card_data_model import CardDataModel
 
 class ICardParser(ABC):
 

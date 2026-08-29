@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from usecases.dtos.cardDTO import CardDTOInput
+from usecases.dtos.cardDTOInput import CardDTOInput
 from core.value_objects.card import Card
 
 class ICardCreator(ABC):

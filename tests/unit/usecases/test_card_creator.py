@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from usecases.Factories.card_creator import CardCreator
-from usecases.dtos.cardDTO import CardDTOInput
+from usecases.dtos.cardDTOInput import CardDTOInput
 
 @pytest.fixture
 def creator():

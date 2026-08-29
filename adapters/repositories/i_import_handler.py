@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from adapters.DTOs.card_data_model import CardDataModel
+from adapters.repositories.DTOs.card_data_model import CardDataModel
 
 
 class ICardImportHandler(ABC):
