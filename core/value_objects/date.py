@@ -7,7 +7,10 @@ logger = getLogger(__name__)
 
 @dataclass(frozen=True)
 class Date:
-    
+    """
+    Classe que representa uma data no sistema. _date não é um atributo privado, apenas uma forma de não
+    sobrescrever date do módulo datetime.
+    """
     _date: date
 
     @classmethod

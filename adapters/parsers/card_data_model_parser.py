@@ -9,7 +9,9 @@ logger = getLogger(__name__)
 
 
 class CardDataModelParser(ICardParser):
-
+    """Classe utilitária que mapeia CardDataModel em outras estruturas de dados. Feita assim para manter
+    algum contexto. Deveria ser depreciada em breve por uma função utilitária para simplificação.
+    """
     def parse(self, data_model: CardDataModel) -> CardDTOInput: 
         parsed_data_model = CardDTOInput(
             data_model['card_id'],

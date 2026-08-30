@@ -10,6 +10,7 @@ logger = getLogger(__name__)
 
 
 class DateMealMatrixController(IController[Any, MatrixDataViewModel]):
+    """Request que retorna os dados para compor uma matrix 2D de glicemia por data x refeição."""
     def __init__(self, get_meal_date_matrix_use_case):
         self.get_meal_date_matrix_use_case = get_meal_date_matrix_use_case
 

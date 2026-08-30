@@ -7,6 +7,9 @@ from adapters.controllers.mappers.mappers import matrix_to_view_model
 logger = getLogger(__name__)
 
 class DateHourMatrixController(IController[Any, MatrixDataViewModel]):
+    """Request que pega os dados para compor uma matrix de dextro por data x hora
+    e os converte para uma MatrixDataViewModel para a UI consumir.
+    """
     def __init__(self, get_hour_date_matrix_use_case):
         self.get_hour_date_matrix_use_case = get_hour_date_matrix_use_case
 

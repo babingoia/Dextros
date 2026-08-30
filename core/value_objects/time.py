@@ -10,6 +10,7 @@ logger = getLogger(__name__)
 class Time():
     """
     VO de tempo, guarda um objeto time. Aceita None para tempo atual arredondado, time, datetime ou string.
+    Seu valor _time não é privado, apenas uma maneira de contornar a sobrescrita de time do módulo datetime.
     """
 
     _time: time

@@ -12,7 +12,10 @@ logger = getLogger(__name__)
 
 
 class CreateCardUseCase:
-    
+    """
+    UseCase que recebe um repositório e um card creator para orquestrar o salvamente de um card no sistema.
+    Primeiro recebe um CardDTOInput depois o valida com o card_creator e por fim salva com o repositório.
+    """
     def __init__(self, repository: ICardRepository, card_creator: ICardCreator):
         self.repository: ICardRepository = repository
         self.card_creator: ICardCreator = card_creator

@@ -2,6 +2,7 @@ from adapters.exceptions import InvalidCardFormat
 from adapters.controllers.i_controller import IController
 
 class DeleteCardRequestController(IController[str, None]):
+    """Query que processa um comando de deleção de card. Recebe o id do card para que isso ocorra."""
     def __init__(self, delete_card_use_case):
         self.delete_card_use_case = delete_card_use_case
 

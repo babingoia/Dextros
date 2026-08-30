@@ -13,6 +13,10 @@ logger = getLogger(__name__)
 
 
 class JsonRepository(ICardRepository):
+    """Classe concreta de repositório que utiliza loads e exports de um CardImportHandler como banco
+    de dados. Precisa receber um card_creator para manipular e validar os dados além de um parser para
+    mapear CardDataModel em CardDTOInput. Suporta operações basícas de um repositório.
+    """
 
     def __init__(self, handler: ICardImportHandler, card_creator: ICardCreator, parser: ICardParser):
         

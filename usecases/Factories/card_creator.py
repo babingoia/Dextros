@@ -20,7 +20,7 @@ logger = getLogger(__name__)
 
 
 class CardCreator(ICardCreator):
-    
+    """Classe concreta que cria Cards á partir de um CardDTOInput."""
     def create_card(self, data: CardDTOInput) -> Card:
         try:
             new_card_id = CardID.parse(data.card_id)

@@ -9,8 +9,9 @@ class _ExerciseDTO:
     exercise_name: str
     intensity: str
 
-@dataclass()
+@dataclass
 class CardOutput:
+    """DTO dataclass fortemente tipada que sai do usecase para os controllers."""
     card_id: str
     card_date: date
     card_time: time

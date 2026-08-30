@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class JsonHandler(ICardImportHandler):
+    """Implementação concreta de um CardImportHandler que utiliza json."""
     def __init__(self, save_path: str | Path):
         logger.debug(f"Initializing JsonHandler with save_path: {save_path}")
         self.save_path = Path(save_path)

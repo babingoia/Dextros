@@ -2,8 +2,11 @@ from core.value_objects.time import Time
 from usecases.dtos.time_output import TimeOutput
 
 class GetTimeListUseCase:
+    """
+    Retorna uma lista de TimeOutput com valores únicos de Time organizados das 6AM até as 00AM do dia 
+    seguinte.
+    """
     def __init__(self):
-
         self.TIME_LIST = [Time.parse(f"{h:02}:00") for h in list(range(6, 24)) + list(range(0, 6))] 
     
 

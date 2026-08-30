@@ -6,6 +6,7 @@ from adapters.controllers.i_controller import IController
 
 
 class MealController(IController[Any, MealList]):
+    """Request que retorna uma lista de todas as refeições permitidas pelo sistema."""
     def __init__(self, get_meal_list_use_case):
         self.get_meal_list_use_case = get_meal_list_use_case
 

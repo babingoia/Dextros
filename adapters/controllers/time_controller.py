@@ -7,6 +7,9 @@ from usecases.dtos.time_output import TimeOutput
 
 
 class TimeController(IController[Any, TimeList]):
+    """Request que retorna uma lista organizada de quais horários o sistema salva para serem consumidas
+    pela UI.
+    """
     def __init__(self, get_time_list_use_case):
         self.get_time_list_use_case = get_time_list_use_case
 

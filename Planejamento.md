@@ -1,41 +1,41 @@
 # ANOTACOES
 -> Os valores de hipoglicemia e hiperglicemia da classe dextros foram feitos com base na diretriz da associação de diabetes do brasil: https://diretriz.diabetes.org.br/metas-no-tratamento-do-diabetes/
 
-# Tasks pequenas
--> Botar um botão de confirmação na hora de excluir um card
--> Limpar os dados do formulário na hora de salvar um card
--> Arrumar a ordem de carregamento das coisas.
--> Tirar o sistema manual de eventos e usar o EventDispatcher do Kivy.
+
+# Próximos passos
+-> Fazer o inventários dos testes faltantes
+-> Adicionar testes  
+    *Unitários{
+
+    }
+
+    *Integração{
+        -> Salvar Card (Consistência interna): UseCase até Router.
+        -> Deletar um card (Consistência interna): UseCase até o Router.
+    }
+
+    *End to End{
+
+    }
+
+-> Criar uma documentação para o projeto.
+-> Adicionar Import/Export de db.
 
 
--> Tirar a manipulação de cache do CardWidget
--> Botar Docstring em tudo.
--> Desacoplar os dados do datepicker e simplificar, jogando na main view.
-
--> Transformar o widget do card em um botão alterável
+-> Organizar TimeList para que ela retorne os dias também para a view desenhar de maneira correta.
+-> Fazer com que os erros pipoquem na view.
+-> Simplificar o map do json repo em uma função utilitária externa.
+-> Simplificar o card parser do repositório.
 -> Criar a função do alterar card do card creator.
+-> Adicionar o intensity na UI.
+-> Adicionar carboidratos em meal.
+-> Adicionar configuração e salvamento dos thresholds de insulina.
+-> Fazer com que os thresholds impactem nos gráficos atuais.
 
--> Adicionar configurações de tamanho padronizadas pros kv.
--> Adicionar um sistema pro SessionCache não ficar salvando e puxando do json toda hora.
+-> Adicionar configuração pra fórmula de cálculo da insulina rápida.
+-> Adicionar um cálculo rápido de insulina rápida.
 
-# Tasks Maiores
--> Atualizar as classes de domínio
-    *Data:
-
-    *Horário: Carrega uma constante de todos os horários do dia e daquele dextro e valida o formato. Útil pra deixar formatado de que jeito os horários vão aparecer na view depois.
-
-    *Refeição: carrega refições pré-definidas que depois vão ser mostradas em um picker e pode receber quantidade de carboidratos consumida.
-    
-    *Dextro: carrega o próprio valor, validação, e estado: se é normal, hipoglicemia ou hiperglicemia.
-    
-    *Insulina Rápida:
-
-    *Insulina Lenta:
-
-    *Exercício:
-
-    *Observação: 
--> Adicionar testes
+-> Gráfico de Média de dextro por hora em x dias.
 
 # Objetivos
 

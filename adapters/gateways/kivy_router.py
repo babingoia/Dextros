@@ -7,6 +7,7 @@ from adapters.controllers.i_controller import IController
 logger = getLogger(__name__)
 
 class KivyRouter(IRouter):
+    """Roteador concreto que recebe requests e queries do app Kivy."""
     def __init__(self, controllers: Dict[str, IController]):
         self._controllers = controllers
 

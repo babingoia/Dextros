@@ -13999,6 +13999,20 @@
         "exercise_name": "sdf",
         "intensity": null
       }
+    },
+    {
+      "card_id": "5963453f-e756-4b50-84fa-7c03050f4f2a",
+      "card_date": "2026-08-30",
+      "card_time": "14:00",
+      "glycemia": 123,
+      "long_acting_insulin": null,
+      "short_acting_insulin": null,
+      "meal": null,
+      "observation": null,
+      "exercise": {
+        "exercise_name": null,
+        "intensity": null
+      }
     }
   ]
 }

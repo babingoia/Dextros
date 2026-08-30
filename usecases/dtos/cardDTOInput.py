@@ -8,6 +8,7 @@ class _ExerciseDTO:
 
 @dataclass()
 class CardDTOInput:
+    """DTO dataclass fortemente tipada que entra nos usecases."""
     card_id: int | str | None
     card_date: str
     card_time: str

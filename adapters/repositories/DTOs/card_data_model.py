@@ -8,7 +8,7 @@ class _ExerciseDataModel(TypedDict):
 
 
 class CardDataModel(TypedDict):
-
+    """DTO em forma de dicionário tipado que cruza a fronteira banco <-> repositório."""
     card_id: str
     card_date: str
     card_time: str

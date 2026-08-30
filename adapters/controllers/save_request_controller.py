@@ -6,6 +6,7 @@ from adapters.controllers.mappers.mappers import view_model_to_input, strip_view
 logger = getLogger(__name__)
 
 class SaveRequestController(IController[CardViewModel, None]):
+    """Query que processa um comando de adicionar novo card no sistema. Recebe um CardViewModel para isso."""
     def __init__(self, save_card_use_case):
         self.save_card_use_case = save_card_use_case
 

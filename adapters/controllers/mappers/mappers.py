@@ -6,6 +6,7 @@ from adapters.controllers.dtos.card_view_model import CardViewModel
 
 
 def strip_view_model(data: CardViewModel) -> CardViewModel:
+    """Recebe uma view model e aplica .strip() em todos os seus campos."""
     data['card_id'] = data['card_id'].strip()
     data['card_data'] = data['card_data'].strip()
     data['card_time'] = data['card_time'].strip()
@@ -29,6 +30,9 @@ def int_or_none(value):
 
 
 def view_model_to_input(card: CardViewModel) -> CardDTOInput:
+    """Transforma um CardViewModel em CardDTOInput. Transforma em None campos com string vazia
+    ou números 0.
+    """
     exercise = card['exercise']
 
     return CardDTOInput(
