@@ -1,62 +1,52 @@
+from dataclasses import dataclass
 from datetime import date, datetime
 from logging import getLogger
-
 
 logger = getLogger(__name__)
 
 
-class Date():
-    def __init__(self, value=None):
-        logger.debug(f"Initializing Date with value: {value}")
+@dataclass(frozen=True)
+class Date:
+    """
+    Classe que representa uma data no sistema. _date não é um atributo privado, apenas uma forma de não
+    sobrescrever date do módulo datetime.
+    """
+    _date: date
 
-        if value is None:
-            self._date: date = date.today()
-        else:
-            self._date = self.parse_date(value)
-
-
-    @property
-    def date(self) -> date:
-        return self._date
-
-
-    def to_string(self) -> str:
-        return self._date.strftime("%Y-%m-%d")
-
-
-    def set_date(self, value):
-        logger.debug(f"Setting date with value: {value}")
-
-        self._date = self.parse_date(value)
-
-
-    @staticmethod
-    def parse_date(value) -> date:
+    @classmethod
+    def parse(cls, value: date | datetime | str | None = None):
         """
-        Aceita datetime.date, datetime.datetime ou string 'YYYY-MM-DD'.
-        Retorna datetime.date ou lança ValueError/TypeError.
+        Ponto de entrada de Date.
+        :type value: date | datetime | str | None
         """
-        logger.debug(f"Parsing date from value: {value}")
+        match value:
+            case datetime():
+                return cls._from_datetime(value)
+            case date():
+                return cls._from_date(value)
+            case str():
+                return cls._from_string(value)
+            case None:
+                return cls._new()
+            case _:
+                raise TypeError(f"Invalid Type for Date: {type(value)}")
+    
 
-        if isinstance(value, date) and not isinstance(value, datetime):
-            return value
-        if isinstance(value, datetime):
-            return value.date()
-        if isinstance(value, str):
-            try:
-                return datetime.strptime(value, "%Y-%m-%d").date()
-            except ValueError:
-                raise ValueError("Data inválida. Use o formato YYYY-MM-DD.")
-        raise TypeError("Valor deve ser datetime.date, datetime.datetime ou string 'YYYY-MM-DD'.")
+    @classmethod
+    def _new(cls):
+        return cls(date.today())
 
+    @classmethod
+    def _from_datetime(cls, value: datetime):
+        return cls(value.date())
 
-    @staticmethod
-    def is_valid_date(date_str: str) -> bool:
-        """Valida se a string é uma data válida no formato YYYY-MM-DD."""
-        logger.debug(f"Validating date string: {date_str}")
-        
+    @classmethod
+    def _from_date(cls, value: date):
+        return cls(value)
+
+    @classmethod
+    def _from_string(cls, value: str):
         try:
-            datetime.strptime(date_str, "%Y-%m-%d")
-            return True
-        except ValueError:
-            return False
+            return cls(datetime.strptime(value.strip(), "%Y-%m-%d").date())
+        except (ValueError, TypeError) as err:
+            raise ValueError(f"Error trying to create date from string value: {value}") from err

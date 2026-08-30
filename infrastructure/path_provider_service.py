@@ -1,36 +1,28 @@
 import os, sys
 from logging import getLogger
 
-
 logger = getLogger(__name__)
 
 
+def _is_android() -> bool:
+    return "P4A_BOOTSTRAP" in os.environ or hasattr(sys, "getandroidapilevel")
+
+
 def get_asset_path(relative_path):
-    logger.debug(f"Getting asset path for: {relative_path}")
-    
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):            # PyInstaller (desktop)
         base = sys._MEIPASS
-    else:
+    else:                                        # dev desktop + Android (assets no pacote)
         base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    
-    logger.debug(f"Base path: {base}")
     return os.path.join(base, relative_path)
 
 
 def get_data_path(relative_path):
-    logger.debug(f"Getting data path for: {relative_path}")
-
-    if getattr(sys, 'frozen', False):
+    if _is_android():
+        from kivy.app import App
+        base = App.get_running_app().user_data_dir  # storage privado, sem permissão
+        os.makedirs(base, exist_ok=True)
+    elif getattr(sys, "frozen", False):          # PyInstaller (desktop)
         base = os.path.dirname(sys.executable)
-    else:
+    else:                                        # dev desktop
         base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    
-    logger.debug(f"Base path: {base}")
     return os.path.join(base, relative_path)
-
-
-def save_file(filename):
-    """Caminho correto em todas as plataformas para arquivos de escrita."""
-    from kivy.app import App
-    logger.debug(f"Getting save file path for: {filename}")
-    return os.path.join(App.get_running_app().user_data_dir, filename)

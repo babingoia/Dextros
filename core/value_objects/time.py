@@ -1,42 +1,54 @@
-from datetime import datetime
+from datetime import datetime, time
 from logging import getLogger
+from dataclasses import dataclass
 
 
 logger = getLogger(__name__)
 
 
+@dataclass(frozen=True)
 class Time():
-    HORARIOS = [f"{h:02}:00" for h in list(range(6, 24)) + list(range(0, 6))] 
+    """
+    VO de tempo, guarda um objeto time. Aceita None para tempo atual arredondado, time, datetime ou string.
+    Seu valor _time não é privado, apenas uma maneira de contornar a sobrescrita de time do módulo datetime.
+    """
+
+    _time: time
+
+    @classmethod
+    def parse(cls, value: None | datetime | time | str = None):
+        match value:
+            case None:
+                return cls._new()
+            case datetime():
+                return cls._from_datetime(value)
+            case time():
+                return cls._from_time(value)
+            case str():
+                return cls._from_string(value)
+            case _:
+                raise TypeError(f"Invalid type for Time: {type(value)}")
 
 
-    def __init__(self, **kwargs):
-        logger.debug("Initializing Time value object")
+    @classmethod
+    def _new(cls):
+        return cls(datetime.now().time())
 
-        super().__init__(**kwargs)
+    @classmethod
+    def _from_datetime(cls, value: datetime):
+        return cls(value.time())
 
+    @classmethod
+    def _from_time(cls, value: time):
+        return cls(value)
 
-    def get_horarios(self):
-        """Retorna a lista de horários disponíveis."""
-        logger.debug("Retrieving available horarios")
+    @classmethod
+    def _from_string(cls, value: str):
+        try:
+            parsed_value = value.strip().lower()
+            value_hour, value_minute = map(int, parsed_value.split(":")[:2])
 
-        return self.HORARIOS
-    
-
-    def get_horario_now(self):
-        """Retorna o horário atual no formato HH:00."""
-        logger.debug("Calculating current horario")
-
-        now = datetime.now()
-        
-        if now.minute >= 30:
-            next_hour = (now.hour + 1) % 24
-            return f"{next_hour:02}:00"
-        
-        return f"{now.hour:02}:00"
-
-
-    def is_valid_horario(self, horario: str) -> bool:
-        """Valida se o horário está na lista de horários disponíveis."""
-        logger.debug(f"Validating horario: {horario}")
-        
-        return horario in self.get_horarios()
+            parsed_time = time(hour=value_hour, minute=value_minute)
+            return cls(parsed_time)
+        except (ValueError, TypeError):
+            raise ValueError(f"Invalid string for Time object: {value}")

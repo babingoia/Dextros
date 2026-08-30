@@ -1,0 +1,74 @@
+{
+  "cards": [
+    {
+      "card_id": "55dd2b35-0c16-4d78-8e34-fc4c3d4cc035",
+      "card_date": "2026-08-28",
+      "card_time": "20:00",
+      "glycemia": 123,
+      "long_acting_insulin": 40,
+      "short_acting_insulin": 12,
+      "meal": "jejum",
+      "observation": "dsa",
+      "exercise": {
+        "exercise_name": "caminhada",
+        "intensity": null
+      }
+    },
+    {
+      "card_id": "702bc596-667a-47b6-8c65-f40f07b0862d",
+      "card_date": "2026-08-28",
+      "card_time": "18:00",
+      "glycemia": 324,
+      "long_acting_insulin": null,
+      "short_acting_insulin": null,
+      "meal": null,
+      "observation": null,
+      "exercise": {
+        "exercise_name": "corrida",
+        "intensity": null
+      }
+    },
+    {
+      "card_id": "51146582-837f-4725-b28e-4ea03e0c869f",
+      "card_date": "2026-08-27",
+      "card_time": "23:00",
+      "glycemia": 243,
+      "long_acting_insulin": null,
+      "short_acting_insulin": 14,
+      "meal": "madrugada",
+      "observation": "aweqweqweqweqw",
+      "exercise": {
+        "exercise_name": "run",
+        "intensity": null
+      }
+    },
+    {
+      "card_id": "cffd5cb0-1c50-499a-a4b2-9d7972eb8380",
+      "card_date": "2026-08-28",
+      "card_time": "23:00",
+      "glycemia": 135,
+      "long_acting_insulin": null,
+      "short_acting_insulin": 16,
+      "meal": "jejum",
+      "observation": "dsfvng",
+      "exercise": {
+        "exercise_name": "qan",
+        "intensity": null
+      }
+    },
+    {
+      "card_id": "025a526b-f61f-449b-b576-61fb097c4a64",
+      "card_date": "2026-08-29",
+      "card_time": "11:00",
+      "glycemia": 179,
+      "long_acting_insulin": 40,
+      "short_acting_insulin": 16,
+      "meal": "jejum",
+      "observation": null,
+      "exercise": {
+        "exercise_name": null,
+        "intensity": null
+      }
+    }
+  ]
+}

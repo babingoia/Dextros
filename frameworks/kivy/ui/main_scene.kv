@@ -1,0 +1,354 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+#:import Border frameworks.kivy.ui.widgets.loader.Border
+#:import GraphScreen frameworks.kivy.ui.widgets.screens.graph_screen.GraphScreen
+
+<MainView>:
+    orientation: "horizontal"
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("app_bg")
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # ======================================================
+    # Controle de estado da navbar lateral em telas pequenas
+    # ======================================================
+    ToggleButton:
+        id: nav_toggle
+        size_hint: None, None
+        size: 0, 0
+        opacity: 0
+        disabled: True
+
+    # ======================================================
+    # NAVBAR LATERAL
+    # ======================================================
+    BoxLayout:
+        id: nav_rail
+        orientation: "vertical"
+        size_hint_x: None
+        width: app_theme.widget("nav_width") if (app_theme.is_desktop(root.width) or nav_toggle.state == "down") else 0
+        padding: [app_theme.space("md"), app_theme.space("md"), app_theme.space("md"), app_theme.space("md")]
+        spacing: app_theme.space("sm")
+
+        canvas.before:
+            Color:
+                rgba: app_theme.color("nav_bg")
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Color:
+                rgba: app_theme.color("border")
+            Rectangle:
+                pos: self.right - app_theme.border("thin"), self.y
+                size: app_theme.border("thin"), self.height
+
+        # Cabeçalho da navbar
+        BoxLayout:
+            size_hint_y: None
+            height: app_theme.widget("appbar_height")
+            spacing: app_theme.space("sm")
+
+            Label:
+                text: "Anotar Dextro"
+                font_size: app_theme.font("title")
+                bold: True
+                color: app_theme.color("text_primary")
+                text_size: self.size
+                halign: "left"
+                valign: "middle"
+
+            # Botão para fechar a navbar em telas pequenas
+            Button:
+                text: "×"
+                size_hint_x: None
+                width: 0 if app_theme.is_desktop(root.width) else app_theme.widget("icon_button")
+                opacity: 0 if app_theme.is_desktop(root.width) else 1
+                disabled: app_theme.is_desktop(root.width)
+                background_normal: ""
+                background_down: ""
+                background_color: 0, 0, 0, 0
+                color: app_theme.color("text_secondary")
+                font_size: app_theme.font("title")
+                on_release: nav_toggle.state = "normal"
+
+        # Itens da navbar
+        ScrollView:
+            do_scroll_x: False
+            bar_width: app_theme.widget("scrollbar")
+            bar_color: app_theme.color("scrollbar")
+            scroll_type: ["content", "bars"]
+
+            BoxLayout:
+                id: nav_items
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: app_theme.space("xs")
+
+                NavButton:
+                    text: "Adicionar Novo Registro"
+                    state: "down"
+                    on_release:
+                        screens.current = "add_card"
+                        nav_toggle.state = "normal"
+
+                NavButton:
+                    text: "Dia x Hora"
+                    on_release:
+                        screens.current = "chart"
+                        nav_toggle.state = "normal"
+                NavButton:
+                    text: "Dia x Refeição"
+                    on_release:
+                        screens.current = "meal_date_chart"
+                        nav_toggle.state = "normal"
+
+        # Espaço para empurrar futuros itens para o topo
+        Widget:
+            size_hint_y: 1
+
+    # ======================================================
+    # CONTEÚDO PRINCIPAL
+    # ======================================================
+    BoxLayout:
+        id: content_column
+        orientation: "vertical"
+
+        # Barra superior
+        BoxLayout:
+            size_hint_y: None
+            height: app_theme.widget("appbar_height")
+            padding: [app_theme.space("sm"), 0, app_theme.space("md"), 0]
+            spacing: app_theme.space("sm")
+
+            canvas.before:
+                Color:
+                    rgba: app_theme.color("surface")
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+                Color:
+                    rgba: app_theme.color("border")
+                Rectangle:
+                    pos: self.x, self.y
+                    size: self.width, app_theme.border("thin")
+
+            # Botão para abrir a navbar em telas pequenas
+            Button:
+                text: "≡"
+                size_hint_x: None
+                width: 0 if app_theme.is_desktop(root.width) else app_theme.widget("touch_target")
+                opacity: 0 if app_theme.is_desktop(root.width) else 1
+                disabled: app_theme.is_desktop(root.width)
+                background_normal: ""
+                background_down: ""
+                background_color: 0, 0, 0, 0
+                color: app_theme.color("text_primary")
+                font_size: app_theme.font("title")
+                on_release: nav_toggle.state = "down" if nav_toggle.state == "normal" else "normal"
+
+            Label:
+                id: appbar_title
+                text: "Adicionar Novo Registro"
+                font_size: app_theme.font("title")
+                bold: True
+                color: app_theme.color("text_primary")
+                text_size: self.size
+                halign: "left"
+                valign: "middle"
+
+            Widget:
+
+        # Telas
+        ScreenManager:
+            id: screens
+
+            on_current:
+                appbar_title.text = appbar_title.text = "Adicionar Novo Registro" if self.current == "add_card" else "Gráfico" if self.current == "chart" else "Refeição x Dia" if self.current == "meal_date_chart" else self.current.replace("_", " ").capitalize()
+
+            # ==============================================
+            # TELA: ADICIONAR CARD
+            # ==============================================
+            Screen:
+                name: "add_card"
+
+                ScrollView:
+                    id: add_scroll
+                    do_scroll_x: False
+                    bar_width: app_theme.widget("scrollbar")
+                    bar_color: app_theme.color("scrollbar")
+                    scroll_type: ["content", "bars"]
+
+                    BoxLayout:
+                        orientation: "vertical"
+                        size_hint_y: None
+                        height: self.minimum_height
+                        spacing: app_theme.space("lg")
+                        padding: [app_theme.content_h_padding(add_scroll.width), app_theme.space("xl"), app_theme.content_h_padding(add_scroll.width), app_theme.space("xl")]
+
+                        ScreenHeader:
+                            text: "Anotar Dextro"
+
+                        # Data e horário
+                        Card:
+                            SectionTitle:
+                                text: "Data e horário"
+
+                            FieldLabel:
+                                text: "Data"
+
+                            BoxLayout:
+                                size_hint_y: None
+                                height: app_theme.widget("input_height")
+                                spacing: app_theme.space("md")
+
+                                ReadOnlyField:
+                                    id: data_input
+                                    text: root.date_display
+
+                                SecondaryButton:
+                                    id: date_button
+                                    text: "Escolher data"
+                                    size_hint_x: None
+                                    width: min(app_theme.widget("date_button_width"), root.width * app_theme.ratio("date_button_max_width"))
+                                    on_release: root._choose_date()
+
+                            FieldLabel:
+                                text: "Horário"
+
+                            AppSpinner:
+                                id: horario_spinner
+                                values: root.available_time
+                                text: root.actual_time
+
+                        # Dextro
+                        Card:
+                            SectionTitle:
+                                text: "Glicemia"
+
+                            FieldLabel:
+                                text: "Dextro"
+
+                            AppTextInput:
+                                id: dextro_input
+                                input_type: "number"
+                                hint_text: "Ex.: 120"
+
+                        # Lenta / Rápida / Exercício / Refeição
+                        Card:
+                            SectionTitle:
+                                text: "Insulina e rotina"
+
+                            GridLayout:
+                                cols: app_theme.layout("pair_columns") if app_theme.is_wide_enough(root.width, "two_columns") else 1
+                                size_hint_y: None
+                                height: self.minimum_height
+                                spacing: app_theme.space("md")
+
+                                BoxLayout:
+                                    orientation: "vertical"
+                                    size_hint_y: None
+                                    height: self.minimum_height
+                                    spacing: app_theme.space("xs")
+
+                                    FieldLabel:
+                                        text: "Lenta"
+
+                                    AppTextInput:
+                                        id: lenta_input
+                                        input_type: "number"
+                                        hint_text: "Dose"
+
+                                BoxLayout:
+                                    orientation: "vertical"
+                                    size_hint_y: None
+                                    height: self.minimum_height
+                                    spacing: app_theme.space("xs")
+
+                                    FieldLabel:
+                                        text: "Rápida"
+
+                                    AppTextInput:
+                                        id: rapida_input
+                                        input_type: "number"
+                                        hint_text: "Dose"
+
+                            GridLayout:
+                                cols: app_theme.layout("pair_columns") if app_theme.is_wide_enough(root.width, "two_columns") else 1
+                                size_hint_y: None
+                                height: self.minimum_height
+                                spacing: app_theme.space("md")
+
+                                BoxLayout:
+                                    orientation: "vertical"
+                                    size_hint_y: None
+                                    height: self.minimum_height
+                                    spacing: app_theme.space("xs")
+
+                                    FieldLabel:
+                                        text: "Exercício"
+
+                                    AppTextInput:
+                                        id: exercicio_input
+                                        hint_text: "Opcional"
+
+                                BoxLayout:
+                                    orientation: "vertical"
+                                    size_hint_y: None
+                                    height: self.minimum_height
+                                    spacing: app_theme.space("xs")
+
+                                    FieldLabel:
+                                        text: "Refeição"
+
+                                    AppSpinner:
+                                        id: meal_value
+                                        values: root.available_meals
+                                        text: root.actual_meal
+
+                        # Observação
+                        Card:
+                            SectionTitle:
+                                text: "Observação"
+
+                            AppTextInput:
+                                id: observacao_input
+                                multiline: True
+                                height: app_theme.widget("text_area_height")
+                                padding: [app_theme.space("md"), app_theme.space("sm")]
+                                hint_text: "Se precisar, escreva um contexto"
+
+                        # Salvar
+                        PrimaryButton:
+                            text: "Salvar"
+                            size_hint_y: None
+                            height: app_theme.widget("button_height")
+                            on_press: root.dispatch("on_save_request")
+
+            # ==============================================
+            # TELA: GRÁFICO
+            # ==============================================
+            GraphScreen:
+                name: "chart"
+
+                GraphScreenContent:
+                    ScreenHeader:
+                        text: "Dextros por dia e horário"
+
+                    Panel:
+                        Border:
+                            id: date_hour_matrix_container
+            
+            GraphScreen:
+                name: "meal_date_chart"
+
+                GraphScreenContent:
+                    ScreenHeader:
+                        text: "Dextros por refeição e dia"
+
+                    Panel:
+                        Border:
+                            id: meal_date_matrix_container
