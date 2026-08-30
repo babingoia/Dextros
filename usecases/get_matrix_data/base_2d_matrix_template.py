@@ -1,33 +1,35 @@
-from logging import getLogger
-
-from usecases.IRepository import ICardRepository
+from core.value_objects.card import Card
 from usecases.dtos.card_output import CardOutput
 from usecases.dtos.matrix_data import MatrixData
+from usecases.get_matrix_data.base_column_matrix_template import (
+    BaseColumnMatrixTemplate,
+    Column,
+    ColumnKey,
+)
 from usecases.utils.mappers import to_card_output
-from core.value_objects.card import Card
-
-logger = getLogger(__name__)
 
 
-Column = tuple[str, str]
 RowKey = str
-ColumnKey = str
 
 
-class BaseMatrixTemplate:
-    def __init__(self, repository: ICardRepository) -> None:
-        self._repository = repository
+class Base2DMatrixTemplate(BaseColumnMatrixTemplate):
+    """
+    Template para gráficos 2D.
+
+    A lógica de linhas fica contextual aqui porque, por enquanto,
+    não existe um mecanismo radicalmente diferente de montagem de linhas.
+    """
 
     def execute(self) -> MatrixData:
         columns: list[Column] = self._get_columns()
-        cards: list[Card] = self._repository.get_all_cards()
-        cards = self._filter_cards(cards)
+        cards: list[Card] = self._get_filtered_cards()
 
         if not cards:
             return self._empty_matrix(columns)
 
         row_keys: list[RowKey] = self._get_row_keys(cards)
         lookup: dict[RowKey, dict[int, Card]] = self._build_lookup(cards, columns)
+
         cell_data: dict[tuple[int, int], CardOutput | None] = self._build_cell_data(
             row_keys=row_keys,
             columns=columns,
@@ -41,17 +43,8 @@ class BaseMatrixTemplate:
         )
 
     # -------------------------------------------------------------------
-    # Pontos de extensão
+    # Row key
     # -------------------------------------------------------------------
-    def _get_columns(self) -> list[Column]:
-        raise NotImplementedError
-
-    def _get_column_key(self, card: Card) -> ColumnKey | None:
-        raise NotImplementedError
-
-    def _filter_cards(self, cards: list[Card]) -> list[Card]:
-        return cards
-
     def _get_card_row_key(self, card: Card) -> RowKey | None:
         return card.card_date._date.strftime("%Y-%m-%d")
 
@@ -81,11 +74,8 @@ class BaseMatrixTemplate:
         return sorted(row_keys)
 
     # -------------------------------------------------------------------
-    # Implementação comum
+    # Construção da matriz
     # -------------------------------------------------------------------
-    def _get_col_headers(self, columns: list[Column]) -> list[str]:
-        return [label for label, _ in columns]
-
     def _empty_matrix(self, columns: list[Column]) -> MatrixData:
         return MatrixData(
             row_headers=[],
@@ -98,10 +88,7 @@ class BaseMatrixTemplate:
         cards: list[Card],
         columns: list[Column],
     ) -> dict[RowKey, dict[int, Card]]:
-        col_index_by_key: dict[ColumnKey, int] = {
-            key: index
-            for index, (_, key) in enumerate(columns)
-        }
+        col_index_by_key = self._build_column_index_by_key(columns)
 
         lookup: dict[RowKey, dict[int, Card]] = {}
 

@@ -1,9 +1,9 @@
 from usecases.get_time_list_use_case import GetTimeListUseCase
 from usecases.IRepository import ICardRepository
-from usecases.get_matrix_data.base_matrix_template import BaseMatrixTemplate, Column, ColumnKey
+from usecases.get_matrix_data.base_2d_matrix_template import Base2DMatrixTemplate, Column, ColumnKey
 from core.value_objects.card import Card
 
-class GetHourDateMatrixUseCase(BaseMatrixTemplate):
+class GetHourDateMatrixUseCase(Base2DMatrixTemplate):
     def __init__(self, repository: ICardRepository) -> None:
         super().__init__(repository)
         self._get_time_list = GetTimeListUseCase()

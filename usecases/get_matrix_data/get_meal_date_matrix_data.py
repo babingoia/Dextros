@@ -1,9 +1,9 @@
 from core.value_objects.card import Card
-from usecases.get_matrix_data.base_matrix_template import BaseMatrixTemplate, Column, ColumnKey
+from usecases.get_matrix_data.base_2d_matrix_template import Base2DMatrixTemplate, Column, ColumnKey
 from usecases.get_meal_list_use_case import GetMealListUseCase
 from usecases.IRepository import ICardRepository
 
-class GetMealDateMatrixUseCase(BaseMatrixTemplate):
+class GetMealDateMatrixUseCase(Base2DMatrixTemplate):
     def __init__(
         self,
         repository: ICardRepository,
