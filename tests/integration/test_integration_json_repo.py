@@ -10,7 +10,7 @@ from adapters.repositories.jsonRepo import JsonRepository
 from frameworks.json_handler_service import JsonHandler
 from adapters.parsers.card_data_model_parser import CardDataModelParser
 from usecases.Factories.card_creator import CardCreator 
-from tests.exceptions import CardNotFoundError
+from adapters.exceptions import CardNotFoundError
 
 # Imports dos Value Objects para criar dados de teste
 from core.value_objects.card_id import CardID

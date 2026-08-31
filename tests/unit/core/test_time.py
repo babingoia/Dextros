@@ -27,11 +27,11 @@ def test_aceita_objeto_time():
     assert resultado._time == entrada
 
 
-@pytest.mark.parametrize("entrada_invalida", [
-    "14:30:00",     # segundos não suportados de propósito
-    "25:99",        # hora/minuto fora do intervalo válido
-    "quatorze:30",  # não numérico
+@pytest.mark.parametrize("entrada_invalida", [   
+    "25:99",        
+    "quatorze:30",  
 ])
+# Segundos agora são truncados
 def test_string_em_formato_invalido_levanta_value_error(entrada_invalida):
     with pytest.raises(ValueError):
         Time.parse(entrada_invalida)

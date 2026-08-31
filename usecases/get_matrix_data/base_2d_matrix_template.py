@@ -7,6 +7,7 @@ from usecases.get_matrix_data.base_column_matrix_template import (
     ColumnKey,
 )
 from usecases.utils.mappers import to_card_output
+from usecases.utils.exceptions import DuplicatedCellError
 
 
 RowKey = str
@@ -104,7 +105,14 @@ class Base2DMatrixTemplate(BaseColumnMatrixTemplate):
             if column_index is None:
                 continue
 
-            lookup.setdefault(row_key, {})[column_index] = card
+            row_lookup = lookup.setdefault(row_key, {})
+
+            if column_index in row_lookup:
+                raise DuplicatedCellError(
+                    f"Duplicated cell: row_key={row_key!r}, column_key={column_key!r}"
+                )
+
+            row_lookup[column_index] = card
 
         return lookup
 

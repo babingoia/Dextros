@@ -14,4 +14,4 @@ class DeleteCardByIDUseCase:
         try:
             self.repository.remove_card(card_id)
         except Exception as err:
-            raise DomainExceptionError(err)
+            raise DomainExceptionError(err) from err

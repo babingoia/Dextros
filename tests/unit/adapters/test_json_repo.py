@@ -1,11 +1,10 @@
 # tests/unit/test_json_repo_unit.py
 import pytest
-from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from unittest.mock import MagicMock
 
 from adapters.repositories.jsonRepo import JsonRepository
 from core.value_objects.card_id import CardID
-from tests.exceptions import CardNotFoundError
+from adapters.exceptions import CardNotFoundError
 
 @pytest.fixture
 def mock_handler():

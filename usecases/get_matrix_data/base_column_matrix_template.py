@@ -2,7 +2,7 @@
 
 from core.value_objects.card import Card
 from usecases.IRepository import ICardRepository
-
+from usecases.utils.exceptions import DuplicatedColumnError
 
 Column = tuple[str, str]
 ColumnKey = str
@@ -52,7 +52,12 @@ class BaseColumnMatrixTemplate:
         self,
         columns: list[Column],
     ) -> dict[ColumnKey, int]:
-        return {
-            key: index
-            for index, (_, key) in enumerate(columns)
-        }
+        column_index: dict[ColumnKey, int] = {}
+
+        for index, (_, key) in enumerate(columns):
+            if key in column_index:
+                raise DuplicatedColumnError(f"Duplicate column key: {key!r}")
+
+            column_index[key] = index
+
+        return column_index
