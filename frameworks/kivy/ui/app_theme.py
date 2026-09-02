@@ -1,5 +1,4 @@
-#Constantes Globais
-from kivy.metrics import dp
+# Constantes Globais
 from kivy.metrics import dp, sp
 from kivy.utils import get_color_from_hex
 
@@ -13,44 +12,36 @@ BORDER_WIDTH = dp(1)
 COLORS = {
     # Fundo geral do app
     "app_bg": "#0B0F1A",
-
     # Superfícies e cards
     "surface": "#101828",
     "surface_alt": "#1F2937",
     "card": "#111C2E",
     "field_bg": "#0D1524",
-
     # Bordas
     "border": "#26324B",
     "border_focus": "#3B82F6",
-
     # Texto
     "text_primary": "#F8FAFC",
     "text_secondary": "#94A3B8",
     "text_hint": "#64748B",
-
     # Botões e destaques
     "primary": "#3B82F6",
     "primary_pressed": "#2563EB",
     "on_primary": "#FFFFFF",
-
     # Navbar lateral
     "nav_bg": "#0A111D",
     "nav_text": "#AEB9CB",
     "nav_active_bg": "#1D4ED8",
     "nav_active_text": "#FFFFFF",
-
     # Detalhes
     "scrollbar": "#334155",
     "transparent": "#00000000",
-    
-    # Feedback e semântica (NOVAS)
+    # Feedback e semântica
     "danger": "#EF4444",
     "danger_pressed": "#DC2626",
     "success": "#10B981",
     "warning": "#F59E0B",
 }
-
 
 # ==========================================================
 # ESPAÇAMENTOS
@@ -62,8 +53,8 @@ _SPACING = {
     "lg": 16,
     "xl": 24,
     "xxl": 32,
+    "row": 24,
 }
-
 
 # ==========================================================
 # RAIO DE BORDA
@@ -74,7 +65,6 @@ _RADIUS = {
     "lg": 16,
     "pill": 999,
 }
-
 
 # ==========================================================
 # TAMANHOS DE FONTE
@@ -88,7 +78,6 @@ _FONT_SIZES = {
     "headline": 26,
 }
 
-
 # ==========================================================
 # TAMANHOS DE COMPONENTES
 # ==========================================================
@@ -98,22 +87,23 @@ _WIDGET_SIZES = {
     "input_height": 48,
     "button_height": 52,
     "appbar_height": 60,
-
     "nav_width": 288,
     "nav_item_height": 48,
-
     "date_button_width": 180,
     "text_area_height": 132,
     "scrollbar": 4,
-
     "header_height": 44,
     "section_title_height": 32,
     "field_label_height": 22,
-
     # Largura máxima do formulário em telas grandes
     "content_max_width": 720,
+    "row_height": 36,
+    "field_label_width": 80,
+    "dialog_width": 500,
+    "dialog_height": 450,
+    "dialog_compact_width": 400,
+    "dialog_content_max_height": 300,
 }
-
 
 # ==========================================================
 # ESPESSURAS DE BORDA
@@ -121,8 +111,8 @@ _WIDGET_SIZES = {
 _BORDER_WIDTHS = {
     "thin": 1.0,
     "focus": 1.7,
+    "separator": 2.0,
 }
-
 
 # ==========================================================
 # BREAKPOINTS / LAYOUT
@@ -130,7 +120,6 @@ _BORDER_WIDTHS = {
 BREAKPOINTS = {
     # A partir dessa largura, a navbar lateral fica fixa
     "desktop": dp(840),
-
     # A partir dessa largura, alguns pares de campos viram 2 colunas
     "two_columns": dp(1000),
 }
@@ -150,12 +139,9 @@ _RATIOS = {
 def color(name):
     if name == "transparent":
         return (0.0, 0.0, 0.0, 0.0)
-
     rgba = get_color_from_hex(COLORS[name])
-
     if len(rgba) == 3:
         rgba = tuple(rgba) + (1.0,)
-
     return tuple(rgba)
 
 
@@ -202,8 +188,6 @@ def content_h_padding(width):
     """
     max_width = widget("content_max_width")
     extra = width - max_width
-
     if extra <= 0:
         return space("lg")
-
     return max(space("lg"), extra / 2.0)

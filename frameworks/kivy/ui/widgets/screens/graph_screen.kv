@@ -1,0 +1,97 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+#:import GenericMatrixGraph frameworks.kivy.ui.widgets.graphs.generic_matrix_graph.GenericMatrixGraph
+
+<ZoomControls@BoxLayout>:
+    graph: None
+
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: app_theme.widget('touch_target') + app_theme.space('sm')
+
+    padding: app_theme.space('sm')
+    spacing: app_theme.space('sm')
+
+    Button:
+        text: '-'
+        size_hint_x: None
+        width: app_theme.widget('touch_target')
+
+        font_size: app_theme.font('title')
+        color: app_theme.color('text_primary')
+
+        background_normal: ''
+        background_down: ''
+        border: (0, 0, 0, 0)
+
+        background_color:
+            app_theme.color('primary_pressed') if self.state == 'down' else app_theme.color('surface_alt')
+
+        on_release: root.graph.zoom_out() if root.graph else None
+
+    Button:
+        text: 'Reset'
+        font_size: app_theme.font('button')
+        color: app_theme.color('text_primary')
+
+        background_normal: ''
+        background_down: ''
+        border: (0, 0, 0, 0)
+
+        background_color:
+            app_theme.color('primary_pressed') if self.state == 'down' else app_theme.color('surface_alt')
+
+        on_release: root.graph.reset_zoom() if root.graph else None
+
+    Button:
+        text: '+'
+        size_hint_x: None
+        width: app_theme.widget('touch_target')
+
+        font_size: app_theme.font('title')
+        color: app_theme.color('text_primary')
+
+        background_normal: ''
+        background_down: ''
+        border: (0, 0, 0, 0)
+
+        background_color:
+            app_theme.color('primary_pressed') if self.state == 'down' else app_theme.color('surface_alt')
+
+        on_release: root.graph.zoom_in() if root.graph else None
+
+
+<GraphScreen>:
+    name: 'graph_screen'
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        padding: app_theme.space('md')
+        spacing: app_theme.space('sm')
+
+        GenericMatrixGraph:
+            id: matrix_graph
+
+            # Chave de persistência da sessão.
+            # Se você quiser zoom independente por tela/gráfico, troque a chave.
+            zoom_session_key: 'graph_screen_matrix'
+
+            # Configurações que você pode testar livremente.
+            default_zoom: 1.0
+            min_zoom: 0.7
+            max_zoom: 2.0
+            zoom_step: 0.10
+
+            base_cell_width: dp(152)
+            base_cell_height: dp(44)
+            base_spacing: dp(4)
+
+            # Se quiser travar tamanho físico mínimo/máximo da célula, use isto.
+            # 0 desativa a trava.
+            min_cell_width: 0
+            min_cell_height: 0
+            max_cell_width: 0
+            max_cell_height: 0
+
+        ZoomControls:
+            graph: matrix_graph

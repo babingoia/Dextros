@@ -1,236 +1,180 @@
-#:import app_theme frameworks.kivy.ui.app_theme
-
 <CardWidget>:
     orientation: "vertical"
-    padding: app_theme.space("lg")
-    spacing: app_theme.space("md")
+    size_hint_y: None
+    height: self.minimum_height
+    spacing: app_theme.space("row")
 
-    canvas.before:
-        Color:
-            rgba: app_theme.color("surface")
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-    ScrollView:
-        do_scroll_x: False
-        do_scroll_y: True
-        bar_width: app_theme.widget("scrollbar")
-        bar_color: app_theme.color("scrollbar")
-        scroll_type: ["bars"]
+    GridLayout:
+        cols: 2
+        size_hint_y: None
+        height: self.minimum_height
+        row_default_height: app_theme.widget("row_height")
+        row_force_default: True
+        spacing: [app_theme.space("xl"), app_theme.space("row")]
 
         BoxLayout:
-            orientation: "vertical"
-            size_hint_y: None
-            height: self.minimum_height
-            spacing: app_theme.space("lg")
+            spacing: app_theme.space("sm")
+            Label:
+                text: "Data:"
+                bold: True
+                color: app_theme.color("text_secondary")
+                size_hint_x: None
+                width: app_theme.widget("field_label_width")
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: data_value
+                text: ""
+                color: app_theme.color("text_primary")
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
 
-            GridLayout:
-                cols: 2
-                size_hint_y: None
-                height: self.minimum_height
-                row_default_height: dp(36)
-                row_force_default: True
-                spacing: [app_theme.space("xl"), app_theme.space("md")]
+        BoxLayout:
+            spacing: app_theme.space("sm")
+            Label:
+                text: "Horário:"
+                bold: True
+                color: app_theme.color("text_secondary")
+                size_hint_x: None
+                width: app_theme.widget("field_label_width")
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: horario_value
+                text: ""
+                color: app_theme.color("text_primary")
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
 
-                # Data
-                BoxLayout:
-                    spacing: app_theme.space("sm")
-                    Label:
-                        text: "Data:"
-                        bold: True
-                        color: app_theme.color("text_secondary")
-                        size_hint_x: None
-                        width: dp(80)
-                        halign: "right"
-                        text_size: self.size
-                        valign: "middle"
-                    Label:
-                        id: data_value
-                        text: ""
-                        color: app_theme.color("text_primary")
-                        halign: "left"
-                        text_size: self.size
-                        valign: "middle"
+        BoxLayout:
+            spacing: app_theme.space("sm")
+            Label:
+                text: "Lenta:"
+                bold: True
+                color: app_theme.color("text_secondary")
+                size_hint_x: None
+                width: app_theme.widget("field_label_width")
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: lenta_value
+                text: ""
+                color: app_theme.color("text_primary")
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
 
-                # Horário
-                BoxLayout:
-                    spacing: app_theme.space("sm")
-                    Label:
-                        text: "Horário:"
-                        bold: True
-                        color: app_theme.color("text_secondary")
-                        size_hint_x: None
-                        width: dp(80)
-                        halign: "right"
-                        text_size: self.size
-                        valign: "middle"
-                    Label:
-                        id: horario_value
-                        text: ""
-                        color: app_theme.color("text_primary")
-                        halign: "left"
-                        text_size: self.size
-                        valign: "middle"
+        BoxLayout:
+            spacing: app_theme.space("sm")
+            Label:
+                text: "Rápida:"
+                bold: True
+                color: app_theme.color("text_secondary")
+                size_hint_x: None
+                width: app_theme.widget("field_label_width")
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: rapida_value
+                text: ""
+                color: app_theme.color("text_primary")
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
 
-                # Lenta
-                BoxLayout:
-                    spacing: app_theme.space("sm")
-                    Label:
-                        text: "Lenta:"
-                        bold: True
-                        color: app_theme.color("text_secondary")
-                        size_hint_x: None
-                        width: dp(80)
-                        halign: "right"
-                        text_size: self.size
-                        valign: "middle"
-                    Label:
-                        id: lenta_value
-                        text: ""
-                        color: app_theme.color("text_primary")
-                        halign: "left"
-                        text_size: self.size
-                        valign: "middle"
+        BoxLayout:
+            spacing: app_theme.space("sm")
+            Label:
+                text: "Exercício:"
+                bold: True
+                color: app_theme.color("text_secondary")
+                size_hint_x: None
+                width: app_theme.widget("field_label_width")
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: exercicio_value
+                text: ""
+                color: app_theme.color("text_primary")
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
 
-                # Rápida
-                BoxLayout:
-                    spacing: app_theme.space("sm")
-                    Label:
-                        text: "Rápida:"
-                        bold: True
-                        color: app_theme.color("text_secondary")
-                        size_hint_x: None
-                        width: dp(80)
-                        halign: "right"
-                        text_size: self.size
-                        valign: "middle"
-                    Label:
-                        id: rapida_value
-                        text: ""
-                        color: app_theme.color("text_primary")
-                        halign: "left"
-                        text_size: self.size
-                        valign: "middle"
+        BoxLayout:
+            spacing: app_theme.space("sm")
+            Label:
+                text: "Refeição:"
+                bold: True
+                color: app_theme.color("text_secondary")
+                size_hint_x: None
+                width: app_theme.widget("field_label_width")
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: refeicao_value
+                text: ""
+                color: app_theme.color("text_primary")
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
 
-                # Exercício
-                BoxLayout:
-                    spacing: app_theme.space("sm")
-                    Label:
-                        text: "Exercício:"
-                        bold: True
-                        color: app_theme.color("text_secondary")
-                        size_hint_x: None
-                        width: dp(80)
-                        halign: "right"
-                        text_size: self.size
-                        valign: "middle"
-                    Label:
-                        id: exercicio_value
-                        text: ""
-                        color: app_theme.color("text_primary")
-                        halign: "left"
-                        text_size: self.size
-                        valign: "middle"
-
-                # Refeição
-                BoxLayout:
-                    spacing: app_theme.space("sm")
-                    Label:
-                        text: "Refeição:"
-                        bold: True
-                        color: app_theme.color("text_secondary")
-                        size_hint_x: None
-                        width: dp(80)
-                        halign: "right"
-                        text_size: self.size
-                        valign: "middle"
-                    Label:
-                        id: refeicao_value
-                        text: ""
-                        color: app_theme.color("text_primary")
-                        halign: "left"
-                        text_size: self.size
-                        valign: "middle"
-
-            # Dextro em destaque (valor centralizado, como na sua versão original)
-            BoxLayout:
-                size_hint_y: None
-                height: dp(44)
-                spacing: app_theme.space("sm")
-
-                Label:
-                    text: "Dextro:"
-                    bold: True
-                    color: app_theme.color("text_secondary")
-                    size_hint_x: 0.25
-                    halign: "right"
-                    text_size: self.size
-                    valign: "middle"
-
-                Label:
-                    id: dextro_value
-                    text: ""
-                    bold: True
-                    font_size: app_theme.font("title")
-                    color: app_theme.color("success")
-                    # Sem text_size/halign: fica centralizado no espaço restante,
-                    # igual à sua versão que renderizava bem
-
-            # Observação
-            BoxLayout:
-                orientation: "vertical"
-                size_hint_y: None
-                height: dp(100)
-                spacing: app_theme.space("xs")
-
-                Label:
-                    text: "Observação:"
-                    bold: True
-                    color: app_theme.color("text_secondary")
-                    size_hint_y: None
-                    height: dp(30)
-                    text_size: self.size
-                    halign: "left"
-                    valign: "middle"
-
-                Label:
-                    id: observacao_value
-                    text: ""
-                    color: app_theme.color("text_primary")
-                    text_size: self.size
-                    halign: "left"
-                    valign: "top"
-
-    # Separador antes dos botões
-    Widget:
-        size_hint_y: None
-        height: app_theme.border("thin")
-        canvas.before:
-            Color:
-                rgba: app_theme.color("border")
-            Rectangle:
-                pos: self.pos
-                size: self.size
-
-    # Botões
+    # Dextro em destaque, mas alinhado como os demais campos
     BoxLayout:
         size_hint_y: None
-        height: app_theme.widget("button_height")
-        spacing: app_theme.space("md")
+        height: app_theme.widget("row_height")
+        spacing: app_theme.space("sm")
 
-        Button:
-            text: "Excluir"
-            background_color: app_theme.color("danger")
-            color: app_theme.color("on_primary")
-            font_size: app_theme.font("button")
+        Label:
+            text: "Dextro:"
             bold: True
-            on_press: root.delete_card()
+            color: app_theme.color("text_secondary")
+            size_hint_x: None
+            width: app_theme.widget("field_label_width")
+            halign: "right"
+            text_size: self.size
+            valign: "middle"
 
-        Button:
-            text: "Voltar"
-            background_color: app_theme.color("primary")
-            color: app_theme.color("on_primary")
-            font_size: app_theme.font("button")
+        Label:
+            id: dextro_value
+            text: ""
             bold: True
-            on_press: root.popup.dismiss()
+            font_size: app_theme.font("title")
+            color: app_theme.color("success")
+            halign: "left"
+            text_size: self.size
+            valign: "middle"
+
+    # Observação em bloco full-width, altura por conteúdo
+    BoxLayout:
+        orientation: "vertical"
+        size_hint_y: None
+        height: self.minimum_height
+        spacing: app_theme.space("xs")
+
+        Label:
+            text: "Observação:"
+            bold: True
+            color: app_theme.color("text_secondary")
+            size_hint_y: None
+            height: app_theme.widget("field_label_height")
+            text_size: self.size
+            halign: "left"
+            valign: "middle"
+
+        Label:
+            id: observacao_value
+            text: ""
+            color: app_theme.color("text_primary")
+            size_hint_y: None
+            height: self.texture_size[1]
+            text_size: self.width, None
+            halign: "left"
+            valign: "top"

@@ -335,19 +335,39 @@
                 name: "chart"
 
                 GraphScreenContent:
-                    ScreenHeader:
-                        text: "Dextros por dia e horário"
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint_y: None
+                        height: app_theme.widget('touch_target')
+                        spacing: app_theme.space('sm')
+
+                        ScreenHeader:
+                            text: "Dextros por dia e horário"
+                            pos_hint: {'center_y': 0.5}
+
+                        HeaderActions:
+                            id: header_actions
 
                     Panel:
                         Border:
                             id: date_hour_matrix_container
-            
+
             GraphScreen:
                 name: "meal_date_chart"
 
                 GraphScreenContent:
-                    ScreenHeader:
-                        text: "Dextros por refeição e dia"
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint_y: None
+                        height: app_theme.widget('touch_target')
+                        spacing: app_theme.space('sm')
+
+                        ScreenHeader:
+                            text: "Dextros por refeição e dia"
+                            pos_hint: {'center_y': 0.5}
+
+                        HeaderActions:
+                            id: header_actions
 
                     Panel:
                         Border:

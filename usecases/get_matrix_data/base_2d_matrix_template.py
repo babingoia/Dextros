@@ -1,3 +1,5 @@
+from logging import getLogger
+
 from core.value_objects.card import Card
 from usecases.dtos.card_output import CardOutput
 from usecases.dtos.matrix_data import MatrixData
@@ -8,6 +10,9 @@ from usecases.get_matrix_data.base_column_matrix_template import (
 )
 from usecases.utils.mappers import to_card_output
 from usecases.utils.exceptions import DuplicatedCellError
+
+
+logger = getLogger(__name__)
 
 
 RowKey = str
@@ -108,9 +113,9 @@ class Base2DMatrixTemplate(BaseColumnMatrixTemplate):
             row_lookup = lookup.setdefault(row_key, {})
 
             if column_index in row_lookup:
-                raise DuplicatedCellError(
+                logger.error(DuplicatedCellError(
                     f"Duplicated cell: row_key={row_key!r}, column_key={column_key!r}"
-                )
+                ))
 
             row_lookup[column_index] = card
 

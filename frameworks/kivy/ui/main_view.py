@@ -102,13 +102,13 @@ class MainView(BoxLayout):
                 panel_found = False
                 for child in screen.walk():
                     if child.__class__.__name__ == 'Panel':
-                        child.add_widget(graph_widget)
+                        graph_widget.embed_in(child)
                         panel_found = True
                         break
                 
                 # Fallback extremo se não achar o Panel
                 if not panel_found:
-                    screen.add_widget(graph_widget)
+                    graph_widget.embed_in(screen)
             else:
                 logger.info(f"Widget do gráfico já está posicionado no pai: {graph_widget.parent}")
 
@@ -124,7 +124,7 @@ class MainView(BoxLayout):
         content.add_widget(Factory.ScreenHeader(text=title))
         
         panel = Factory.Panel()
-        panel.add_widget(graph_widget)
+        graph_widget.embed_in(panel)
         content.add_widget(panel)
         
         screen.add_widget(content)
@@ -145,7 +145,7 @@ class MainView(BoxLayout):
         content.add_widget(Factory.ScreenHeader(text=title))
         
         panel = Factory.Panel()
-        panel.add_widget(graph_widget)
+        graph_widget.embed_in(panel)
         content.add_widget(panel)
         
         screen.add_widget(content)

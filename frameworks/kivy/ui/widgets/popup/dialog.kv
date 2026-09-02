@@ -1,0 +1,105 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+
+<DialogButton>:
+    bold: True
+    font_size: app_theme.font("button")
+    color: app_theme.color("on_primary")
+    background_color: root.bg_color
+    canvas.before:
+        Color:
+            rgba: root.bg_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [(app_theme.radius("md"), app_theme.radius("md"))] * 4
+
+<DialogMessage>:
+    color: app_theme.color("text_primary")
+    font_size: app_theme.font("body")
+    size_hint_y: None
+    height: self.texture_size[1]
+    text_size: self.width, None
+    halign: "left"
+    valign: "top"
+
+<AppDialog>:
+    AnchorLayout:
+        size_hint: 1, 1
+
+        BoxLayout:
+            id: card
+            orientation: "vertical"
+            size_hint: None, None
+            width: root.card_width
+            height: root.card_height
+            padding: app_theme.space("lg")
+            spacing: app_theme.space("md")
+
+            canvas.before:
+                Color:
+                    rgba: app_theme.color("surface")
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [(app_theme.radius("lg"), app_theme.radius("lg"))] * 4
+                Color:
+                    rgba: app_theme.color("border")
+                Line:
+                    rounded_rectangle: [self.x, self.y, self.width, self.height, app_theme.radius("lg")]
+                    width: app_theme.border("thin")
+
+            Label:
+                id: title_label
+                text: root.title_text
+                font_size: app_theme.font("title")
+                bold: True
+                color: app_theme.color("text_primary")
+                size_hint_y: None
+                height: app_theme.widget("section_title_height")
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+                shorten: True
+
+            Widget:
+                size_hint_y: None
+                height: app_theme.border("separator")
+                canvas.before:
+                    Color:
+                        rgba: app_theme.color("border_focus")
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            ScrollView:
+                id: scroll
+                do_scroll_x: False
+                do_scroll_y: True
+                bar_width: app_theme.widget("scrollbar")
+                bar_color: app_theme.color("scrollbar")
+                scroll_type: ["bars"]
+                size_hint_y: None if root.auto_height else 1
+                height: root.scroll_height if root.auto_height else 0
+
+                GridLayout:
+                    id: content_holder
+                    cols: 1
+                    size_hint_y: None
+                    height: self.minimum_height
+                    spacing: 0
+
+            Widget:
+                size_hint_y: None
+                height: app_theme.border("separator")
+                canvas.before:
+                    Color:
+                        rgba: app_theme.color("border")
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            BoxLayout:
+                id: buttons_holder
+                size_hint_y: None
+                height: app_theme.widget("button_height")
+                spacing: app_theme.space("md")

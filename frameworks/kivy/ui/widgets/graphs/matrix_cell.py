@@ -1,64 +1,81 @@
-# framework/kivy/ui/widgets/graphs/matrix_cell.py
-from kivy.properties import StringProperty, BooleanProperty, ObjectProperty
-from kivy.uix.popup import Popup
-from kivy.metrics import dp
-from kivy.core.window import Window
+from kivy.properties import StringProperty, BooleanProperty, ObjectProperty, NumericProperty
+from kivy.metrics import sp
 from kivy.lang import Builder
 from logging import getLogger
-import frameworks.kivy.ui.app_theme as app_theme
 
 from frameworks.kivy.ui.widgets.loader import CardWidget, Border
+from frameworks.kivy.ui.widgets.popup.dialog import AppDialog, DialogMessage
 
 Builder.load_file("frameworks/kivy/ui/widgets/graphs/matrix_cell.kv")
+
 logger = getLogger(__name__)
 
 
 class MatrixCell(Border):
     is_empty = BooleanProperty(True)
     is_header = BooleanProperty(False)
+
     dextro_text = StringProperty("")
+
     delete_callback = ObjectProperty(None, allownone=True)
     card_reference = ObjectProperty(None, allownone=True)
 
+    # Fonte proporcional ao tamanho da célula (zoom)
+    cell_font_size = NumericProperty(sp(14))
+    font_height_ratio = NumericProperty(0.38)
+    font_width_ratio = NumericProperty(0.16)
+    min_cell_font_size = NumericProperty(sp(10))
+    max_cell_font_size = NumericProperty(sp(24))
 
     def _show_card_details(self):
-        # Só abre popup se for um card real
         if self.is_empty or self.is_header or not self.card_reference:
             return
 
         logger.debug(f"Showing details for card: {self.card_reference.get('card_id')}")
-        
-        # Injeta o callback de deleção
-        content = CardWidget(self.card_reference, on_delete_callback=self._on_delete_clicked)
+        self._build_details_dialog().open()
 
-        width = min(dp(500), Window.width * 0.9)
-        height = min(dp(450), Window.height * 0.9)
-
-        popup = Popup(
-            title="Card Details",
-            content=content,
-            size_hint=(None, None),
-            size=(width, height),
-            title_color=app_theme.color("text_primary"),
-            separator_color=app_theme.color("border_focus"),
+    def _build_details_dialog(self):
+        dialog = AppDialog(
+            title="Detalhes",
+            content=CardWidget(self.card_reference),
         )
+        dialog.set_buttons([
+            ("Excluir", "danger", lambda *a: self._switch_to_confirm(dialog)),
+            ("Voltar", "primary", lambda *a: dialog.dismiss()),
+        ])
+        return dialog
 
-        # Dá acesso ao popup para o CardWidget conseguir fechar depois de deletar
-        content.popup = popup
-        popup.open()
+    def _switch_to_confirm(self, dialog):
+        card_id = self.card_reference.get("card_id")
+        dialog.auto_height = True
+        dialog.title_text = "Confirmar exclusão"
+        dialog.set_content(DialogMessage(
+            text="Excluir este registro? Essa ação não pode ser desfeita."
+        ))
+        dialog.set_buttons([
+            ("Excluir", "danger", lambda *a: self._confirm_delete(dialog, card_id)),
+            ("Cancelar", "primary", lambda *a: self._switch_to_details(dialog)),
+        ])
 
+    def _switch_to_details(self, dialog):
+        dialog.auto_height = False
+        dialog.title_text = "Detalhes"
+        dialog.set_content(CardWidget(self.card_reference))
+        dialog.set_buttons([
+            ("Excluir", "danger", lambda *a: self._switch_to_confirm(dialog)),
+            ("Voltar", "primary", lambda *a: dialog.dismiss()),
+        ])
+
+    def _confirm_delete(self, dialog, card_id):
+        dialog.dismiss()
+        self._on_delete_clicked(card_id)
 
     def _on_delete_clicked(self, card_id: str):
-        """Recebe o clique do CardWidget e dispara o callback do Controller."""
         logger.debug(f"MatrixCell calling delete callback for card_id: {card_id}")
-        
         if self.delete_callback:
-            # Chama o _handle_delete_card do MatrixController
             self.delete_callback(card_id)
         else:
             logger.warning("Delete callback não foi injetado na MatrixCell!")
 
-
     def on_delete_request(self, card_id: str):
-        """Handler padrão obrigatório para eventos Kivy. O Controller vai interceptar."""
         pass

@@ -41,16 +41,3 @@ class CardWidget(BoxLayout):
         
         self.ids.refeicao_value.text = card_data.get("meal", "")
         self.ids.observacao_value.text = card_data.get("observation", "")
-
-
-    def delete_card(self):
-        """Chamado pelo botão de delete no KV. Apenas avisa o callback."""
-        card_id = self.card_data.get("card_id")
-        logger.debug(f"Delete button clicked inside popup for card_id: {card_id}")
-        
-        if self.on_delete_callback:
-            self.on_delete_callback(card_id)
-            
-        # Fecha o popup se ele estiver vinculado a este widget
-        if hasattr(self, 'popup') and self.popup:
-            self.popup.dismiss()
