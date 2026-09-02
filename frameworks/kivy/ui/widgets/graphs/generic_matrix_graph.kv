@@ -1,71 +1,28 @@
 #:import app_theme frameworks.kivy.ui.app_theme
 
-# View interna montada via KV (o padrão que já funciona no teu app).
-<MatrixInnerView@RecycleView>:
+<GenericMatrixGraph>:
     viewclass: 'MatrixCell'
+
+    # Scroll normal nas duas direções; trava só durante o pinch
+    # (a view binda zoom.is_pinching -> graph.scroll_locked).
+    do_scroll_x: not root.scroll_locked
+    do_scroll_y: not root.scroll_locked
+
+    # Scrollbar no tema.
     bar_width: app_theme.widget('scrollbar')
     bar_color: app_theme.color('scrollbar')
     bar_inactive_color: app_theme.color('border')
 
     RecycleGridLayout:
+        # cols do render atual (muda com headers_visible, quem seta é o renderer).
+        cols: root.layout_cols
+
+        # Métricas vêm do renderer (scale * métricas da MatrixCell).
+        default_size: root.cell_width, root.cell_height
+        spacing: root.cell_spacing
         default_size_hint: None, None
+
+        # Força o grid a crescer o suficiente para habilitar o scroll 2D.
         size_hint: None, None
         width: self.minimum_width
         height: self.minimum_height
-
-<ToolButton>:
-    font_size: app_theme.font('button')
-    color: app_theme.color('on_primary') if self.active_state else app_theme.color('text_primary')
-    background_normal: ''
-    background_down: ''
-    background_color: (0, 0, 0, 0)
-    canvas.before:
-        Color:
-            rgba: app_theme.color('primary_pressed') if self.state == 'down' else (app_theme.color('primary') if self.active_state else app_theme.color('surface_alt'))
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [app_theme.radius('sm'), app_theme.radius('sm'), app_theme.radius('sm'), app_theme.radius('sm')]
-        Color:
-            rgba: app_theme.color('border_focus') if self.active_state else app_theme.color('border')
-        Line:
-            rounded_rectangle: [self.x, self.y, self.width, self.height, app_theme.radius('sm')]
-            width: app_theme.border('thin')
-
-<ZoomControls>:
-    orientation: 'horizontal'
-    size_hint: None, None
-    width: self.minimum_width
-    height: app_theme.widget('touch_target')
-    spacing: app_theme.space('xs')
-
-    ToolButton:
-        text: '-'
-        size_hint_x: None
-        width: app_theme.widget('icon_button')
-        on_release: root.graph.zoom_out() if root.graph else None
-
-    ToolButton:
-        text: '100%'
-        size_hint_x: None
-        width: int(app_theme.widget('icon_button') * 1.6)
-        on_release: root.graph.reset_zoom() if root.graph else None
-
-    ToolButton:
-        text: '+'
-        size_hint_x: None
-        width: app_theme.widget('icon_button')
-        on_release: root.graph.zoom_in() if root.graph else None
-
-    ToolButton:
-        text: '📌'
-        size_hint_x: None
-        width: app_theme.widget('icon_button')
-        active_state: root.graph.sticky_headers if root.graph else False
-        on_release: root.graph.toggle_sticky_headers() if root.graph else None
-
-<HeaderActions@BoxLayout>:
-    orientation: 'horizontal'
-    size_hint_x: None
-    width: self.minimum_width
-    spacing: app_theme.space('xs')

@@ -1,0 +1,23 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+
+<GraphScreenContent>:
+    orientation: 'vertical'
+    spacing: app_theme.space('sm')
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: app_theme.widget('touch_target')
+        spacing: app_theme.space('sm')
+
+        ScreenHeader:
+            text: root.title
+            pos_hint: {'center_y': 0.5}
+
+        ZoomControls:
+            zoom: root.zoom
+            sticky: root.sticky
+
+    Panel:
+        Border:
+            id: container

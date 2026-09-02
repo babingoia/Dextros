@@ -1,0 +1,56 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+
+# Botão utilitário temático e reutilizável.
+<ToolButton>:
+    font_size: app_theme.font('button')
+    color: app_theme.color('on_primary') if self.active_state else app_theme.color('text_primary')
+
+    background_normal: ''
+    background_down: ''
+    background_color: (0, 0, 0, 0)
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color('primary_pressed') if self.state == 'down' else (app_theme.color('primary') if self.active_state else app_theme.color('surface_alt'))
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius('sm'), app_theme.radius('sm'), app_theme.radius('sm'), app_theme.radius('sm')]
+        Color:
+            rgba: app_theme.color('border_focus') if self.active_state else app_theme.color('border')
+        Line:
+            rounded_rectangle: [self.x, self.y, self.width, self.height, app_theme.radius('sm')]
+            width: app_theme.border('thin')
+
+# Toolbar. Não sabe nada de gráfico/matriz: só chama a API dos decorators.
+<ZoomControls>:
+    orientation: 'horizontal'
+    size_hint: None, None
+    width: self.minimum_width
+    height: app_theme.widget('touch_target')
+    spacing: app_theme.space('xs')
+
+    ToolButton:
+        text: '-'
+        size_hint_x: None
+        width: app_theme.widget('icon_button')
+        on_release: root.zoom.zoom_out() if root.zoom else None
+
+    ToolButton:
+        text: '100%'
+        size_hint_x: None
+        width: int(app_theme.widget('icon_button') * 1.6)
+        on_release: root.zoom.reset_zoom() if root.zoom else None
+
+    ToolButton:
+        text: '+'
+        size_hint_x: None
+        width: app_theme.widget('icon_button')
+        on_release: root.zoom.zoom_in() if root.zoom else None
+
+    ToolButton:
+        text: '📌'
+        size_hint_x: None
+        width: app_theme.widget('icon_button')
+        active_state: root.sticky.enabled if root.sticky else False
+        on_release: root.sticky.toggle() if root.sticky else None

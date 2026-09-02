@@ -1,10 +1,9 @@
 #:import app_theme frameworks.kivy.ui.app_theme
 #:import Border frameworks.kivy.ui.widgets.loader.Border
-#:import GraphScreen frameworks.kivy.ui.widgets.screens.graph_screen.GraphScreen
+#:import GraphScreen frameworks.kivy.ui.widgets.graphs.screens.graph_screen.GraphScreen
 
 <MainView>:
     orientation: "horizontal"
-
     canvas.before:
         Color:
             rgba: app_theme.color("app_bg")
@@ -335,40 +334,14 @@
                 name: "chart"
 
                 GraphScreenContent:
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        size_hint_y: None
-                        height: app_theme.widget('touch_target')
-                        spacing: app_theme.space('sm')
-
-                        ScreenHeader:
-                            text: "Dextros por dia e horário"
-                            pos_hint: {'center_y': 0.5}
-
-                        HeaderActions:
-                            id: header_actions
-
-                    Panel:
-                        Border:
-                            id: date_hour_matrix_container
+                    id: chart_content
+                    title: "Dextros por dia e horário"
+                    session_key: "chart"
 
             GraphScreen:
                 name: "meal_date_chart"
 
                 GraphScreenContent:
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        size_hint_y: None
-                        height: app_theme.widget('touch_target')
-                        spacing: app_theme.space('sm')
-
-                        ScreenHeader:
-                            text: "Dextros por refeição e dia"
-                            pos_hint: {'center_y': 0.5}
-
-                        HeaderActions:
-                            id: header_actions
-
-                    Panel:
-                        Border:
-                            id: meal_date_matrix_container
+                    id: meal_date_content
+                    title: "Dextros por refeição e dia"
+                    session_key: "meal_date_chart"
