@@ -14013,6 +14013,34 @@
         "exercise_name": null,
         "intensity": null
       }
+    },
+    {
+      "card_id": "ae4e8278-888f-4124-920a-4efd9f921034",
+      "card_date": "2026-09-02",
+      "card_time": "13:00",
+      "glycemia": 123,
+      "long_acting_insulin": null,
+      "short_acting_insulin": 4,
+      "meal": "jejum",
+      "observation": "ewfefewfw",
+      "exercise": {
+        "exercise_name": "erewr",
+        "intensity": null
+      }
+    },
+    {
+      "card_id": "3f881bbe-5192-408f-ad11-61a8ec8befe2",
+      "card_date": "2026-09-01",
+      "card_time": "13:00",
+      "glycemia": 234,
+      "long_acting_insulin": 43,
+      "short_acting_insulin": 2,
+      "meal": null,
+      "observation": null,
+      "exercise": {
+        "exercise_name": null,
+        "intensity": null
+      }
     }
   ]
 }

@@ -1,44 +1,60 @@
 from kivy.properties import StringProperty, BooleanProperty, ObjectProperty, NumericProperty
-from kivy.metrics import sp
+from kivy.metrics import dp, sp
+from kivy.factory import Factory
 from kivy.lang import Builder
 from logging import getLogger
 
 from frameworks.kivy.ui.widgets.loader import CardWidget, Border
 from frameworks.kivy.ui.widgets.popup.dialog import AppDialog, DialogMessage
 
-Builder.load_file("frameworks/kivy/ui/widgets/graphs/matrix_cell.kv")
-
 logger = getLogger(__name__)
 
 
 class MatrixCell(Border):
+    # ------------------------------------------------------------------
+    # Métricas da célula: fonte de verdade do próprio tamanho.
+    # São atributos de classe de propósito: o grid lê daqui, e tu altera
+    # aqui (ou via subclasse) pra testar.
+    # ------------------------------------------------------------------
+    base_width = dp(152)
+    base_height = dp(44)
+
+    # Métricas da célula (fonte de verdade do próprio tamanho)
+    base_width = dp(152)
+    base_height = dp(44)
+    base_spacing = dp(4)
+    min_width = 0
+    min_height = 0
+    max_width = 0
+    max_height = 0
+
+    # Escala de fonte proporcional ao tamanho
+    font_height_ratio = 0.38
+    font_width_ratio = 0.16
+    min_font = sp(10)
+    max_font = sp(24)
+
+    # Estado visual da célula
+    cell_font_size = NumericProperty(sp(14))
+
     is_empty = BooleanProperty(True)
     is_header = BooleanProperty(False)
-
     dextro_text = StringProperty("")
 
     delete_callback = ObjectProperty(None, allownone=True)
     card_reference = ObjectProperty(None, allownone=True)
 
-    # Fonte proporcional ao tamanho da célula (zoom)
-    cell_font_size = NumericProperty(sp(14))
-    font_height_ratio = NumericProperty(0.38)
-    font_width_ratio = NumericProperty(0.16)
-    min_cell_font_size = NumericProperty(sp(10))
-    max_cell_font_size = NumericProperty(sp(24))
-
+    # ------------------------------------------------------------------
+    # Detalhes do card
+    # ------------------------------------------------------------------
     def _show_card_details(self):
         if self.is_empty or self.is_header or not self.card_reference:
             return
-
         logger.debug(f"Showing details for card: {self.card_reference.get('card_id')}")
         self._build_details_dialog().open()
 
     def _build_details_dialog(self):
-        dialog = AppDialog(
-            title="Detalhes",
-            content=CardWidget(self.card_reference),
-        )
+        dialog = AppDialog(title="Detalhes", content=CardWidget(self.card_reference))
         dialog.set_buttons([
             ("Excluir", "danger", lambda *a: self._switch_to_confirm(dialog)),
             ("Voltar", "primary", lambda *a: dialog.dismiss()),
@@ -79,3 +95,7 @@ class MatrixCell(Border):
 
     def on_delete_request(self, card_id: str):
         pass
+
+
+Factory.register("MatrixCell", cls=MatrixCell)
+Builder.load_file("frameworks/kivy/ui/widgets/graphs/matrix_cell.kv")
