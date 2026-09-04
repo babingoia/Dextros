@@ -36,4 +36,4 @@ class BarCell(FloatLayout):
         ).open()
 
 
-Factory.register("BarCell", cls=BarCell)
+Factory.register("BarCell", cls=BarCell)    

@@ -77,25 +77,33 @@
     foreground_color: app_theme.color("text_primary")
     hint_text_color: app_theme.color("text_hint")
     cursor_color: app_theme.color("primary")
-    
-    # Removemos o background_normal/active e aplicamos a cor de fundo direto aqui.
-    # Isso evita que o Kivy "confunda" a cor do texto digitado com a do hint.
-    background_normal: ""
-    background_active: ""
+
     background_color: app_theme.color("field_bg")
     
     padding: [app_theme.space("md"), max(0, (self.height - self.line_height) / 2)]
 
     canvas.before:
-        # Agora o canvas.before desenha APENAS a borda, não o fundo.
-        Color:
-            rgba: 1, 0, 0, 1
         Line:
             rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
-            width: 4
+            width: 1
 
+<AppSpinnerOption@SpinnerOption>:
+    font_size: app_theme.font("field")
+    
+    # Cores de texto explícitas
+    foreground_color: app_theme.color("text_primary")
+    hint_text_color: app_theme.color("text_hint")
+    cursor_color: app_theme.color("primary")
+
+    background_color: app_theme.color("primary_pressed")
+
+    canvas.before:
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("lg")
+            width: 1
 
 <AppSpinner@Spinner>:
+    option_cls: 'AppSpinnerOption'
     size_hint_y: None
     height: app_theme.widget("input_height")
     font_size: app_theme.font("field")
@@ -109,18 +117,21 @@
     padding_x: app_theme.space("md")
 
     canvas.before:
+        # Apenas o preenchimento do fundo
         Color:
             rgba: app_theme.color("field_bg")
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: [app_theme.radius("md")]
+            radius: [app_theme.radius("md")] if isinstance(app_theme.radius("md"), (int, float)) else app_theme.radius("md")
+
+    canvas.after:
+        # A borda desenhada POR CIMA do widget
         Color:
             rgba: app_theme.color("border_focus") if self.state == "down" else app_theme.color("border")
         Line:
-            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
-            width: app_theme.border("thin")
-
+            rounded_rectangle: (self.x, self.y, self.width, self.height, app_theme.radius("md")[0] if isinstance(app_theme.radius("md"), (list, tuple)) else app_theme.radius("md"))
+            width: app_theme.border("thin") or 1
 
 # ==========================================================
 # BOTÕES

@@ -38,7 +38,7 @@ from adapters.gateways.kivy_router import KivyRouter
 # Kivy
 from frameworks.kivy.controllers.main_controller import MainController
 
-log_service.configure_logging(console_level=log_service.logging.DEBUG)
+log_service.configure_logging(console_level=log_service.logging.INFO)
 logger = log_service.get_logger(__name__)
 
 DB = "db/cards_populated.json"
