@@ -20,6 +20,7 @@ from usecases.get_meal_list_use_case import GetMealListUseCase
 from usecases.create_card_use_case import CreateCardUseCase
 from usecases.delete_card_by_id_use_case import DeleteCardByIDUseCase
 from usecases.get_matrix_data.get_meal_date_matrix_data import GetMealDateMatrixUseCase
+from usecases.get_matrix_data.get_average_glycemia_day_use_case import GetAverageGlycemiaPerDayUseCase
 
 # Controllers (adapters)
 from adapters.controllers.time_controller import TimeController
@@ -29,6 +30,7 @@ from adapters.controllers.save_request_controller import SaveRequestController
 from adapters.controllers.delete_card_request_controller import DeleteCardRequestController
 from adapters.controllers.date_meal_matrix_controller import DateMealMatrixController
 from adapters.controllers.i_controller import IController
+from adapters.controllers.average_glycemia_matrix_controller import AverageGlycemiaDayMatrixController
 
 # Gateway
 from adapters.gateways.kivy_router import KivyRouter
@@ -80,6 +82,10 @@ class DextroApp(MDApp):
 
         get_date_meal_matrix_uc = GetMealDateMatrixUseCase(get_meal_list=get_meal_list_uc,
                                                            repository=card_repository)
+        
+        get_average_glycemia_day_uc = GetAverageGlycemiaPerDayUseCase(
+            repository=card_repository
+        )
 
         # 3. Controllers (use cases injetados)
         time_controller = TimeController(get_time_list_uc)
@@ -88,6 +94,9 @@ class DextroApp(MDApp):
         save_request_controller = SaveRequestController(create_card_uc)
         delete_card_id_controller = DeleteCardRequestController(delete_card_by_id_uc)
         date_meal_matrix_controller = DateMealMatrixController(get_date_meal_matrix_uc)
+        average_glycemia_matrix_controller = AverageGlycemiaDayMatrixController(
+            get_average_glycemia_day_use_case=get_average_glycemia_day_uc
+        )
 
         # 4. Commands
         routes: Dict[str, IController] = {
@@ -95,6 +104,7 @@ class DextroApp(MDApp):
             "get_meal_list": meal_controller,
             "get_hour_date_matrix_data": date_hour_matrix_controller,
             "get_meal_date_matrix_data": date_meal_matrix_controller,
+            "get_average_glycemia_matrix_data": average_glycemia_matrix_controller,
             
             # Queries
             "save_card": save_request_controller,

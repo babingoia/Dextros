@@ -40,7 +40,7 @@ class Sticky(EventDispatcher):
         self._top_row = self._bottom_row = None
 
         self.bind(enabled=self._on_enabled, scale=self._apply_metrics)
-        self.target.fbind("data_changed", self.sync_headers)
+        self.target.fbind("on_data_changed", self.sync_headers)
 
     def toggle(self) -> None:
         self.enabled = not self.enabled

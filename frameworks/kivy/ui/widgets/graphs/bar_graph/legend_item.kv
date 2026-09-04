@@ -1,0 +1,26 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+
+<LegendItem>:
+    orientation: 'horizontal'
+    size_hint: None, None
+    size: self.minimum_width, app_theme.widget('field_label_height')
+    spacing: app_theme.space('xs')
+
+    Widget:
+        size_hint: None, None
+        size: app_theme.space('sm'), app_theme.space('sm')
+        pos_hint: {'center_y': 0.5}
+        canvas.before:
+            Color:
+                rgba: app_theme.color(root.color_name)
+            Ellipse:
+                pos: self.pos
+                size: self.size
+
+    Label:
+        text: root.label_text
+        color: app_theme.color('text_secondary')
+        font_size: app_theme.font('caption')
+        size_hint_x: None
+        width: self.texture_size[0]
+        valign: 'middle'

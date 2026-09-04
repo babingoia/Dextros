@@ -11,7 +11,7 @@ from kivy.factory import Factory
 
 # My files
 from frameworks.kivy.ui.widgets.pickers.date_picker import DatePicker
-from frameworks.kivy.ui.widgets.graphs.screens.graph_screen import GraphScreen
+from frameworks.kivy.ui.widgets.graphs.generic_matrix.screens.graph_screen import GraphScreen
 from infrastructure.path_provider_service import get_asset_path
 from adapters.controllers.dtos.card_view_model import CardViewModel
 from frameworks.kivy.ui.widgets.popup.dialog import AppDialog, DialogMessage

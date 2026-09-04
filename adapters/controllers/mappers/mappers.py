@@ -1,8 +1,14 @@
 from usecases.dtos.matrix_data import MatrixData
 from usecases.dtos.card_output import CardOutput
 from usecases.dtos.cardDTOInput import CardDTOInput
+from usecases.dtos.single_row_matrix_data import SingleRowMatrixData
+from usecases.dtos.card_average_output import CardAverageOutput
+
+from adapters.controllers.dtos.card_average_view_model import CardAverageViewModel
 from adapters.controllers.dtos.matrix_data_view_model import MatrixDataViewModel
 from adapters.controllers.dtos.card_view_model import CardViewModel
+from adapters.controllers.dtos.single_row_matrix_view import SingleRowMatrixView
+
 
 
 def strip_view_model(data: CardViewModel) -> CardViewModel:
@@ -93,6 +99,17 @@ def card_output_to_view_model(card: CardOutput) -> CardViewModel:
     }
 
 
+def card_average_output_to_view_model(card_average: CardAverageOutput) -> CardAverageViewModel:
+    return CardAverageViewModel(
+        glycemia=card_average.glycemia,
+        short_acting_insulin=card_average.short_acting_insulin,
+        long_acting_insulin=card_average.long_acting_insulin,
+        glycemia_occurrences=card_average.glycemia_occurrences,
+        short_acting_insulin_occurrences=card_average.short_acting_insulin_occurrences,
+        long_acting_insulin_occurrences=card_average.long_acting_insulin_occurrences
+    )
+
+
 def empty_card_view_model() -> CardViewModel:
     """Retorna um CardViewModel 'zerado' para células vazias da matriz."""
     return {
@@ -106,3 +123,15 @@ def empty_card_view_model() -> CardViewModel:
         "meal": "",
         "observation": ""
     }
+
+
+def single_row_to_view_model(single_row: SingleRowMatrixData) -> SingleRowMatrixView:
+    cell_data_vm = []
+    
+    for card_average_output in single_row.cells:
+        cell_data_vm.append(card_average_output_to_view_model(card_average_output))
+            
+    return SingleRowMatrixView(
+        col_headers=single_row.col_headers,
+        cells=cell_data_vm
+    )

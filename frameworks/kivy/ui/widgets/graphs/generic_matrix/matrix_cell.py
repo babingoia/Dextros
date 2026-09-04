@@ -18,10 +18,6 @@ class MatrixCell(Border):
     # ------------------------------------------------------------------
     base_width = dp(152)
     base_height = dp(44)
-
-    # Métricas da célula (fonte de verdade do próprio tamanho)
-    base_width = dp(152)
-    base_height = dp(44)
     base_spacing = dp(4)
     min_width = 0
     min_height = 0
@@ -98,4 +94,4 @@ class MatrixCell(Border):
 
 
 Factory.register("MatrixCell", cls=MatrixCell)
-Builder.load_file("frameworks/kivy/ui/widgets/graphs/matrix_cell.kv")
+Builder.load_file("frameworks/kivy/ui/widgets/graphs/generic_matrix/matrix_cell.kv")

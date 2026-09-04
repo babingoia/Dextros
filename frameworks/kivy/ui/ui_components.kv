@@ -72,27 +72,27 @@
     height: app_theme.widget("input_height")
     multiline: False
     font_size: app_theme.font("field")
+    
+    # Cores de texto explícitas
     foreground_color: app_theme.color("text_primary")
-    disabled_foreground_color: app_theme.color("text_hint")
-    cursor_color: app_theme.color("primary")
     hint_text_color: app_theme.color("text_hint")
+    cursor_color: app_theme.color("primary")
+    
+    # Removemos o background_normal/active e aplicamos a cor de fundo direto aqui.
+    # Isso evita que o Kivy "confunda" a cor do texto digitado com a do hint.
     background_normal: ""
     background_active: ""
-    background_color: 0, 0, 0, 0
+    background_color: app_theme.color("field_bg")
+    
     padding: [app_theme.space("md"), max(0, (self.height - self.line_height) / 2)]
 
     canvas.before:
+        # Agora o canvas.before desenha APENAS a borda, não o fundo.
         Color:
-            rgba: app_theme.color("field_bg")
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [app_theme.radius("md")]
-        Color:
-            rgba: app_theme.color("border_focus") if self.focus else app_theme.color("border")
+            rgba: 1, 0, 0, 1
         Line:
             rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
-            width: app_theme.border("focus") if self.focus else app_theme.border("thin")
+            width: 4
 
 
 <AppSpinner@Spinner>:

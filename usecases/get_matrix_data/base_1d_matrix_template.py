@@ -1,6 +1,7 @@
-# usecases/templates/base_1d_matrix_template.py
+# usecases/get_matrix_data/base_1d_matrix_template.py
 
 from core.value_objects.card import Card
+from usecases.dtos.card_average_output import CardAverageOutput
 from usecases.dtos.single_row_matrix_data import SingleRowMatrixData
 from usecases.get_matrix_data.base_column_matrix_template import (
     BaseColumnMatrixTemplate,
@@ -27,7 +28,7 @@ class Base1DMatrixTemplate(BaseColumnMatrixTemplate):
 
         grouped_cards = self._group_cards_by_column(cards, columns)
 
-        cells: list[str | None] = [
+        cells: list[CardAverageOutput] = [
             self._build_cell(grouped_cards.get(column_index, []))
             for column_index in range(len(columns))
         ]
@@ -43,7 +44,7 @@ class Base1DMatrixTemplate(BaseColumnMatrixTemplate):
     def _get_columns_for_cards(self, cards: list[Card]) -> list[Column]:
         return self._get_columns()
 
-    def _build_cell(self, cards: list[Card]) -> str | None:
+    def _build_cell(self, cards: list[Card]) -> CardAverageOutput:
         raise NotImplementedError
 
     # -------------------------------------------------------------------

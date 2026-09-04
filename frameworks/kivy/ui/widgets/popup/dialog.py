@@ -1,3 +1,5 @@
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.modalview import ModalView
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -151,3 +153,37 @@ class ErrorDialog(AppDialog):
         super().__init__(title=title, auto_height=True, **kwargs)
         self.set_content(DialogMessage(text=message))
         self.set_buttons([(button_text, "danger", lambda *a: self.dismiss())])
+
+
+class MetricStat(BoxLayout):
+    """Uma coluna de métrica (rótulo + valor + ocorrências), usada em diálogos de resumo."""
+    label = StringProperty("")
+    value = StringProperty("")
+    occurrences = NumericProperty(0)
+    color_name = StringProperty("primary")
+
+
+class MetricsSummaryDialog(AppDialog):
+    """Diálogo genérico pra exibir N métricas lado a lado (ex: médias de um dia).
+    Não sabe nada sobre glicemia/insulina — só recebe uma lista pronta."""
+
+    def __init__(self, metrics=None, title="", **kwargs):
+        super().__init__(title=title, auto_height=True, **kwargs)
+        self.set_content(self._build_metrics_grid(metrics or []))
+        self.set_buttons([("Fechar", "primary", lambda *a: self.dismiss())])
+
+    def _build_metrics_grid(self, metrics):
+        grid = GridLayout(
+            cols=len(metrics) or 1,
+            spacing=app_theme.space("md"),
+            size_hint_y=None,
+        )
+        grid.bind(minimum_height=grid.setter("height"))
+        for metric in metrics:
+            grid.add_widget(MetricStat(
+                label=metric.get("label", ""),
+                value=str(metric.get("value", "")),
+                occurrences=metric.get("occurrences", 0),
+                color_name=metric.get("color_name", "primary"),
+            ))
+        return grid

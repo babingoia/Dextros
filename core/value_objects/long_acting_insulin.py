@@ -28,7 +28,6 @@ class LongActingInsulin:
 
     @classmethod
     def parse(cls, quantity_value: int | str | None = None) -> "LongActingInsulin":
-        logger.debug(f"Criando insulina lenta: {type(quantity_value)}")
         match quantity_value:
             case None:
                 return cls(quantity_value)

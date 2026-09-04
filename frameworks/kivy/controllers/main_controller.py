@@ -4,6 +4,7 @@ from datetime import datetime
 from adapters.gateways.i_router import IRouter
 from adapters.controllers.dtos.time_view_model import TimeList
 from adapters.controllers.dtos.card_view_model import CardViewModel
+from frameworks.kivy.controllers.bar_matrix_controller import BarMatrixController
 from frameworks.kivy.ui.main_view import MainView
 from frameworks.kivy.controllers.matrix_controller import MatrixController
 
@@ -12,6 +13,7 @@ logger = getLogger(__name__)
 _DATA_SOURCE_CONFIG = {
     'date_hour_matrix': "get_hour_date_matrix_data",
     'meal_date_matrix': "get_meal_date_matrix_data",
+    'average_glycemia_matrix': "get_average_glycemia_matrix_data"
 }
 
 
@@ -38,12 +40,21 @@ class MainController:
             data_source=_DATA_SOURCE_CONFIG["meal_date_matrix"],
         )
 
+        self.average_glycemia_matrix_controller = BarMatrixController(
+            content=self.main_view.ids.average_glycemia_content,
+            router=self.router,
+            data_source=_DATA_SOURCE_CONFIG["average_glycemia_matrix"]
+        )
+
         # Lazy load: callback direto na screen, sem passar pelo MainView.
         self.main_view.ids.screens.get_screen("chart").refresh_callback = \
             self.date_hour_matrix_controller.on_screen_enter
 
         self.main_view.ids.screens.get_screen("meal_date_chart").refresh_callback = \
             self.meal_date_matrix_controller.on_screen_enter
+        
+        self.main_view.ids.screens.get_screen("average_glycemia_bar_graph").refresh_callback = \
+            self.average_glycemia_matrix_controller.on_screen_enter
 
         # Horarios
         self.time: TimeList = self.router.navigate("get_time_list")

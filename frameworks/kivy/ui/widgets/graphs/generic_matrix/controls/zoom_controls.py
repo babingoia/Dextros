@@ -21,4 +21,4 @@ class ZoomControls(BoxLayout):
 
 Factory.register("ToolButton", cls=ToolButton)
 Factory.register("ZoomControls", cls=ZoomControls)
-Builder.load_file("frameworks/kivy/ui/widgets/graphs/controls/zoom_controls.kv")
+Builder.load_file("frameworks/kivy/ui/widgets/graphs/generic_matrix/controls/zoom_controls.kv")

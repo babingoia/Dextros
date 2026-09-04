@@ -41,7 +41,6 @@ class JsonRepository(ICardRepository):
         for card in parsed_data:
             cards.append(self.card_creator.create_card(card))
         
-        logger.debug(f"Cards imported: {cards}")
         return cards
 
 
@@ -70,7 +69,6 @@ class JsonRepository(ICardRepository):
 
 
     def get_all_cards(self) -> list[Card]:
-        logger.debug(f"Loading cards from JSON... {self.cards_on_session}")
         return list(self.cards_on_session)
 
     

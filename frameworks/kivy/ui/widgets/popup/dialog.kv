@@ -103,3 +103,45 @@
                 size_hint_y: None
                 height: app_theme.widget("button_height")
                 spacing: app_theme.space("md")
+
+
+<MetricStat>:
+    orientation: "vertical"
+    spacing: app_theme.space("xs")
+    size_hint_y: None
+    height: self.minimum_height
+
+    Label:
+        text: root.label
+        bold: True
+        color: app_theme.color(root.color_name)
+        font_size: app_theme.font("body")
+        size_hint_y: None
+        height: app_theme.widget("field_label_height")
+        text_size: self.width, None
+        halign: "center"
+        valign: "middle"
+        shorten: True
+
+    Label:
+        text: root.value
+        bold: True
+        color: app_theme.color("text_primary")
+        font_size: app_theme.font("headline")
+        size_hint_y: None
+        height: app_theme.widget("section_title_height")
+        text_size: self.width, None
+        halign: "center"
+        valign: "middle"
+        shorten: True
+
+    Label:
+        text: f"ocorrências: {int(root.occurrences)}"
+        color: app_theme.color("text_secondary")
+        font_size: app_theme.font("caption")
+        size_hint_y: None
+        height: app_theme.widget("field_label_height")
+        text_size: self.width, None
+        halign: "center"
+        valign: "middle"
+        shorten: True

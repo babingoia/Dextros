@@ -5,15 +5,15 @@ from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from logging import getLogger
 
-from frameworks.kivy.ui.widgets.graphs.generic_matrix_graph import GenericMatrixGraph
-from frameworks.kivy.ui.widgets.graphs.matrix_cell import MatrixCell
-from frameworks.kivy.ui.widgets.graphs.decorators.zoom_decorator import PinchZoom
-from frameworks.kivy.ui.widgets.graphs.decorators.sticky_decorator import Sticky
-import frameworks.kivy.ui.widgets.graphs.controls.zoom_controls 
+from frameworks.kivy.ui.widgets.graphs.generic_matrix.generic_matrix_graph import GenericMatrixGraph
+from frameworks.kivy.ui.widgets.graphs.generic_matrix.matrix_cell import MatrixCell
+from frameworks.kivy.ui.widgets.graphs.generic_matrix.decorators.zoom_decorator import PinchZoom
+from frameworks.kivy.ui.widgets.graphs.generic_matrix.decorators.sticky_decorator import Sticky
+import frameworks.kivy.ui.widgets.graphs.generic_matrix.controls.zoom_controls 
 
 logger = getLogger(__name__)
 
-Builder.load_file("frameworks/kivy/ui/widgets/graphs/screens/graph_screen.kv")
+Builder.load_file("frameworks/kivy/ui/widgets/graphs/generic_matrix/screens/graph_screen.kv")
 
 _STICKY_SESSION: dict[str, bool] = {}
 

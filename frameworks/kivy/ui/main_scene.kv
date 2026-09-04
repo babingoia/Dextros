@@ -1,6 +1,7 @@
 #:import app_theme frameworks.kivy.ui.app_theme
 #:import Border frameworks.kivy.ui.widgets.loader.Border
-#:import GraphScreen frameworks.kivy.ui.widgets.graphs.screens.graph_screen.GraphScreen
+#:import GraphScreen frameworks.kivy.ui.widgets.graphs.generic_matrix.screens.graph_screen.GraphScreen
+#:import BarGraphScreen frameworks.kivy.ui.widgets.graphs.bar_graph.screens.generic_bar_graph_screen
 
 <MainView>:
     orientation: "horizontal"
@@ -103,6 +104,11 @@
                     text: "Dia x Refeição"
                     on_release:
                         screens.current = "meal_date_chart"
+                        nav_toggle.state = "normal"
+                NavButton:
+                    text: "Média de Dextros por Dia"
+                    on_release:
+                        screens.current = "average_glycemia_bar_graph"
                         nav_toggle.state = "normal"
 
         # Espaço para empurrar futuros itens para o topo
@@ -345,3 +351,10 @@
                     id: meal_date_content
                     title: "Dextros por refeição e dia"
                     session_key: "meal_date_chart"
+            
+            BarGraphScreen:
+                name: "average_glycemia_bar_graph"
+
+                BarGraphScreenContent:
+                    id: average_glycemia_content
+                    title: "Média de Dextros por dia"
