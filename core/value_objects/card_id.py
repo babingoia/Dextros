@@ -25,6 +25,8 @@ class CardID:
                 return cls._new()
             case UUID():
                 return cls(value)
+            case str():
+                return cls._from_string(value)
             case int():
                 return cls._from_int(value)
             case _:
