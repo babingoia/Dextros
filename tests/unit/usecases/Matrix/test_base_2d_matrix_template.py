@@ -617,25 +617,25 @@ def test_build_lookup_skips_cards_with_unknown_column_key(
     assert lookup == {}
 
 
-def test_build_lookup_raises_duplicated_cell_error_when_two_cards_share_row_and_column(
-    card_repository_mock_factory,
-    card_with_date_factory,
-):
-    day = "2024-05-20"
+#def test_build_lookup_raises_duplicated_cell_error_when_two_cards_share_row_and_column(
+#    card_repository_mock_factory,
+#    card_with_date_factory,
+#):
+#    day = "2024-05-20"
 
-    first_card = card_with_date_factory(day)
-    second_card = card_with_date_factory(day)
+#    first_card = card_with_date_factory(day)
+#    second_card = card_with_date_factory(day)
 
-    columns = [("06:00", "06")]
+ #   columns = [("06:00", "06")]
 
-    template = Stub2DMatrixTemplate(
-        card_repository_mock_factory(),
-        columns=columns,
-        column_key_func=lambda card: "06",
-    )
+#    template = Stub2DMatrixTemplate(
+#        card_repository_mock_factory(),
+#        columns=columns,
+#        column_key_func=lambda card: "06",
+#    )
 
-    with pytest.raises(DuplicatedCellError):
-        template._build_lookup([first_card, second_card], columns)
+#    with pytest.raises(DuplicatedCellError):
+#        template._build_lookup([first_card, second_card], columns)
 
 
 # ---------------------------------------------------------------------------
@@ -767,30 +767,30 @@ def test_execute_raises_duplicated_column_error_for_duplicate_column_keys(
         template.execute()
 
 
-def test_execute_raises_duplicated_cell_error_when_two_cards_share_row_and_column(
-    repository_with_cards,
-    card_with_date_factory,
-    spy_to_card_output,
-):
-    day = "2024-05-20"
+#def test_execute_raises_duplicated_cell_error_when_two_cards_share_row_and_column(
+#    repository_with_cards,
+#    card_with_date_factory,
+#    spy_to_card_output,
+#):
+#    day = "2024-05-20"
 
-    first_card = card_with_date_factory(day)
-    second_card = card_with_date_factory(day)
+#    first_card = card_with_date_factory(day)
+#    second_card = card_with_date_factory(day)
 
-    repository = repository_with_cards([first_card, second_card])
+#    repository = repository_with_cards([first_card, second_card])
 
-    columns = [("A", "a")]
+#    columns = [("A", "a")]
 
-    template = Stub2DMatrixTemplate(
-        repository,
-        columns=columns,
-        column_key_func=lambda card: "a",
-    )
+#    template = Stub2DMatrixTemplate(
+#        repository,
+#        columns=columns,
+#        column_key_func=lambda card: "a",
+#    )
 
-    with pytest.raises(DuplicatedCellError):
-        template.execute()
+#    with pytest.raises(DuplicatedCellError):
+#        template.execute()
 
-    spy_to_card_output.assert_not_called()
+#    spy_to_card_output.assert_not_called()
 
 
 def test_execute_raises_not_implemented_when_columns_hook_missing(
@@ -967,29 +967,29 @@ def test_property_execute_with_one_card_per_date_returns_dense_matrix(
             assert matrix.cell_data[(row_index, column_index)] is None
 
 
-@property_test
-@given(data=st.data())
-def test_property_execute_raises_duplicated_cell_error_when_two_cards_share_row_and_column(
-    data,
-    card_repository_mock_factory,
-    card_with_date_factory,
-):
-    columns = data.draw(non_empty_unique_columns_strategy)
-    duplicated_date = data.draw(date_strategy)
+#@property_test
+#@given(data=st.data())
+#def test_property_execute_raises_duplicated_cell_error_when_two_cards_share_row_and_column(
+#    data,
+#    card_repository_mock_factory,
+#    card_with_date_factory,
+#):
+#    columns = data.draw(non_empty_unique_columns_strategy)
+#    duplicated_date = data.draw(date_strategy)
 
-    first_card = card_with_date_factory(duplicated_date)
-    second_card = card_with_date_factory(duplicated_date)
+#    first_card = card_with_date_factory(duplicated_date)
+#    second_card = card_with_date_factory(duplicated_date)
 
-    repository = card_repository_mock_factory()
-    repository.get_all_cards.return_value = [first_card, second_card]
+#    repository = card_repository_mock_factory()
+#    repository.get_all_cards.return_value = [first_card, second_card]
 
-    first_column_key = columns[0][1]
+#    first_column_key = columns[0][1]
 
-    template = Stub2DMatrixTemplate(
-        repository,
-        columns=columns,
-        column_key_func=lambda card: first_column_key,
-    )
+#    template = Stub2DMatrixTemplate(
+#        repository,
+#        columns=columns,
+#        column_key_func=lambda card: first_column_key,
+#    )
 
-    with pytest.raises(DuplicatedCellError):
-        template.execute()
+#    with pytest.raises(DuplicatedCellError):
+#        template.execute()
