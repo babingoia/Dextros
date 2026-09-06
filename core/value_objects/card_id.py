@@ -1,6 +1,8 @@
 from uuid import uuid4, UUID
-from dataclasses import dataclass, InitVar, field
+from dataclasses import dataclass
 from logging import getLogger
+
+from core.exceptions import ParseError, InvalidCardId
 
 logger = getLogger(__name__)
 
@@ -13,7 +15,7 @@ class CardID:
     def __post_init__(self):
         """Método reservado. Usar parse para criar entidades como entry point."""
         if self.card_id.version != 4:
-            raise ValueError(f"CardID precisa ser UUID versão 4, recebeu: {self.card_id}")
+            raise InvalidCardId(f"CardID can only be v4, but is: {self.card_id}")
  
 
     @classmethod
@@ -30,7 +32,7 @@ class CardID:
             case int():
                 return cls._from_int(value)
             case _:
-                raise TypeError(f"Tipo inválido para CardID: {type(value)}")
+                raise ParseError(f"Invalid type for CardID: {type(value)}")
 
 
     @classmethod
@@ -43,7 +45,7 @@ class CardID:
         try:
             parsed = UUID(value.strip())
         except (ValueError, AttributeError) as err:
-            raise ValueError(f"CardID inválido a partir de string: {value!r}") from err
+            raise ParseError(f"Invalid string for card ID: {value!r}") from err
         return cls(parsed)
  
 
@@ -52,23 +54,20 @@ class CardID:
         try:
             parsed = UUID(int=value)
         except (ValueError, TypeError) as err:
-            raise ValueError(f"CardID inválido a partir de int: {value!r}") from err
+            raise ParseError(f"Invalid CardId for integer: {value!r}") from err
         return cls(parsed)
     
 
     def __eq__(self, other):
-        # Se estiver comparando com outro CardID
         if isinstance(other, CardID):
             return self.card_id == other.card_id
         
-        # Se estiver comparando com uma string (ex: a que vem do JSON/Repo)
         if isinstance(other, str):
             try:
                 return self.card_id == UUID(other)
             except ValueError:
-                return False # Se a string não for um UUID válido, não é igual
+                return False 
         
-        # Se estiver comparando direto com um objeto UUID
         if isinstance(other, UUID):
             return self.card_id == other
             
