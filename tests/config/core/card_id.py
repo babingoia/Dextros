@@ -1,6 +1,7 @@
 """
 Arquivo 100% escrito sem IA.
 """
+import pytest
 
 from hypothesis import assume, strategies as st
 
@@ -16,8 +17,9 @@ invalid_uuid_version = st.one_of(
 
 
 invalid_id_inputs = st.one_of(
-    st.integers(min_value=2**128+1),
+    st.integers(min_value=2**128),
     st.integers(max_value=-1),
+    st.just(2**128),
     st.floats(),
     st.text()
 )

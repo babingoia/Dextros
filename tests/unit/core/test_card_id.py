@@ -3,7 +3,7 @@ Arquivo 100% escrito sem IA.
 """
 
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given, example, strategies as st
 
 from core.value_objects.card_id import CardID
 from core.exceptions import ParseError, InvalidCardId
@@ -43,6 +43,7 @@ def test_invalid_uuid(card_id):
         CardID.parse(card_id)
 
 
+@example(card_id=2**128)
 @given(card_id=invalid_id_inputs)
 def test_invalid_input_value_error(card_id):
     """
