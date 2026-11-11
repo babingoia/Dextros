@@ -25,9 +25,11 @@ class FoodResultRow(Button):
     food = ObjectProperty(None)
     row_text = StringProperty("")
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.bind(food=self._update_text)
+    def on_food(self, instance, value):
+        """on_food em vez de bind no __init__: o kwarg food é aplicado DENTRO do
+        super().__init__(), antes de qualquer bind registrado depois dele — o
+        evento dispara e ninguém escuta, e a linha nasce sem texto."""
+        self._update_text(value)
 
     def _update_text(self, *args):
         food = self.food

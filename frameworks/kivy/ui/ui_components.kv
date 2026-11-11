@@ -93,6 +93,12 @@
         Line:
             rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
             width: app_theme.border("focus") if self.focus else app_theme.border("thin")
+        # O TextInput desenha os glifos do texto sem instrução Color própria:
+        # o texto herda a ÚLTIMA cor ativa do canvas (como o style.kv do Kivy faz,
+        # terminando canvas.before com Color(foreground)). Sem esta instrução final,
+        # o texto digitado herdaria a cor da borda e ficaria quase invisível.
+        Color:
+            rgba: self.disabled_foreground_color if self.disabled else (self.hint_text_color if not self.text else self.foreground_color)
 
 
 <AppSpinner@Spinner>:

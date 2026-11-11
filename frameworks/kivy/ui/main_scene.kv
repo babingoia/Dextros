@@ -355,6 +355,8 @@
                                 SecondaryButton:
                                     id: food_search_button
                                     text: "Buscar alimento na Tabela TACO"
+                                    size_hint_y: None
+                                    height: app_theme.widget("button_height")
                                     disabled: nutrition_toggle.state != "down"
                                     on_release: root._open_food_search()
 

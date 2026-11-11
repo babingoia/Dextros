@@ -126,6 +126,46 @@
                 text_size: self.size
                 valign: "middle"
 
+        # Nutrição consumida no período — lado a lado, na linha abaixo de Refeição.
+        # Valores vazios = nutrição não registrada nesse card.
+        BoxLayout:
+            spacing: app_theme.space("sm")
+            Label:
+                text: "CHO:"
+                bold: True
+                color: app_theme.color("text_secondary")
+                size_hint_x: None
+                width: app_theme.widget("field_label_width")
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: carboidratos_value
+                text: ""
+                color: app_theme.color("text_primary")
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
+
+        BoxLayout:
+            spacing: app_theme.space("sm")
+            Label:
+                text: "Gordura:"
+                bold: True
+                color: app_theme.color("text_secondary")
+                size_hint_x: None
+                width: app_theme.widget("field_label_width")
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: gorduras_value
+                text: ""
+                color: app_theme.color("text_primary")
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
+
     # Dextro em destaque, mas alinhado como os demais campos
     BoxLayout:
         size_hint_y: None

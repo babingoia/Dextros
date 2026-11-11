@@ -97,10 +97,20 @@ def matrix_to_view_model(matrix_data: MatrixData) -> MatrixDataViewModel:
     )
 
 
+def format_grams_for_display(value):
+    """Formata gramas consumidas para exibição ("45", "45,2", "" quando ausente).
+    Convenção de apresentação: vírgula decimal brasileira, sem unidade — a unidade
+    está no rótulo do campo na tela."""
+    if value is None:
+        return ""
+    text = f"{value:g}"
+    return text.replace(".", ",")
+
+
 def card_output_to_view_model(card: CardOutput) -> CardViewModel:
-    """Mapeia um CardOutput para o CardViewModel (TypedDict).
-    A nutrição ainda não aparece nas matrizes — os campos vão vazios até que
-    a apresentação de nutrição seja decidida numa branch própria."""
+    """Mapeia um CardOutput para o CardViewModel (TypedDict) da UI.
+    A nutrição (carboidratos/gorduras consumidos) aparece no popup de detalhes
+    do card, abaixo de Refeição."""
     return {
         "card_id": card.card_id,
         "card_data": card.card_date.strftime("%d/%m/%Y"),
@@ -113,8 +123,8 @@ def card_output_to_view_model(card: CardOutput) -> CardViewModel:
             "intensity": card.exercise.intensity or ""
         },
         "meal": card.meal or "",
-        "carbohydrate_g": "",
-        "fat_g": "",
+        "carbohydrate_g": format_grams_for_display(card.carbohydrate_g),
+        "fat_g": format_grams_for_display(card.fat_g),
         "observation": card.observation or ""
     }
 

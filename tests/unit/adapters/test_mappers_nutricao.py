@@ -88,7 +88,8 @@ class TestStripViewModel:
 
 
 class TestViewModelMatrizes:
-    def test_card_output_to_view_model_tem_campos_de_nutricao_vazios(self):
+    def test_card_output_to_view_model_sem_nutricao_vai_vazio(self):
+        """Card sem nutrição registrada no MealPeriod: campos vazios, sem 'None' vazando pra UI."""
         from usecases.utils.mappers import to_card_output
         from tests.integration.test_integration_json_repo import make_dummy_card
         card = make_dummy_card()
@@ -96,7 +97,47 @@ class TestViewModelMatrizes:
         assert vm['carbohydrate_g'] == ''
         assert vm['fat_g'] == ''
 
+    def test_card_output_carrega_nutricao_do_meal_period(self):
+        """A nutrição consumida vive em card.meal.meal (VO Meal) — deve sair no CardOutput."""
+        from usecases.utils.mappers import to_card_output
+        from tests.integration.test_integration_json_repo import make_dummy_card_com_nutricao
+        card = make_dummy_card_com_nutricao(carb=45, fat=12)
+        output = to_card_output(card)
+        assert output.carbohydrate_g == 45
+        assert output.fat_g == 12
+        assert output.meal == "pós almoço"
+
+    def test_card_output_sem_nutricao_tem_none(self):
+        from usecases.utils.mappers import to_card_output
+        from tests.integration.test_integration_json_repo import make_dummy_card
+        output = to_card_output(make_dummy_card())
+        assert output.carbohydrate_g is None
+        assert output.fat_g is None
+
+    def test_view_model_da_matriz_leva_nutricao_formatada(self):
+        """O popup de detalhes do card lê o CardViewModel — valores formatados pra exibição."""
+        from usecases.utils.mappers import to_card_output
+        from tests.integration.test_integration_json_repo import make_dummy_card_com_nutricao
+        vm = card_output_to_view_model(to_card_output(make_dummy_card_com_nutricao(carb=45, fat=12)))
+        assert vm['carbohydrate_g'] == '45'
+        assert vm['fat_g'] == '12'
+        assert vm['meal'] == 'pós almoço'
+
     def test_empty_card_view_model_tem_campos_de_nutricao(self):
         vm = empty_card_view_model()
         assert vm['carbohydrate_g'] == ''
         assert vm['fat_g'] == ''
+
+
+class TestFormatGramsForDisplay:
+    @pytest.mark.parametrize("raw,expected", [
+        (45, "45"),
+        (45.0, "45"),
+        (45.2, "45,2"),
+        (0.5, "0,5"),
+        (None, ""),
+    ])
+    def test_formato_brasileiro_sem_unidade(self, raw, expected):
+        """Vírgula decimal e sem 'g' — a unidade fica no rótulo da tela."""
+        from adapters.controllers.mappers.mappers import format_grams_for_display
+        assert format_grams_for_display(raw) == expected
