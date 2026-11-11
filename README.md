@@ -3,7 +3,7 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Kivy](https://img.shields.io/badge/Kivy-2.3.1-1F2937?style=flat-square)
 ![KivyMD](https://img.shields.io/badge/KivyMD-1.2.0-7C4DFF?style=flat-square)
-![Testes](https://img.shields.io/badge/testes-275%20passando-10B981?style=flat-square)
+![Testes](https://img.shields.io/badge/testes-421%20passando-10B981?style=flat-square)
 ![Licença](https://img.shields.io/badge/licen%C3%A7a-PolyForm%20Noncommercial%201.0.0-EF4444?style=flat-square)
 ![Plataforma](https://img.shields.io/badge/plataforma-Desktop%20%7C%20Android-0EA5E9?style=flat-square)
 
@@ -157,7 +157,7 @@ Dextros/
 
 ## 🧪 Testes
 
-O projeto conta com **279 itens de teste** (220 funções `test_*`, expandidas por parametrização e testes baseados em propriedade) entre unitários e de integração:
+O projeto conta com **422 itens de teste** (expandidos por parametrização e testes baseados em propriedade) entre unitários e de integração.
 
 | Suíte | Escopo |
 |---|---|
@@ -168,7 +168,7 @@ O projeto conta com **279 itens de teste** (220 funções `test_*`, expandidas p
 | `tests/unit/frameworks/` | `JsonHandler` (escrita atômica, retrocompatibilidade) |
 | `tests/integration/` | `JsonRepository` com `JsonHandler` **real** em disco: CRUD, JSON corrompido, caracteres especiais/emoji, consistência |
 
-Última execução registrada: **275 passando, 1 pulado (caso parametrizado), 3 falhando** — as falhas são testes que esperam `DuplicatedCellError` sendo *lançado*, enquanto a implementação atual apenas *loga* o erro (detalhes na [documentação.md](./documentação.md#17-dívidas-técnicas-e-problemas-identificados)).
+Última execução registrada: **421 passando, 1 pulado (caso parametrizado), 0 falhando**.
 
 ```bash
 pytest
@@ -183,7 +183,7 @@ Alguns dos próximos passos planejados (veja [`Planejamento.md`](./Planejamento.
 - [ ] Calculadora de insulina rápida (bolus) a partir da glicemia e carboidratos consumidos.
 - [ ] Configuração de thresholds de glicemia/insulina, refletidos visualmente nas matrizes.
 - [ ] Gráfico de linha com média de glicemia por horário ao longo de X dias.
-- [ ] Campo de carboidratos nas refeições.
+- [x] Campo de carboidratos nas refeições (com gorduras e busca na tabela TACO — branch `meal-improvements-for-real-food`).
 - [ ] Edição de registros já salvos (o repositório já possui `update_card`).
 - [ ] Import/export do banco de dados.
 - [ ] Testes end-to-end e de UI.
