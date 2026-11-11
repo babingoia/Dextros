@@ -59,3 +59,69 @@ def test_parse_handles_random_valid_data(parser, card_id, date, time, glycemia,
     assert isinstance(result.long_acting_insulin, str)
     assert isinstance(result.short_acting_insulin, str)
     assert result.card_id == card_id
+
+# ==========================================================
+# Campo meal: formato canônico (dict aninhado) e legado (string)
+# ==========================================================
+
+def test_parse_formato_canonico_meal_com_nutricao(parser):
+    data_model = {
+        "card_id": "123", "card_date": "2023-01-01", "card_time": "12:00",
+        "glycemia": 100, "long_acting_insulin": 10, "short_acting_insulin": 5,
+        "meal": {"meal_period": "pós almoço", "meal": {"carbohydrate_g": 45, "fat_g": 12}},
+        "observation": "obs",
+        "exercise": {"exercise_name": "corrida", "intensity": "moderada"}
+    }
+
+    result = parser.parse(data_model)
+
+    assert result.meal == "pós almoço"
+    assert result.carbohydrate_g == 45
+    assert result.fat_g == 12
+
+
+def test_parse_formato_canonico_meal_sem_nutricao(parser):
+    data_model = {
+        "card_id": "123", "card_date": "2023-01-01", "card_time": "12:00",
+        "glycemia": 100, "long_acting_insulin": 10, "short_acting_insulin": 5,
+        "meal": {"meal_period": "jejum", "meal": None},
+        "observation": "obs",
+        "exercise": {"exercise_name": None, "intensity": None}
+    }
+
+    result = parser.parse(data_model)
+
+    assert result.meal == "jejum"
+    assert result.carbohydrate_g is None
+    assert result.fat_g is None
+
+
+def test_parse_formato_legado_meal_string(parser):
+    """Cards salvos antes da branch meal-improvements continuam carregando."""
+    data_model = {
+        "card_id": "123", "card_date": "2023-01-01", "card_time": "12:00",
+        "glycemia": 100, "long_acting_insulin": 10, "short_acting_insulin": 5,
+        "meal": "pós almoço", "observation": "obs",
+        "exercise": {"exercise_name": None, "intensity": None}
+    }
+
+    result = parser.parse(data_model)
+
+    assert result.meal == "pós almoço"
+    assert result.carbohydrate_g is None
+    assert result.fat_g is None
+
+
+def test_parse_meal_none(parser):
+    data_model = {
+        "card_id": "123", "card_date": "2023-01-01", "card_time": "12:00",
+        "glycemia": 100, "long_acting_insulin": None, "short_acting_insulin": None,
+        "meal": None, "observation": None,
+        "exercise": {"exercise_name": None, "intensity": None}
+    }
+
+    result = parser.parse(data_model)
+
+    assert result.meal is None
+    assert result.carbohydrate_g is None
+    assert result.fat_g is None
