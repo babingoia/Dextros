@@ -1,0 +1,93 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+
+<FoodResultRow>:
+    size_hint_y: None
+    height: app_theme.widget("input_height") * 1.9
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    text: root.row_text
+    font_size: app_theme.font("field")
+    color: app_theme.color("text_primary")
+    text_size: self.width - app_theme.space("md") * 2, None
+    halign: "left"
+    valign: "middle"
+    padding_x: app_theme.space("md")
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("surface_alt") if self.state == "down" else app_theme.color("field_bg")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("md")]
+        Color:
+            rgba: app_theme.color("border")
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
+            width: app_theme.border("thin")
+
+
+<FoodSearchContent>:
+    orientation: "vertical"
+    spacing: app_theme.space("md")
+    size_hint_y: None
+    height: self.minimum_height
+
+    AppTextInput:
+        id: search_input
+        hint_text: "Buscar alimento (ex.: arroz, pão, banana...)"
+        on_text: root.schedule_search()
+
+    AppSpinner:
+        id: category_spinner
+        values: ["todas"] + root.categories
+        text: "todas"
+        on_text: root.search()
+
+    ScrollView:
+        do_scroll_x: False
+        bar_width: app_theme.widget("scrollbar")
+        bar_color: app_theme.color("scrollbar")
+        scroll_type: ["content", "bars"]
+        size_hint_y: None
+        height: app_theme.widget("input_height") * 6
+
+        BoxLayout:
+            id: results_holder
+            orientation: "vertical"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: app_theme.space("xs")
+
+            Label:
+                id: empty_state
+                size_hint_y: None
+                height: app_theme.widget("input_height")
+                text: "Nenhum alimento encontrado — digite para buscar"
+                font_size: app_theme.font("field")
+                color: app_theme.color("text_hint")
+                text_size: self.size
+                halign: "left"
+                valign: "middle"
+
+    ReadOnlyField:
+        id: selected_label
+        text: root.selected_summary
+        color: app_theme.color("text_secondary")
+
+    BoxLayout:
+        size_hint_y: None
+        height: app_theme.widget("input_height")
+        spacing: app_theme.space("md")
+
+        AppTextInput:
+            id: grams_input
+            input_type: "number"
+            hint_text: "Quantidade em gramas (ex.: 150)"
+
+        PrimaryButton:
+            text: "Usar"
+            size_hint_x: None
+            width: app_theme.widget("touch_target") * 1.4
+            on_release: root.confirm()

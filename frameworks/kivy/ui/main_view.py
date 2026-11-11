@@ -12,6 +12,7 @@ from kivy.factory import Factory
 # My files
 from frameworks.kivy.ui.widgets.pickers.date_picker import DatePicker
 from frameworks.kivy.ui.widgets.graphs.screens.graph_screen import GraphScreen
+from frameworks.kivy.ui.widgets.pickers.food_search_popup import FoodSearchContent
 from infrastructure.path_provider_service import get_asset_path
 from adapters.controllers.dtos.card_view_model import CardViewModel
 from frameworks.kivy.ui.widgets.popup.dialog import AppDialog, DialogMessage
@@ -27,6 +28,7 @@ class MainView(BoxLayout):
 
     available_meals = ListProperty([])
     available_time = ListProperty([])
+    available_food_categories = ListProperty([])
     actual_meal = StringProperty("Escolha uma Refeição:")
     actual_time = StringProperty("Horário:")
     date_display = StringProperty()
@@ -38,6 +40,11 @@ class MainView(BoxLayout):
             self.date_display,
             on_date_selected=self._update_data_input
         )
+        # Handlers injetados pelo MainController (padrão refresh_callback):
+        # a UI não conhece router nem use case, só os callables.
+        self.food_search_handler = None      # callable(query, category) -> FoodSearchResult
+        self.nutrition_calculator = None     # callable(food, grams) -> Meal | None
+        self._active_food_search_dialog = None
 
     def on_save_request(self, *args):
         logger.debug("Save request event triggered with data: %s", args)
@@ -80,6 +87,10 @@ class MainView(BoxLayout):
     def get_data(self) -> dict[str, str]:
         logger.debug("Retrieving data from input fields")
 
+        # A seção de nutrição é opt-in: com o toggle desligado, os valores são
+        # ignorados mesmo que sobrou texto digitado — o estado do toggle manda.
+        nutrition_enabled = self.ids.nutrition_toggle.state == "down"
+
         data = CardViewModel(
             card_id='',
             card_data=self.ids.data_input.text,
@@ -92,10 +103,63 @@ class MainView(BoxLayout):
                 'intensity': ''
             },
             meal="" if self.ids.meal_value.text.lower() == "nenhum" else self.ids.meal_value.text,
+            carbohydrate_g=self.ids.carb_input.text if nutrition_enabled else '',
+            fat_g=self.ids.fat_input.text if nutrition_enabled else '',
             observation=self.ids.observacao_input.text,
         )
 
         return data
+
+    def _open_food_search(self):
+        logger.debug("Food search popup opened")
+
+        if self.food_search_handler is None:
+            logger.error("food_search_handler not injected — cannot open search")
+            self.show_error("Busca de alimentos indisponível nesta sessão.")
+            return
+
+        content = FoodSearchContent(
+            categories=self.available_food_categories,
+            search_handler=self.food_search_handler,
+        )
+        content.bind(on_use_food=self._on_food_selected)
+
+        self._active_food_search_dialog = AppDialog(
+            title="Buscar alimento — Tabela TACO",
+            content=content,
+            buttons=[
+                ("Cancelar", "primary", lambda *a: self._active_food_search_dialog.dismiss()),
+            ],
+        )
+        self._active_food_search_dialog.open()
+
+    def _on_food_selected(self, content, food, grams):
+        logger.debug(f"Food selected in popup: {food.description} x {grams}g")
+
+        if self.nutrition_calculator is None:
+            logger.error("nutrition_calculator not injected — cannot compute nutrition")
+            self.show_error("Cálculo de nutrição indisponível nesta sessão.")
+            return
+
+        result = self.nutrition_calculator(food, grams)
+
+        if result is None:
+            # Alimento sem nenhum dos dois nutrientes na tabela (NA/Tr) —
+            # popup continua aberto para o usuário escolher outro alimento.
+            self.show_error(
+                f"\"{food.description}\" não tem dados de carboidratos ou gorduras "
+                "na tabela TACO. Escolha outro alimento ou digite os valores manualmente."
+            )
+            return
+
+        if self._active_food_search_dialog is not None:
+            self._active_food_search_dialog.dismiss()
+            self._active_food_search_dialog = None
+
+        # A busca destrava a seção sozinha ao preencher
+        self.ids.nutrition_toggle.state = "down"
+        self.ids.carb_input.text = "" if result.carbohydrate_g is None else str(result.carbohydrate_g)
+        self.ids.fat_input.text = "" if result.fat_g is None else str(result.fat_g)
 
     def add_graph_screen(self, name, title, graph_widget, refresh_callback=None):
         """

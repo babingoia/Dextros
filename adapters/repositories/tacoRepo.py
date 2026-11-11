@@ -7,9 +7,9 @@ from core.value_objects.food import Food
 
 logger = getLogger(__name__)
 
-# Convenções da tabela TACO para valores não aplicáveis / traço / vazio.
+# Convenções da tabela TACO para valores não aplicáveis / traço / não medido.
 # Todos viram None: dado indisponível é diferente de zero.
-_UNAVAILABLE_TOKENS = {"NA", "TR", ""}
+_UNAVAILABLE_TOKENS = {"NA", "TR", "*", ""}
 
 # Ruído de medição da fonte: a TACO original tem valores de carboidrato
 # levemente negativos em peixes/carnes sem CHO (entre -0.045 e -0.007 g/100g),

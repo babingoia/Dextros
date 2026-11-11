@@ -308,6 +308,56 @@
                                         values: root.available_meals
                                         text: root.actual_meal
 
+                        # Nutrição da refeição (opcional — habilitada pelo usuário)
+                        Card:
+                            SectionTitle:
+                                text: "Nutrição da refeição"
+
+                            BoxLayout:
+                                size_hint_y: None
+                                height: app_theme.widget("input_height")
+                                spacing: app_theme.space("md")
+
+                                FieldLabel:
+                                    text: "Registrar carboidratos e gorduras?"
+                                    size_hint_x: 1
+
+                                NutritionToggleButton:
+                                    id: nutrition_toggle
+                                    size_hint_x: None
+                                    width: app_theme.widget("touch_target") * 1.2
+
+                            BoxLayout:
+                                orientation: "vertical"
+                                size_hint_y: None
+                                height: self.minimum_height
+                                spacing: app_theme.space("xs")
+                                opacity: 1 if nutrition_toggle.state == "down" else 0.4
+
+                                FieldLabel:
+                                    text: "Carboidratos (g)"
+
+                                AppTextInput:
+                                    id: carb_input
+                                    input_type: "number"
+                                    hint_text: "Ex.: 45,2 (ou buscar na tabela)"
+                                    disabled: nutrition_toggle.state != "down"
+
+                                FieldLabel:
+                                    text: "Gorduras (g)"
+
+                                AppTextInput:
+                                    id: fat_input
+                                    input_type: "number"
+                                    hint_text: "Ex.: 12,4"
+                                    disabled: nutrition_toggle.state != "down"
+
+                                SecondaryButton:
+                                    id: food_search_button
+                                    text: "Buscar alimento na Tabela TACO"
+                                    disabled: nutrition_toggle.state != "down"
+                                    on_release: root._open_food_search()
+
                         # Observação
                         Card:
                             SectionTitle:

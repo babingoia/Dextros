@@ -15,8 +15,9 @@ def strip_view_model(data: CardViewModel) -> CardViewModel:
     data['glycemia'] = data['glycemia'].strip()
     data['long_acting_insulin'] = data['long_acting_insulin'].strip()
     data['meal'] = data['meal'].strip()
+    data['carbohydrate_g'] = data['carbohydrate_g'].strip()
+    data['fat_g'] = data['fat_g'].strip()
     data['observation'] = data['observation'].strip()
-    data['short_acting_insulin'] = data['short_acting_insulin'].strip()
     return data
 
 
@@ -27,6 +28,24 @@ def empty_to_none(value):
 def int_or_none(value):
     value = empty_to_none(value)
     return int(value) if value is not None and value is not 0 else None
+
+
+def normalize_decimal(value):
+    """Converte vírgula decimal brasileira em ponto ("45,2" -> "45.2").
+    Responsabilidade da camada de apresentação — o VO de domínio não lida com vírgula."""
+    if value is None:
+        return None
+    return value.replace(',', '.') if isinstance(value, str) else value
+
+
+def decimal_or_none(value):
+    """Converte texto decimal em float ou None. Segue a convenção do app
+    (int_or_none): string vazia e 0 significam "campo não preenchido"."""
+    value = empty_to_none(normalize_decimal(value))
+    if value is None:
+        return None
+    parsed = float(value)
+    return None if parsed == 0 else parsed
 
 
 def view_model_to_input(card: CardViewModel) -> CardDTOInput:
@@ -49,6 +68,9 @@ def view_model_to_input(card: CardViewModel) -> CardDTOInput:
 
         short_acting_insulin=int_or_none(card['short_acting_insulin']),
         long_acting_insulin=int_or_none(card['long_acting_insulin']),
+
+        carbohydrate_g=decimal_or_none(card['carbohydrate_g']),
+        fat_g=decimal_or_none(card['fat_g']),
 
         observation=empty_to_none(card['observation']),
     )
@@ -76,7 +98,9 @@ def matrix_to_view_model(matrix_data: MatrixData) -> MatrixDataViewModel:
 
 
 def card_output_to_view_model(card: CardOutput) -> CardViewModel:
-    """Mapeia um CardOutput para o CardViewModel (TypedDict)."""
+    """Mapeia um CardOutput para o CardViewModel (TypedDict).
+    A nutrição ainda não aparece nas matrizes — os campos vão vazios até que
+    a apresentação de nutrição seja decidida numa branch própria."""
     return {
         "card_id": card.card_id,
         "card_data": card.card_date.strftime("%d/%m/%Y"),
@@ -89,6 +113,8 @@ def card_output_to_view_model(card: CardOutput) -> CardViewModel:
             "intensity": card.exercise.intensity or ""
         },
         "meal": card.meal or "",
+        "carbohydrate_g": "",
+        "fat_g": "",
         "observation": card.observation or ""
     }
 
@@ -104,5 +130,7 @@ def empty_card_view_model() -> CardViewModel:
         "short_acting_insulin": "",
         "exercise": {"exercise_name": "", "intensity": ""},
         "meal": "",
+        "carbohydrate_g": "",
+        "fat_g": "",
         "observation": ""
     }

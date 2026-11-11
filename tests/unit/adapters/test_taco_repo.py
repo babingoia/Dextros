@@ -16,10 +16,11 @@ def real_repo():
 
 class TestNormalizeTacoValue:
     @pytest.mark.parametrize("raw,expected", [
-        ("NA", None), ("Tr", None), ("", None), (None, None),
+        ("NA", None), ("Tr", None), ("*", None), ("", None), (None, None),
         (25.80975, 25.80975), (145, 145.0), ("77.45", 77.45),
     ])
     def test_convencoes_da_fonte(self, raw, expected):
+        """Os três tokens da TACO: NA (não aplicável), Tr (traço) e * (não medido)."""
         assert _normalize_taco_value(raw) == expected
 
     def test_string_imparseavel_vira_none_com_warning(self):

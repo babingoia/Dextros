@@ -242,3 +242,29 @@
     orientation: "vertical"
     padding: [app_theme.space("lg"), app_theme.space("lg"), app_theme.space("lg"), app_theme.space("xl")]
     spacing: app_theme.space("lg")
+
+<NutritionToggleButton@ToggleButton>:
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    color: app_theme.color("on_primary") if self.state == "down" else app_theme.color("text_primary")
+    font_size: app_theme.font("button")
+    bold: True
+    text: "Ativado" if self.state == "down" else "Ativar"
+    text_size: self.size
+    halign: "center"
+    valign: "middle"
+    shorten: True
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("primary") if self.state == "down" else app_theme.color("field_bg")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("md")]
+        Color:
+            rgba: app_theme.color("border_focus") if self.state == "down" else app_theme.color("border")
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
+            width: app_theme.border("thin")
