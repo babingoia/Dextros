@@ -3,6 +3,10 @@
 <FoodDetailContent>:
     orientation: "vertical"
     spacing: app_theme.space("md")
+    # Gutter à direita: a barra de rolagem do dialog é desenhada SOBRE o
+    # conteúdo na borda — sem este respiro, a scrollbar cobre o texto dos
+    # valores (reportado em uso real).
+    padding: [0, 0, app_theme.space("lg"), 0]
     size_hint_y: None
     height: self.minimum_height
 
@@ -30,9 +34,12 @@
         valign: "middle"
         shorten: True
 
-    # Tabela de detalhes por 100g — rótulo à esquerda, valor numérico alinhado à direita.
-    # Altura explícita em cada célula: sem row_force_default, a linha cresce para o
-    # maior filho e FieldLabel (22dp) e ReadOnlyField (48dp por default) ficam alinhados.
+    # Tabela de detalhes por 100g — rótulo à esquerda, número CENTRALIZADO na
+    # coluna dele. Valores são Labels puras (sem caixa de campo): caixa com
+    # borda parece campo editável e convida o usuário a digitar onde não dá
+    # (reportado em uso real). Altura explícita em cada célula: sem
+    # row_force_default, a linha cresce para o maior filho e FieldLabel (22dp)
+    # e o valor ficam alinhados.
     GridLayout:
         cols: 2
         size_hint_y: None
@@ -42,64 +49,95 @@
         FieldLabel:
             text: "Energia (kcal)"
             height: app_theme.widget("row_height")
-        ReadOnlyField:
+        Label:
             text: root.energy_text
+            bold: True
+            font_size: app_theme.font("field")
+            color: app_theme.color("text_primary")
             height: app_theme.widget("row_height")
-            padding_x: 0
-            halign: "right"
+            text_size: self.size
+            halign: "center"
+            valign: "middle"
 
         FieldLabel:
             text: "Proteína (g)"
             height: app_theme.widget("row_height")
-        ReadOnlyField:
+        Label:
             text: root.protein_text
+            bold: True
+            font_size: app_theme.font("field")
+            color: app_theme.color("text_primary")
             height: app_theme.widget("row_height")
-            padding_x: 0
-            halign: "right"
+            text_size: self.size
+            halign: "center"
+            valign: "middle"
 
         FieldLabel:
             text: "Carboidrato (g)"
             height: app_theme.widget("row_height")
-        ReadOnlyField:
+        Label:
             text: root.carb_text
+            bold: True
+            font_size: app_theme.font("field")
+            color: app_theme.color("text_primary")
             height: app_theme.widget("row_height")
-            padding_x: 0
-            halign: "right"
+            text_size: self.size
+            halign: "center"
+            valign: "middle"
 
         FieldLabel:
             text: "Gordura (g)"
             height: app_theme.widget("row_height")
-        ReadOnlyField:
+        Label:
             text: root.fat_text
+            bold: True
+            font_size: app_theme.font("field")
+            color: app_theme.color("text_primary")
             height: app_theme.widget("row_height")
-            padding_x: 0
-            halign: "right"
+            text_size: self.size
+            halign: "center"
+            valign: "middle"
 
         FieldLabel:
             text: "Fibra (g)"
             height: app_theme.widget("row_height")
-        ReadOnlyField:
+        Label:
             text: root.fiber_text
+            bold: True
+            font_size: app_theme.font("field")
+            color: app_theme.color("text_primary")
             height: app_theme.widget("row_height")
-            padding_x: 0
-            halign: "right"
+            text_size: self.size
+            halign: "center"
+            valign: "middle"
 
         FieldLabel:
             text: "Sódio (mg)"
             height: app_theme.widget("row_height")
-        ReadOnlyField:
+        Label:
             text: root.sodium_text
+            bold: True
+            font_size: app_theme.font("field")
+            color: app_theme.color("text_primary")
             height: app_theme.widget("row_height")
-            padding_x: 0
-            halign: "right"
+            text_size: self.size
+            halign: "center"
+            valign: "middle"
 
-    # Preview ao vivo da porção digitada — vazio enquanto não há quantidade válida
-    ReadOnlyField:
+    # Preview ao vivo da porção digitada — texto corrido, não campo: sem caixa,
+    # com quebra de linha quando a frase não cabe. Vazio enquanto não há
+    # quantidade válida.
+    Label:
         text: root.portion_summary
-        color: app_theme.color("text_secondary")
+        font_size: app_theme.font("field")
         bold: True
-        height: app_theme.widget("input_height") if root.portion_summary else 0
+        color: app_theme.color("text_secondary")
+        size_hint_y: None
+        text_size: self.width, None
+        height: max(app_theme.widget("field_label_height"), self.texture_size[1]) if root.portion_summary else 0
         opacity: 1 if root.portion_summary else 0
+        halign: "left"
+        valign: "middle"
 
     AppTextInput:
         id: grams_input
