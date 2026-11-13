@@ -15,9 +15,9 @@ _ZOOM_SESSION: dict[str, float] = {}
 
 class Zoom(EventDispatcher):
     zoom_level = NumericProperty(1.0)
-    default_zoom = NumericProperty(1.0)
-    min_zoom = NumericProperty(0.7)
-    max_zoom = NumericProperty(2.0)
+    default_zoom = NumericProperty(0.7)
+    min_zoom = NumericProperty(0.2)
+    max_zoom = NumericProperty(1.7)
     zoom_step = NumericProperty(0.10)
     is_pinching = BooleanProperty(False)
     active = BooleanProperty(True)  # view liga/desliga por screen atual

@@ -1,0 +1,24 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+
+<GenericBarGraph>:
+    viewclass: 'BarCell'
+
+    do_scroll_x: not root.scroll_locked
+    do_scroll_y: False
+
+    bar_width: app_theme.widget('scrollbar')
+    bar_color: app_theme.color('scrollbar')
+    bar_inactive_color: app_theme.color('border')
+    effect_cls: "ScrollEffect"
+
+    RecycleGridLayout:
+        cols: root.layout_cols
+
+        # Tamanhos explícitos vindos do Python. Nunca minimum_width.
+        default_size: root.cell_width, root.content_height
+        default_size_hint: None, None
+
+        size_hint: None, None
+        width: root.content_width
+        height: root.content_height
+        spacing: app_theme.space('md')

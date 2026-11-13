@@ -1,0 +1,27 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+
+<BarGraphScreenContent>:
+    orientation: 'vertical'
+    spacing: app_theme.space('sm')
+    padding: app_theme.space('md')
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: app_theme.widget('touch_target')
+        spacing: app_theme.space('sm')
+
+        ScreenHeader:
+            text: root.title
+            pos_hint: {'center_y': 0.5}
+
+    BoxLayout:
+        id: legend_holder
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: app_theme.widget('field_label_height')
+        spacing: app_theme.space('lg')
+
+    Panel:
+        Border:
+            id: container

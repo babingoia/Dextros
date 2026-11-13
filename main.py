@@ -22,6 +22,7 @@ from usecases.get_meal_list_use_case import GetMealListUseCase
 from usecases.create_card_use_case import CreateCardUseCase
 from usecases.delete_card_by_id_use_case import DeleteCardByIDUseCase
 from usecases.get_matrix_data.get_meal_date_matrix_data import GetMealDateMatrixUseCase
+from usecases.get_matrix_data.get_average_glycemia_day_use_case import GetAverageGlycemiaPerDayUseCase
 from usecases.search_food_use_case import SearchFoodUseCase
 from usecases.get_food_category_list_use_case import GetFoodCategoryListUseCase
 from usecases.calculate_nutrition_use_case import CalculateNutritionUseCase
@@ -37,6 +38,7 @@ from adapters.controllers.search_food_controller import SearchFoodController
 from adapters.controllers.food_category_list_controller import FoodCategoryListController
 from adapters.controllers.calculate_nutrition_controller import CalculateNutritionController
 from adapters.controllers.i_controller import IController
+from adapters.controllers.average_glycemia_matrix_controller import AverageGlycemiaDayMatrixController
 
 # Gateway
 from adapters.gateways.kivy_router import KivyRouter
@@ -44,7 +46,7 @@ from adapters.gateways.kivy_router import KivyRouter
 # Kivy
 from frameworks.kivy.controllers.main_controller import MainController
 
-log_service.configure_logging(console_level=log_service.logging.DEBUG)
+log_service.configure_logging(console_level=log_service.logging.INFO)
 logger = log_service.get_logger(__name__)
 
 DB = "db/cards_populated.json"
@@ -97,6 +99,10 @@ class DextroApp(MDApp):
 
         get_date_meal_matrix_uc = GetMealDateMatrixUseCase(get_meal_list=get_meal_list_uc,
                                                            repository=card_repository)
+        
+        get_average_glycemia_day_uc = GetAverageGlycemiaPerDayUseCase(
+            repository=card_repository
+        )
 
         search_food_uc = SearchFoodUseCase(foods)
         food_category_list_uc = GetFoodCategoryListUseCase(foods)
@@ -109,6 +115,9 @@ class DextroApp(MDApp):
         save_request_controller = SaveRequestController(create_card_uc)
         delete_card_id_controller = DeleteCardRequestController(delete_card_by_id_uc)
         date_meal_matrix_controller = DateMealMatrixController(get_date_meal_matrix_uc)
+        average_glycemia_matrix_controller = AverageGlycemiaDayMatrixController(
+            get_average_glycemia_day_use_case=get_average_glycemia_day_uc
+        )
         search_food_controller = SearchFoodController(search_food_uc)
         food_category_list_controller = FoodCategoryListController(food_category_list_uc)
         calculate_nutrition_controller = CalculateNutritionController(calculate_nutrition_uc)
@@ -119,11 +128,13 @@ class DextroApp(MDApp):
             "get_meal_list": meal_controller,
             "get_hour_date_matrix_data": date_hour_matrix_controller,
             "get_meal_date_matrix_data": date_meal_matrix_controller,
+            "get_average_glycemia_matrix_data": average_glycemia_matrix_controller,
 
             # Tabela TACO
             "search_food": search_food_controller,
             "get_food_category_list": food_category_list_controller,
             "calculate_nutrition": calculate_nutrition_controller,
+
 
             # Queries
             "save_card": save_request_controller,

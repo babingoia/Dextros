@@ -95,7 +95,6 @@ _WIDGET_SIZES = {
     "header_height": 44,
     "section_title_height": 32,
     "field_label_height": 22,
-    # Largura máxima do formulário em telas grandes
     "content_max_width": 720,
     "row_height": 36,
     "field_label_width": 80,
@@ -103,6 +102,10 @@ _WIDGET_SIZES = {
     "dialog_height": 450,
     "dialog_compact_width": 400,
     "dialog_content_max_height": 300,
+    "bar_max_height": 300,
+    "bar_min_width": 96,
+    "bar_max_width": 35,         
+    "bar_value_label_height": 28,
 }
 
 # ==========================================================

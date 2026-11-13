@@ -1,0 +1,127 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+
+<BarCell>:
+    canvas.before:
+        Color:
+            rgba: app_theme.color('border')
+        Line:
+            points: self.x, self.y, self.x, self.y + self.height
+            width: app_theme.border('thin')
+
+    BoxLayout:
+        pos_hint: {'x': 0, 'y': 0}
+        orientation: 'vertical'
+        padding: app_theme.space('sm'), app_theme.space('sm')
+        spacing: app_theme.space('xs')
+
+        # Fileira dos números — chip com fundo, cada valor centralizado no seu terço
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: app_theme.widget('bar_value_label_height') + app_theme.space('xs') * 2
+            padding: app_theme.space('xs')
+
+            canvas.before:
+                Color:
+                    rgba: app_theme.color('surface_alt')
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [app_theme.radius('sm')]
+                Color:
+                    rgba: app_theme.color('border')
+                Line:
+                    rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius('sm')
+                    width: app_theme.border('thin')
+
+            Label:
+                text: str(int(root.glycemia_value)) if root.glycemia_value else ""
+                font_size: app_theme.font('caption')
+                bold: True
+                color: app_theme.color('primary')
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+
+            Label:
+                text: str(int(root.long_value)) if root.long_value else ""
+                font_size: app_theme.font('caption')
+                bold: True
+                color: app_theme.color('success')
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+
+            Label:
+                text: str(int(root.short_value)) if root.short_value else ""
+                font_size: app_theme.font('caption')
+                bold: True
+                color: app_theme.color('warning')
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+
+        # Fileira das barras
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: app_theme.space('sm')
+
+            FloatLayout:
+                Widget:
+                    size_hint: None, None
+                    width: min(self.parent.width * 0.8, app_theme.widget('bar_max_width'))
+                    height: root.glycemia_ratio * max(1, self.parent.height)
+                    pos_hint: {'center_x': 0.5, 'y': 0}
+                    canvas.before:
+                        Color:
+                            rgba: app_theme.color('primary')
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [app_theme.radius('sm'), app_theme.radius('sm'), 0, 0]
+
+            FloatLayout:
+                Widget:
+                    size_hint: None, None
+                    width: min(self.parent.width * 0.8, app_theme.widget('bar_max_width'))
+                    height: root.long_ratio * max(1, self.parent.height)
+                    pos_hint: {'center_x': 0.5, 'y': 0}
+                    canvas.before:
+                        Color:
+                            rgba: app_theme.color('success')
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [app_theme.radius('sm'), app_theme.radius('sm'), 0, 0]
+
+            FloatLayout:
+                Widget:
+                    size_hint: None, None
+                    width: min(self.parent.width * 0.8, app_theme.widget('bar_max_width'))
+                    height: root.short_ratio * max(1, self.parent.height)
+                    pos_hint: {'center_x': 0.5, 'y': 0}
+                    canvas.before:
+                        Color:
+                            rgba: app_theme.color('warning')
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [app_theme.radius('sm'), app_theme.radius('sm'), 0, 0]
+
+        # Separador sutil
+        Widget:
+            size_hint_y: None
+            height: app_theme.border('thin')
+            canvas.before:
+                Color:
+                    rgba: app_theme.color('border')
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        # Data como botão de verdade, no tema do app
+        PrimaryButton:
+            text: root.header_text
+            size_hint: 1, None
+            height: app_theme.widget('header_height')
+            on_release: root._show_details()

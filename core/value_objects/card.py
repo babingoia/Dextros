@@ -33,14 +33,12 @@ class Card:
         if self.card_date._date > date.today():
             raise ValueError(f"Card não pode ter data no futuro: {self.card_date._date}")
 
-        logger.debug(f'Adjusting datetime...')
         # 2. Aplica a distorção/arredondamento de domínio
         dt = datetime.combine(self.card_date._date, self.card_time._time)
         if dt.minute >= 30:
             dt += timedelta(hours=1)
         dt = dt.replace(minute=0, second=0, microsecond=0)
 
-        logger.debug(f'DateTime Adjusted.')
         # 3. Atualiza os Value Objects com o horário arredondado
         object.__setattr__(self, "card_date", Date.parse(dt.date()))
         object.__setattr__(self, "card_time", Time.parse(dt.time()))

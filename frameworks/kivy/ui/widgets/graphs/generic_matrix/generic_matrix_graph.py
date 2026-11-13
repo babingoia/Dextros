@@ -7,10 +7,10 @@ from kivy.uix.recycleview import RecycleView
 from kivy.lang import Builder
 from logging import getLogger
 
-from frameworks.kivy.ui.widgets.graphs.matrix_cell import MatrixCell
+from frameworks.kivy.ui.widgets.graphs.generic_matrix.matrix_cell import MatrixCell
 from adapters.controllers.dtos.card_view_model import CardViewModel
 
-Builder.load_file("frameworks/kivy/ui/widgets/graphs/generic_matrix_graph.kv")
+Builder.load_file("frameworks/kivy/ui/widgets/graphs/generic_matrix/generic_matrix_graph.kv")
 
 logger = getLogger(__name__)
 
