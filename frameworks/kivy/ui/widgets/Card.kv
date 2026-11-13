@@ -152,50 +152,60 @@
                 text_size: self.size
                 valign: "middle"
 
+        # Quantidades: rótulo SEM dois pontos — o valor fica EMBAIXO, e dois
+        # pontos sugerem valor ao lado do rótulo (reportado em uso real). O bloco
+        # tem altura por conteúdo e fica CENTRALIZADO na célula de 48dp via
+        # pos_hint (BoxLayout horizontal honra center_y no eixo cruzado), com gap
+        # curto entre rótulo e valor — antes o valor flutuava longe do rótulo.
         BoxLayout:
             spacing: app_theme.space("md")
 
             BoxLayout:
                 orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                pos_hint: {"center_y": 0.5}
+                spacing: app_theme.space("xs")
+
                 Label:
-                    text: "CHO:"
+                    text: "CHO"
                     bold: True
                     font_size: app_theme.font("caption")
                     color: app_theme.color("text_secondary")
                     size_hint_y: None
-                    height: app_theme.widget("field_label_height")
-                    text_size: self.size
-                    halign: "left"
-                    valign: "middle"
+                    height: self.texture_size[1]
                 Label:
                     id: carboidratos_value
                     text: ""
+                    font_size: app_theme.font("field")
                     color: app_theme.color("text_primary")
-                    text_size: self.size
-                    halign: "left"
-                    valign: "middle"
+                    size_hint_y: None
+                    height: self.texture_size[1]
 
             BoxLayout:
                 orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                pos_hint: {"center_y": 0.5}
+                spacing: app_theme.space("xs")
+
                 Label:
-                    text: "Gordura:"
+                    text: "Gordura"
                     bold: True
                     font_size: app_theme.font("caption")
                     color: app_theme.color("text_secondary")
                     size_hint_y: None
-                    height: app_theme.widget("field_label_height")
-                    text_size: self.size
-                    halign: "left"
-                    valign: "middle"
+                    height: self.texture_size[1]
                 Label:
                     id: gorduras_value
                     text: ""
+                    font_size: app_theme.font("field")
                     color: app_theme.color("text_primary")
-                    text_size: self.size
-                    halign: "left"
-                    valign: "middle"
+                    size_hint_y: None
+                    height: self.texture_size[1]
 
-    # Observação em bloco full-width, altura por conteúdo
+    # Observação em bloco full-width, altura por conteúdo. Rótulo sem dois
+    # pontos, pela mesma razão de CHO/Gordura: o texto fica EMBAIXO dele.
     BoxLayout:
         orientation: "vertical"
         size_hint_y: None
@@ -203,7 +213,7 @@
         spacing: app_theme.space("xs")
 
         Label:
-            text: "Observação:"
+            text: "Observação"
             bold: True
             color: app_theme.color("text_secondary")
             size_hint_y: None
