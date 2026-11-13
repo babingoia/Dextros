@@ -77,7 +77,9 @@
                 do_scroll_y: True
                 bar_width: app_theme.widget("scrollbar")
                 bar_color: app_theme.color("scrollbar")
-                scroll_type: ["bars"]
+                # "content" é o que permite rolar arrastando o texto no toque
+                # (mobile); "bars" sozinho exige arrastar uma barrinha de 4dp.
+                scroll_type: ["content", "bars"]
                 size_hint_y: None if root.auto_height else 1
                 height: root.scroll_height if root.auto_height else 0
 
@@ -97,6 +99,13 @@
                     Rectangle:
                         pos: self.pos
                         size: self.size
+
+            # Rodapé fixo: status que NÃO pode rolar pra fora da vista (ex.: o
+            # total acumulado da busca TACO). Vazio em dialogs que não o usam.
+            BoxLayout:
+                id: footer_holder
+                size_hint_y: None
+                height: self.minimum_height
 
             BoxLayout:
                 id: buttons_holder

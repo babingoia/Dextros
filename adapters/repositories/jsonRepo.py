@@ -50,6 +50,19 @@ class JsonRepository(ICardRepository):
         parsed_cards_on_session: list[CardDataModel] = []
         
         for card in self.cards_on_session:
+            # Espelho do VO MealPeriod no banco: {"meal_period": ..., "meal": {...} | None}
+            meal_data_model = {
+                "meal_period": card.meal.meal_period,
+                "meal": (
+                    {
+                        "carbohydrate_g": card.meal.meal.carbohydrate_g,
+                        "fat_g": card.meal.meal.fat_g,
+                    }
+                    if card.meal.meal is not None
+                    else None
+                ),
+            }
+
             parsed_card = CardDataModel(
                 card_id=str(card.card_id.card_id), 
                 card_date=card.card_date._date.isoformat(), 
@@ -57,7 +70,7 @@ class JsonRepository(ICardRepository):
                 glycemia=card.glycemia.glycemia,
                 long_acting_insulin=card.long_acting_insulin.quantity,
                 short_acting_insulin=card.short_acting_insulin.quantity,
-                meal=card.meal.meal_period,
+                meal=meal_data_model,
                 observation=card.obs.observation,
                 exercise={
                     'exercise_name': card.exercise.exercise_name,

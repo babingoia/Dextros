@@ -2,7 +2,7 @@
 
 > Documentação de engenharia produzida a partir da leitura integral do código-fonte do repositório [`babingoia/Dextros`](https://github.com/babingoia/Dextros) (branch `main`) e da **execução real da suíte de testes**. Cobre arquitetura, domínio, casos de uso, adapters, frameworks, interface gráfica, testes, persistência de dados, convenções e dívidas técnicas identificadas no próprio código.
 >
-> **Estado analisado**: commit mais recente da branch `main` ("Criação de requirements.txt"), setembro/2026. Esta versão substitui a documentação anterior de 30/08/2026 — os itens resolvidos desde então (criação do `requirements.txt`, correção do import quebrado nos testes, refatoração da camada de UI com zoom/sticky/diálogos) foram incorporados e as estatísticas recalculadas.
+> **Estado analisado**: branch `meal-improvements-for-real-food` (novembro/2026), que estende a `main` com a camada de nutrição TACO completa — VOs `Food`/`Meal`, repositório da tabela, use cases de consulta, migração de esquema e popups de alimento. Esta versão substitui a análise de setembro/2026 (branch `main`): absorve as mudanças intermediárias da própria `main` (refatoração de zoom/sticky/diálogos, testes de matriz), incorpora a nutrição e recalcula todas as estatísticas.
 
 ---
 
@@ -160,7 +160,7 @@ Um padrão consistente em **todos** os Value Objects do `core`: o construtor "cr
 
 ### 3.5 Fluxo de dependência (visão macro)
 
-Em uma frase: a UI Kivy dispara eventos → o `MainController` traduz em chamadas `router.navigate(rota, dados)` → o `KivyRouter` despacha para um `IController` → o controller converte ViewModel em DTO de caso de uso → o caso de uso orquestra `Factories` + `ICardRepository` → os Value Objects do core validam tudo → o `JsonRepository` serializa via `JsonHandler` → o JSON em disco é atualizado atomicamente. As três seções do bloco 12 detalham esse caminho passo a passo para criar, visualizar e excluir registros.
+Em uma frase: a UI Kivy dispara eventos → o `MainController` traduz em chamadas `router.navigate(rota, dados)` → o `KivyRouter` despacha para um `IController` → o controller converte ViewModel em DTO de caso de uso → o caso de uso orquestra `Factories` + `ICardRepository` → os Value Objects do core validam tudo → o `JsonRepository` serializa via `JsonHandler` → o JSON em disco é atualizado atomicamente. As quatro seções do bloco 12 detalham esse caminho para criar, visualizar, excluir registros e registrar refeições com a tabela TACO.
 
 ---
 
@@ -186,7 +186,8 @@ Dextros/
 │       ├── long_acting_insulin.py # VO de insulina basal (0 → None)
 │       ├── short_acting_insulin.py# VO de insulina bolus (0 → None)
 │       ├── exercise.py            # VO de exercício físico (nome + intensidade)
-│       ├── meal.py                # VO de período de refeição (11 valores fechados)
+│       ├── meal.py                # VO Meal (CHO/gordura consumidos) + MealPeriod (11 períodos) aninhando Meal
+│       ├── food.py                # VO Food: alimento da tabela TACO (valores por 100g)
 │       └── observation.py         # VO de observação textual (240 chars)
 │
 ├── usecases/
@@ -195,6 +196,9 @@ Dextros/
 │   ├── delete_card_by_id_use_case.py
 │   ├── get_meal_list_use_case.py
 │   ├── get_time_list_use_case.py
+│   ├── search_food_use_case.py               # Busca na TACO (sem acento, ranking)
+│   ├── calculate_nutrition_use_case.py       # (Food, gramas) -> Meal consumido
+│   ├── get_food_category_list_use_case.py    # Categorias da TACO p/ spinner
 │   ├── Factories/
 │   │   ├── I_card_creator.py                 # Porta ICardCreator
 │   │   └── card_creator.py                   # Fábrica concreta de Card (valida tudo)
@@ -204,6 +208,8 @@ Dextros/
 │   │   ├── matrix_data.py                    # Matriz 2D (dict de células)
 │   │   ├── single_row_matrix_data.py         # Gráfico 1D (uma linha)
 │   │   ├── meal_list.py                      # Lista de refeições válidas
+│   │   ├── food_search.py                    # Resultado de busca de alimentos
+│   │   ├── food_category_list.py             # Lista de categorias da TACO
 │   │   └── time_output.py                    # Um único time de domínio
 │   ├── get_matrix_data/
 │   │   ├── base_column_matrix_template.py    # Template Method — base comum
@@ -226,6 +232,9 @@ Dextros/
 │   │   ├── delete_card_request_controller.py
 │   │   ├── date_hour_matrix_controller.py
 │   │   ├── date_meal_matrix_controller.py
+│   │   ├── search_food_controller.py
+│   │   ├── calculate_nutrition_controller.py
+│   │   ├── food_category_list_controller.py
 │   │   ├── dtos/
 │   │   │   ├── card_view_model.py            # CardViewModel (TypedDict, tudo str)
 │   │   │   ├── matrix_data_view_model.py
@@ -241,6 +250,7 @@ Dextros/
 │   └── repositories/
 │       ├── i_import_handler.py               # Porta ICardImportHandler (load/export)
 │       ├── jsonRepo.py                       # Repositório em memória + re-export total
+│       ├── tacoRepo.py                       # Tabela TACO read-only (cache, convenções NA/Tr)
 │       └── DTOs/
 │           └── card_data_model.py            # CardDataModel (TypedDict do JSON)
 │
@@ -262,7 +272,9 @@ Dextros/
 │               ├── popup/
 │               │   ├── dialog.py             # AppDialog, ConfirmDialog, ErrorDialog (NOVO)
 │               │   └── dialog.kv             # Casca do diálogo genérico (104 linhas)
-│               ├── pickers/date_picker.py    # Wrapper do MDDatePicker
+│               ├── pickers/date_picker.py          # Wrapper do MDDatePicker
+│               ├── pickers/food_search_popup.py/.kv # Busca TACO: lista RecycleView + rodapé de total
+│               ├── pickers/food_detail_popup.py/.kv # Detalhes por 100g + quantidade + Adicionar
 │               ├── graphs/
 │               │   ├── generic_matrix_graph.py/.kv  # RecycleView genérica com cache
 │               │   ├── matrix_cell.py/.kv           # Célula individual + fluxo de exclusão
@@ -276,39 +288,41 @@ Dextros/
 │
 ├── infrastructure/
 │   ├── log_service.py                        # Logging colorido (ANSI) + arquivo
-│   └── path_provider_service.py              # Paths dev/PyInstaller/Android
+│   ├── path_provider_service.py              # Paths dev/PyInstaller/Android
+│   └── db_migration_service.py               # Migração de esquema do banco (startup)
 │
 ├── db/
 │   ├── cards.json                            # Dado legado (schema antigo em PT-BR)
 │   ├── cards_v2.json                         # Amostra pequena (2 cards), schema atual
-│   └── cards_populated.json                  # Seed com 1003 registros (schema atual)
+│   ├── cards_populated.json                  # Seed com 1003 registros (schema atual)
+│   └── TACO.json                             # Tabela TACO: 597 alimentos, 15 categorias (asset)
 │
 └── tests/
     ├── __init__.py
     ├── conftest.py                            # Fixtures/factories compartilhadas (529 linhas)
     ├── unit/
-    │   ├── core/           (10 arquivos — 1 por Value Object, 112 testes)
-    │   ├── adapters/       (parser + repositório, 12 testes)
-    │   ├── usecases/       (78 testes, incluindo Matrix/)
-    │   │   └── Matrix/     (50 testes dos templates)
-    │   └── frameworks/     (json handler, 6 testes)
+    │   ├── core/           (1 arquivo por Value Object, 153 funções de teste)
+    │   ├── adapters/       (parser, repositório, TacoRepository, mappers — 54 funções)
+    │   ├── usecases/       (55 funções, incluindo as consultas TACO)
+    │   │   └── Matrix/     (47 funções dos templates)
+    │   └── frameworks/     (JsonHandler + DatabaseMigrationService — 23 funções)
     └── integration/
-        └── test_integration_json_repo.py      (12 testes, disco real)
+        └── test_integration_json_repo.py      (16 funções, disco real)
 ```
 
-**Estatísticas do repositório** (medidas diretamente no estado atual da branch `main`):
+**Estatísticas do repositório** (medidas diretamente no estado atual da branch `meal-improvements-for-real-food`):
 
 | Métrica | Valor |
 |---|---|
-| Arquivos `.py` de produção (excluindo testes) | 68 |
-| Arquivos `.py` de teste | 21 |
-| Linhas de código Python (produção) | ~3.435 |
-| Linhas de código Python (testes) | ~4.198 |
-| Funções de teste (`def test_*`) | 220 |
-| Itens de teste coletados pelo pytest (com parametrização/hypothesis) | 279 |
-| Arquivos `.kv` (Kivy Language) | 9 (1.004 linhas) |
+| Arquivos `.py` de produção (excluindo testes) | 81 |
+| Arquivos `.py` de teste | 28 |
+| Linhas de código Python (produção) | ~5.037 |
+| Linhas de código Python (testes) | ~5.371 |
+| Funções de teste (`def test_*`) | 348 |
+| Itens de teste coletados pelo pytest (com parametrização/hypothesis) | 481 |
+| Arquivos `.kv` (Kivy Language) | 11 (1.418 linhas) |
 
-> A suíte de testes é hoje **maior em linhas que o próprio código de produção** (~4.2k vs ~3.4k) — um indício raro e saudável de maturidade para um projeto em estágio inicial.
+> A suíte de testes continua **maior em linhas que o próprio código de produção** (~5.4k vs ~5.0k) — um indício raro e saudável de maturidade para um projeto em estágio inicial.
 
 ---
 
@@ -413,7 +427,22 @@ intensity: str | None = None
 - Intensidade restrita a um conjunto fechado `_INTENSITY_POSSIBLE_VALUES = frozenset({"leve", "moderada", "vigorosa"})`, seguindo o *Guia de Atividade Física para a População Brasileira* (citado na docstring).
 - `parse(exercise_value, intensity_value)` normaliza ambos para minúsculas com `strip()`; strings vazias viram `None`. Nome sem intensidade é permitido (ex: "caminhada" sem informar intensidade).
 
-### 5.7 `MealPeriod` (`meal.py`, 35 linhas)
+### 5.7 `Meal` e `MealPeriod` (`meal.py`, ~165 linhas)
+
+O módulo carrega dois VOs relacionados: o `MealPeriod` original (enum-like de períodos) e o `Meal`, o novo VO de nutrição consumida, **aninhado** dentro do período.
+
+#### `Meal` — nutrição consumida no registro
+
+```python
+Meal(carbohydrate_g: int | None, fat_g: int | None)
+```
+
+Representa **o que foi comido** na ocasião do registro, em gramas inteiras (`round()` no parse — a precisão de meio grama não muda a contagem de dextros). Cada campo é opcional (é comum registrar só carboidrato). Regras de validação — filosofia "só o literalmente impossível": negativo, não-numérico e NaN/infinito são rejeitados; **não existe limite superior** (1000 g de CHO é raro mas real). Normalizar vírgula decimal é responsabilidade do mapper de apresentação, não do VO (seção 7.6).
+
+- `Meal.parse(carbohydrate_value, fat_value)` retorna **`None`** quando nenhum valor foi informado — um Meal sem conteúdo nunca é persistido como objeto vazio.
+- `Meal.from_food(food, grams)` é a conversão pura a partir da tabela TACO (regra de três com os valores por 100 g do `Food`). O VO não busca nada: recebe o `Food` já resolvido (sem IO, sem consulta). Nutriente ausente na tabela (`None`) permanece `None` no resultado — desconhecido ≠ zero.
+
+#### `MealPeriod` — período + nutrição aninhada
 
 Enum-like baseado em `str | None`, restrito à lista fechada de **onze momentos do dia** relevantes para monitoramento glicêmico:
 
@@ -423,13 +452,31 @@ _VALID_MEAL_VALUES = ["jejum", "pós café da manhã", "pré lanche da manhã",
                       "pós café da tarde", "pré jantar", "pós jantar", "madrugada"]
 ```
 
-- `parse()` normaliza para minúsculas com `strip()`; `None` é aceito (registro sem refeição associada); tipo não-string → `TypeError`.
-- A lista é exportada também como constante de módulo, reaproveitada por `GetMealListUseCase` como cabeçalho de coluna da matriz "Dia × Refeição" e como opções do formulário na UI.
+- `parse()` normaliza o período para minúsculas com `strip()`; `None` é aceito tanto para o período (registro sem refeição próxima) quanto para o `Meal` aninhado; tipo não-string → `TypeError`.
+- A lista é exportada como constante de módulo, reaproveitada por `GetMealListUseCase` (colunas da matriz "Dia × Refeição"), pelo `DatabaseMigrationService` (validação do legado) e pelas opções do formulário na UI.
+- A composição acontece no `CardCreator` (seção 6.2): `Meal.parse(...)` → `MealPeriod.parse(meal_period, meal)` — a UI e os DTOs continuam planos e nunca manipulam o dict aninhado (seção 7.6).
 - Curiosidade coberta pela suíte: um dos casos parametrizados de valor inválido está **pulador** (`skipped`) com a mensagem "Este valor na verdade é válido após normalização" — evidência de refinamento incremental dos testes.
 
 ### 5.8 `Observation` (`observation.py`, 41 linhas)
 
 Texto livre opcional, limitado a **240 caracteres**. Particularidade: string vazia (`""`) que chegue **direto ao construtor** é tratada como **erro** (`ValueError("Observation text with 0 characters...")`) — diferente de outros VOs onde string vazia vira `None` silenciosamente; no fluxo normal, a normalização de `""` → `None` acontece no `parse()` (que também faz `strip()`), *antes* de chegar no construtor, então o `__post_init__` nunca deveria receber `""` legitimamente. Textos com 241+ caracteres são rejeitados (limite testado exatamente em 240/241).
+
+### 5.9 `Food` (`food.py`, ~135 linhas)
+
+Referência nutricional de um alimento da tabela TACO — o único VO cujos dados vêm de uma fonte de dados externa (o `TacoRepository`, seção 7.4) e não do usuário:
+
+```python
+Food(food_id: int, description: str, category: str,
+     carbohydrate_g: float | None = None, fat_g: float | None = None,
+     energy_kcal: float | None = None, protein_g: float | None = None,
+     fiber_g: float | None = None, sodium_mg: float | None = None)
+```
+
+- Todos os valores nutricionais são **por 100 g**, na precisão original da tabela (`float`, sem arredondamento — arredondar é regra do `Meal`, que representa o consumido).
+- Campos nutricionais podem ser `None` quando a tabela não traz valor confiável ("NA", "Tr", "*" — a normalização desses casos é responsabilidade da fonte de dados, não do VO). Dado indisponível ≠ zero: o popup de detalhes exibe "—" (seção 8.3).
+- `__post_init__` valida os 6 campos numéricos: `TypeError` para tipo errado, `ValueError` para negativo ou não-finito (NaN/infinito). `food_id` negativo e `description`/`category` vazias também são rejeitados.
+- `Food.parse(...)` é o entry point: aceita `float`, `int`, string numérica ou `None` para cada nutriente (string vazia → `None`), `int`/`float`/`str` para o id e faz `strip()` nos textos.
+- Os 6 campos são exatamente o que o popup de detalhes do alimento exibe (energia, proteína, carboidrato, gordura, fibra e sódio) — o VO foi desenhado junto com a UI.
 
 ---
 
@@ -516,17 +563,27 @@ O template mais elaborado, com pipeline explícito e métodos bem fatorados:
 
 | DTO | Direção | Papel |
 |---|---|---|
-| `CardDTOInput` | Controller → UseCase | Entrada fortemente tipada para criação de card; usa `InitVar` para receber `exercise_name`/`exercise_intensity` "soltos" e montar um sub-DTO `_ExerciseDTO` em `__post_init__` (o campo `exercise` é `field(init=False)`). |
+| `CardDTOInput` | Controller → UseCase | Entrada fortemente tipada para criação de card; usa `InitVar` para receber `exercise_name`/`exercise_intensity` "soltos" e montar um sub-DTO `_ExerciseDTO` em `__post_init__` (o campo `exercise` é `field(init=False)`). A nutrição entra **plana** (`carbohydrate_g`/`fat_g` em gramas) — a composição aninhada é feita pelo `CardCreator`. |
 | `CardOutput` | UseCase → Controller | Espelha `CardDTOInput`, mas já com tipos nativos (`date`, `time`, `int`, UUID em `card_id`) em vez de strings — saída de leitura. Também usa `InitVar` + `_ExerciseDTO`. |
 | `MatrixData` | UseCase → Controller | Matriz 2D: `row_headers: list[str]`, `col_headers: list[str]`, `cell_data: dict[tuple[int, int], CardOutput]`. |
 | `SingleRowMatrixData` | UseCase → Controller | Gráfico 1D: `col_headers`, `cells: list[str \| None]`. |
 | `MealList` | UseCase → Controller | `meal_values: list[str]` — valores válidos de refeição. |
 | `TimeOutput` | UseCase → Controller | Um único `time` de domínio (`time_value`). |
+| `FoodSearchResult` | UseCase → Controller | `foods: list[Food]` — resultado da busca na TACO (tabela completa alfabética quando a query é vazia). |
+| `FoodCategoryList` | UseCase → Controller | `categories: list[str]` — categorias da tabela, alfabéticas, cruas (com acento) para a UI exibir. |
 
 ### 6.7 Utilitários (`usecases/utils/`)
 
 - **`exceptions.py`**: hierarquia própria de exceções da camada de aplicação — `DomainExceptionError(Exception)` é a base; `CardCreationError`, `NonExistentCard`, **`DuplicatedColumnError`** e **`DuplicatedCellError`** derivam dela. As duas últimas são novas desde a última documentação e dão suporte às garantias de unicidade dos templates de matriz.
-- **`mappers.py`**: função `to_card_output(card: Card) -> CardOutput`, que "achata" os Value Objects de volta para tipos primitivos/nativos, extraindo com segurança (`getattr(card, 'exercise', None)`) os subcampos de exercício.
+- **`mappers.py`**: função `to_card_output(card: Card) -> CardOutput`, que "achata" os Value Objects de volta para tipos primitivos/nativos, extraindo com segurança (`getattr(card, 'exercise', None)`) os subcampos de exercício — incluindo a nutrição aninhada (`card.meal.meal`), plana no DTO de saída.
+
+### 6.8 Consultas à tabela TACO (`SearchFoodUseCase`, `GetFoodCategoryListUseCase`, `CalculateNutritionUseCase`)
+
+Três casos de uso **puros e sem porta nova**: recebem a lista de `Food` já carregada pelo composition root no construtor — mesmo padrão do `GetMealListUseCase` (dados de referência de onde estão). A fonte de dados fica isolada no `TacoRepository` (adapters); aqui só existe lógica de consulta, 100% testável sem arquivo.
+
+- **`SearchFoodUseCase`** (`search_food_use_case.py`, ~95 linhas): busca com normalização própria (`unicodedata` NFD) — minúsculas, sem acentos e sem pontuação, para que `"pao frances"` encontre `"Pão, francês"` (a TACO usa vírgulas em toda a descrição). Ranking por relevância: **prefixo > início de palavra > contém**, empate resolvido alfabeticamente, com `DEFAULT_LIMIT = 25`. **Decisão de produto**: query vazia devolve a tabela COMPLETA em ordem alfabética — o popup abre navegável (mobile first: o usuário folheia antes de digitar) e a RecycleView da UI torna despejar 597 itens barato. Pré-normaliza descrições e categorias uma única vez no `__init__` (cada consulta é uma varredura O(n) em memória sobre ~600 alimentos — barato para o app offline).
+- **`GetFoodCategoryListUseCase`** (`get_food_category_list_use_case.py`, ~22 linhas): espelho do `GetMealListUseCase` — `sorted({food.category for food in foods})`, cópia defensiva na saída.
+- **`CalculateNutritionUseCase`** (`calculate_nutrition_use_case.py`, ~22 linhas): wrapper de `Meal.from_food(food, grams)` mantido como use case para preservar o padrão rota → controller → use case do app inteiro, inclusive para cálculos puros. Toda a regra de conversão vive no VO (core); aqui não existe lógica além do repasse.
 
 ---
 
@@ -546,6 +603,9 @@ Todos implementam a interface genérica `IController[RequestDTO, ResponseDTO]` (
 | `DateMealMatrixController` | Query de leitura | `Any` (ignorado) | `MatrixDataViewModel` | Idem, para Dia×Refeição. |
 | `SaveRequestController` | Comando de escrita | `CardViewModel` | `None` | *Strip* dos campos → conversão para `CardDTOInput` → chama `CreateCardUseCase`. Encapsula **qualquer** exceção em `TypeError("Malformed data for saving request...")` com causa preservada. |
 | `DeleteCardRequestController` | Comando de escrita | `str` (card_id) | `None` | Valida que o ID não é vazio (`InvalidCardFormat`) antes de delegar ao `DeleteCardByIDUseCase`. |
+| `SearchFoodController` | Query de leitura | `dict` | `FoodSearchResult` | Mapeia `"todas"` (convenção do spinner de categoria) para `None` (sem filtro) e delega ao `SearchFoodUseCase`; `query` ausente → `TypeError`. |
+| `FoodCategoryListController` | Query de leitura | `None` | `FoodCategoryList` | Repassa direto ao `GetFoodCategoryListUseCase`. |
+| `CalculateNutritionController` | Query de leitura | `dict` | `Meal \| None` | Repassa `(food, grams)` ao `CalculateNutritionUseCase`. |
 
 ### 7.2 Gateway / Router (`adapters/gateways/`)
 
@@ -564,10 +624,13 @@ Esse design permite à UI (Kivy) **nunca conhecer** os Use Cases diretamente —
 | `"get_meal_date_matrix_data"` | `DateMealMatrixController` | `None` | `MatrixDataViewModel` |
 | `"save_card"` | `SaveRequestController` | `CardViewModel` | `None` |
 | `"delete_card"` | `DeleteCardRequestController` | `str` | `None` |
+| `"search_food"` | `SearchFoodController` | `dict` (`query`, `category`) | `FoodSearchResult` |
+| `"get_food_category_list"` | `FoodCategoryListController` | `None` | `FoodCategoryList` |
+| `"calculate_nutrition"` | `CalculateNutritionController` | `dict` (`food`, `grams`) | `Meal` ou `None` |
 
 ### 7.3 Parsers (`adapters/parsers/`)
 
-- **`ICardParser`** (porta) / **`CardDataModelParser`** (implementação): converte um `CardDataModel` (formato de dicionário vindo diretamente do arquivo JSON) em `CardDTOInput` (formato de entrada de Use Case), fazendo o *cast* de campos numéricos de volta para `str` (já que `Glycemia.parse` aceita strings e as insulinas também). Campos `None` de insulina permanecem `None` (o `str(None)` seria catastrófico aqui — o ternário protege isso). A própria docstring da interface se autodescreve como "bastante inútil" e candidata a ser substituída por uma função utilitária simples — dívida técnica assumida pelo autor.
+- **`ICardParser`** (porta) / **`CardDataModelParser`** (implementação): converte um `CardDataModel` (formato de dicionário vindo diretamente do arquivo JSON) em `CardDTOInput` (formato de entrada de Use Case), fazendo o *cast* de campos numéricos de volta para `str` (já que `Glycemia.parse` aceita strings e as insulinas também). Campos `None` de insulina permanecem `None` (o `str(None)` seria catastrófico aqui — o ternário protege isso). **Leitura retrocompatível do `meal`**: dicionário aninhado (formato canônico) → período + nutrição; string simples (legado) → só período, nutrição `None` — tolerância "cinto e suspensório" enquanto o `DatabaseMigrationService` normaliza o arquivo em disco (seção 9.3). A própria docstring da interface se autodescreve como "bastante inútil" e candidata a ser substituída por uma função utilitária simples — dívida técnica assumida pelo autor.
 
 ### 7.4 Repositories (`adapters/repositories/`)
 
@@ -581,10 +644,12 @@ Esse design permite à UI (Kivy) **nunca conhecer** os Use Cases diretamente —
   - Lança `CardNotFoundError` (de `adapters/exceptions.py`) quando um ID não é encontrado em `get_card`, `remove_card` ou `update_card`.
   - `get_all_cards` retorna `list(self.cards_on_session)` — cópia rasa da lista (protege contra mutação estrutural externa, mas os `Card` em si são imutáveis, então é seguro).
 
+- **`TacoRepository`** (`tacoRepo.py`, ~110 linhas): fonte de dados concreta e **read-only** da tabela TACO (`db/TACO.json`, asset empacotado com o app). **Não implementa ABC de propósito**: único consumidor é o composition root (que injeta os `Food` parseados nos use cases de consulta) e não há comportamento polimórfico — criar interface aqui seria ceremony. Carrega o arquivo **uma vez** (lazy) e cacheia; `get_all()` devolve cópia defensiva. Normaliza as convenções da fonte: `"NA"` (não aplicável), `"Tr"` (traço), `"*"` (não medido) e `""` viram **`None`** — dado indisponível é diferente de zero. A TACO real tem 4 carboidratos levemente negativos (ruído de medição laboratorial em peixes/carnes, entre -0.045 e -0.007 g/100g): viram `0.0` na carga; negativo além de 1 g/100 g é corrupção e falha com **`FoodDataError`** (exceção nova em `adapters/exceptions.py`), assim como arquivo ausente ou JSON inválido — dado corrompido não entra no app como "melhor esforço". Valor inparseável é logado com `warning` e tratado como indisponível.
+
 ### 7.5 DTOs de fronteira
 
 - **`CardViewModel`** (`TypedDict`): fronteira Controller ↔ UI — todos os campos são `str` (inclusive números), pois vêm de campos de texto do Kivy; aninha um `_Exercise` (`exercise_name`, `intensity`). **Quirk a conhecer**: o campo de data se chama `card_data` (e não `card_date`) — nome historicamente consolidado em todo o pipeline de UI/mappers.
-- **`CardDataModel`** (`TypedDict`): fronteira Repositório ↔ arquivo JSON (chaves `card_id`, `card_date`, `card_time`, `glycemia`, `long_acting_insulin`, `short_acting_insulin`, `exercise`, `meal`, `observation`).
+- **`CardDataModel`** (`TypedDict`): fronteira Repositório ↔ arquivo JSON (chaves `card_id`, `card_date`, `card_time`, `glycemia`, `long_acting_insulin`, `short_acting_insulin`, `exercise`, `meal`, `observation`). No formato canônico atual, `meal` é o objeto aninhado `{"meal_period": ..., "meal": {"carbohydrate_g": ..., "fat_g": ...} | None}` (seção 10.1); o parser ainda tolera a string legado.
 - **`MatrixDataViewModel`** / **`TimeList`**: ViewModels de saída para a UI consumir matrizes e listas de horário. `MatrixDataViewModel` é um `@dataclass` com `cell_data: dict[tuple[int, int], CardViewModel]`.
 
 ### 7.6 Mappers de Controller (`adapters/controllers/mappers/mappers.py`)
@@ -593,9 +658,10 @@ Funções puras de tradução (todas testáveis isoladamente):
 
 - `strip_view_model`: aplica `.strip()` em todos os campos de texto de um `CardViewModel` (higienização de input), incluindo o dicionário aninhado de exercício.
 - `empty_to_none` / `int_or_none`: normalizam string vazia → `None` e, no segundo caso, convertem para `int` **ou** `None` quando o valor é vazio ou `0`.
-- `view_model_to_input`: `CardViewModel` → `CardDTOInput`. Converte `glycemia` com `int()` direto (erro de conversão aqui é encapsulado pelo `SaveRequestController` como `TypeError`), insulinas com `int_or_none` e exercício via `InitVar`s.
+- `view_model_to_input`: `CardViewModel` → `CardDTOInput`. Converte `glycemia` com `int()` direto (erro de conversão aqui é encapsulado pelo `SaveRequestController` como `TypeError`), insulinas com `int_or_none`, exercício via `InitVar`s e nutrição com `decimal_or_none` (vírgula brasileira; vazio e `0` viram `None`).
+- **Helpers do fluxo multi-alimento TACO**: `normalize_decimal` (vírgula → ponto — responsabilidade da apresentação), `parse_brazilian_decimal` (texto de campo → `float` ou `None`; texto inválido é logado em `debug` e tratado como ausente), `format_grams_for_display` (`%g` com vírgula decimal brasileira) e **`sum_grams_for_input`** (soma a comida adicionada ao que já está no campo — quem registra uma refeição de verdade come mais de um alimento: acumular, não substituir; texto vazio/inválido conta como 0).
 - `matrix_to_view_model`: `MatrixData` → `MatrixDataViewModel`, convertendo células `None` em um `CardViewModel` "vazio" (todos os campos `""`) — decisão deliberada para que **a UI nunca precise tratar `None`**, apenas checar se `card_id` está vazio.
-- `card_output_to_view_model`: `CardOutput` → `CardViewModel`, formatando a data como `%d/%m/%Y` (formato de exibição) e a hora como `%H:%M`, e convertendo todos os campos para string com `""` para nulos.
+- `card_output_to_view_model`: `CardOutput` → `CardViewModel`, formatando a data como `%d/%m/%Y` (formato de exibição) e a hora como `%H:%M`, e convertendo todos os campos para string com `""` para nulos. Também traduz MealPeriod `None` para a palavra `"nenhum"` (mesma opção de UI do picker) e formata a nutrição consumida via `format_grams_for_display`.
 - `empty_card_view_model`: helper que devolve o `CardViewModel` "zerado".
 
 > **Detalhe de implementação**: `int_or_none` usa a comparação por identidade `value is not 0` — funciona na prática para inteiros pequenos (CPython interna `-5..256`), mas é um code smell sutil; a comparação correta seria `value != 0`. Ver seção 17.
@@ -635,10 +701,11 @@ Implementação concreta de `ICardImportHandler`, usando arquivos JSON puros:
 1. Instancia a `MainView` (raiz da árvore de widgets);
 2. Instancia **dois** `MatrixController`, cada um vinculado ao respectivo componente de conteúdo da view (`ids.chart_content` / `ids.meal_date_content`) e a uma chave de rota via o dicionário `_DATA_SOURCE_CONFIG` (`'date_hour_matrix'` → `"get_hour_date_matrix_data"`, `'meal_date_matrix'` → `"get_meal_date_matrix_data"`);
 3. Conecta o **lazy load** diretamente nas telas: `self.main_view.ids.screens.get_screen("chart").refresh_callback = matrix_controller.on_screen_enter` (a refatoração eliminou o antigo `Clock.schedule_once(_setup_graph_screen)` e o fallback dinâmico de criação de telas — as telas agora existem declarativamente no `.kv` como `GraphScreen`);
-4. Popula propriedades reativas da view chamando o router de forma síncrona logo na inicialização: `available_time` (via `"get_time_list"`), `actual_time` (relógio do sistema formatado `%H:%M`), `date_display` (hoje, `%Y-%m-%d`) e `available_meals` (via `"get_meal_list"`, com a opção `"nenhum"` inserida no topo — valor de UI que não existe como domínio e é convertido para vazio no `main_view.get_data()`);
-5. Faz o **bind de eventos** Kivy: `on_save_request` da `MainView` → `_handle_save_request`; `on_date_selected`/`on_save` do `DatePicker`;
-6. **`_handle_save_request`**: lê `main_view.get_data()` → mostra confirmação (`show_save_confirmation`) → `router.navigate("save_card", raw_data)`. O comentário no código reconhece que o popup hoje funciona como "feedback simples de clique", pois o router ainda não retorna resposta de sucesso/falha;
-7. **`throw_exception(message)`**: loga o erro e exibe `main_view.show_error(message)` — o caminho planejado para fazer erros "pipocarem" na view (item do roadmap).
+4. Popula propriedades reativas da view chamando o router de forma síncrona logo na inicialização: `available_time` (via `"get_time_list"`), `actual_time` (relógio do sistema formatado `%H:%M`), `date_display` (hoje, `%Y-%m-%d`) e `available_meals` (via `"get_meal_list"`, com a opção `"nenhum"` inserida no topo e **autoselecionada** — o default antigo era o placeholder `"Escolha uma Refeição:"`, que o domínio rejeitava quando o usuário salvava sem tocar no picker; "nenhum" é valor de UI convertido para vazio no `main_view.get_data()`);
+5. Conecta a **busca TACO** à view: popula `available_food_categories` (via `"get_food_category_list"`) e injeta os handlers `_food_search_handler` e `_nutrition_calculator` — callables que fazem `router.navigate("search_food", {"query", "category"})` e `router.navigate("calculate_nutrition", {"food", "grams"})`. A `MainView` nunca conhece o router: chama os handlers como funções;
+6. Faz o **bind de eventos** Kivy: `on_save_request` da `MainView` → `_handle_save_request`; `on_date_selected`/`on_save` do `DatePicker`;
+7. **`_handle_save_request`**: lê `main_view.get_data()` → mostra confirmação (`show_save_confirmation`) → `router.navigate("save_card", raw_data)`. O comentário no código reconhece que o popup hoje funciona como "feedback simples de clique", pois o router ainda não retorna resposta de sucesso/falha;
+8. **`throw_exception(message)`**: loga o erro e exibe `main_view.show_error(message)` — o caminho planejado para fazer erros "pipocarem" na view (item do roadmap).
 
 #### `MatrixController` (50 linhas)
 
@@ -669,7 +736,9 @@ Módulo puramente declarativo com constantes de design system, usado tanto de Py
 - Propriedades reativas: `available_meals`, `available_time` (ListProperty), `actual_meal`, `actual_time`, `date_display` (StringProperty);
 - Carrega os dois arquivos `.kv` principais explicitamente via `Builder.load_file(get_asset_path(...))`, usando o `path_provider_service` para resolver caminhos corretamente em dev, executável empacotado (PyInstaller) ou Android;
 - No `__init__`, instancia o `DatePicker` já conectando o callback `_update_data_input` (que escreve a data escolhida direto no campo `ids.data_input`);
-- **`get_data()`**: lê diretamente os campos de texto da árvore de widgets (via `self.ids.*`) e monta um `CardViewModel` — é o **único ponto** onde a UI concreta é convertida para o DTO de fronteira; a opção "nenhum" de refeição é convertida para string vazia aqui; `intensity` ainda é sempre enviado como `''` (campo não exposto no formulário — ver seção 17);
+- **`get_data()`**: lê diretamente os campos de texto da árvore de widgets (via `self.ids.*`) e monta um `CardViewModel` — é o **único ponto** onde a UI concreta é convertida para o DTO de fronteira; a opção "nenhum" de refeição é convertida para string vazia aqui, e os campos de nutrição (`carbohydrate_g`/`fat_g` da seção Refeição) entram planos no ViewModel; `intensity` ainda é sempre enviado como `''` (campo não exposto no formulário — ver seção 17);
+- **Busca TACO (`_open_food_search`)**: monta um `FoodSearchContent` com os handlers injetados e o abre num `AppDialog` com **rodapé fixo** (`set_footer` com a linha de total acumulado); o `on_dismiss` do dialog pai fecha o popup de detalhes empilhado (o detalhe não pode sobreviver sem o pai);
+- **Adicionar alimento (`on_use_food` do popup)**: calcula o `Meal` via `nutrition_calculator` (rota `calculate_nutrition`) e **SOMA** as gramas nos campos do formulário com `sum_grams_for_input` (vírgula decimal; acumula várias comidas por registro), atualiza a linha de total do rodapé e **mantém o popup de busca aberto** para a próxima comida;
 - **Diálogos de feedback (novos)**: `show_save_confirmation(message="Registro Salvo!")` e `show_error(message, title="ERRO")` — ambos constroem um `AppDialog` com `DialogMessage` e botão (`primary`/`danger` respectivamente);
 - **`add_graph_screen(name, title, graph_widget, refresh_callback)`**: simplificado na refatoração — como a tela já existe no `.kv` e o `GraphScreenContent` já criou o gráfico internamente, o método apenas verifica `has_screen`, injeta o `refresh_callback`, atualiza o `content.title` e navega. (O antigo bloco duplicado de criação dinâmica de telas/botões foi eliminado.)
 - **`_navigate_to(name)`**: contorna a limitação do Kivy em que `on_pre_enter` não dispara se a tela de destino já for a atual — forçando manualmente o `refresh_callback` nesse caso; em telas pequenas, fecha a navbar lateral após navegar (`nav_toggle.state = "normal"`).
@@ -678,25 +747,29 @@ Módulo puramente declarativo com constantes de design system, usado tanto de Py
 
 | Arquivo | Papel |
 |---|---|
-| `loader.py` (`Border`, `CardWidget`) | `Border`: `BoxLayout` genérico com borda customizável (`border_color`, `border_width`), base visual de células/cards. `CardWidget`: conteúdo do popup de detalhes de um card — preenche os labels a partir do `CardViewModel` (data, horário, dextro, lenta, rápida, exercício com intensidade entre parênteses, refeição, observação). |
+| `loader.py` (`Border`, `CardWidget`) | `Border`: `BoxLayout` genérico com borda customizável (`border_color`, `border_width`), base visual de células/cards. `CardWidget`: conteúdo do popup de detalhes de um card — preenche os labels a partir do `CardViewModel` (data, horário, dextro, lenta, rápida, exercício com intensidade entre parênteses, refeição — exibe `"nenhum"` para card sem refeição —, observação, e a linha de nutrição: Dextro | CHO | Gordura em colunas de 1/4). |
 | `creators/card_creator.py` (`CardCreator`) | Mapeia `CardViewModel` → dicionário de propriedades de célula Kivy (`CARD` = `"card"`, `NONE_CARD` = `"none_card"`). O dict de célula carrega `is_empty`, `is_header`, `dextro_text` e `card_reference` (o ViewModel inteiro, para o popup ler). Usa `TYPE_CHECKING` para tipar contra o `CardViewModel` sem quebrar a fronteira de dependência em runtime. Homônimo — mas **não relacionado** — do `CardCreator` de `usecases/Factories`. |
 | `graphs/generic_matrix_graph.py` (`GenericMatrixGraph(RecycleView)`) | Motor **genérico** de renderização de matriz, agora com **cache de partes** (`self._parts = (corner, col_dicts, row_dicts, body_dicts, n_cols)`): `draw_self()` roda a `cell_factory` **uma única vez** e cacheia tudo; `refresh()` apenas re-serializa o cache no modo atual (com ou sem headers), sem rebuild — barato para o toggle do sticky. Propriedades: `matrix_cols` (colunas + 1 do canto), `headers_visible`, `scroll_locked` (trava scroll durante pinch), `scale` (injetada pelo zoom) com aplicação em `cell_width`/`cell_height`/`cell_spacing` respeitando clamps min/max da classe célula. Dispara evento `on_data_changed` após cada refresh (consumido pelo sticky). |
 | `graphs/matrix_cell.py` (`MatrixCell(Border)`) | Célula individual clicável. **Métricas como atributos de classe**: `base_width = dp(152)`, `base_height = dp(44)`, `base_spacing = dp(4)` (mais clamps `min_/max_width/height` e razões de fonte `font_height_ratio`/`font_width_ratio` com limites `sp(10)`–`sp(24)`). Ao tocar numa célula preenchida, abre um `AppDialog` de detalhes com `CardWidget`; o fluxo de exclusão agora é **duas etapas** dentro do mesmo diálogo: Detalhes → "Excluir" → confirmação ("Excluir este registro? Essa ação não pode ser desfeita.") → `_confirm_delete` → `delete_callback(card_id)` (injetado pelo `MatrixController`); "Cancelar" volta para os detalhes. Registrada no `Factory` do Kivy. |
 | `pickers/date_picker.py` (`DatePicker(MDDatePicker)`) | Encapsula o seletor de data do KivyMD (título "Escolha a Data"), convertendo o valor selecionado para string `YYYY-MM-DD` e notificando via callback (`on_date_selected`); trata cancelamento e valores vazios. |
+| `pickers/food_search_popup.py` (`FoodResultRow`, `FoodSearchContent`) | Popup de busca na tabela TACO (NOVO). `FoodSearchContent` (BoxLayout): campo de busca com **debounce de 0.3s**, spinner de categorias e **RecycleView** de resultados — abre com a tabela COMPLETA (decisão de produto, mobile first). `FoodResultRow(Button)` é a viewclass reciclada: o estado mora nos DADOS (dict com `food` + `row_callback`), não no widget; textos de duas linhas (descrição; categoria · CHO · Gordura por 100g). O toque numa linha abre o `FoodDetailContent` empilhado num `AppDialog` próprio; "Adicionar" fecha SÓ o detalhe (o usuário volta pra lista e soma a próxima comida). A linha de total do registro (`accumulated_text`) é exposta para o rodapé fixo do dialog pai via `set_footer`. Handler de busca injetado (`search_handler`) — o widget não conhece router nem use case. |
+| `pickers/food_detail_popup.py` (`FoodDetailContent`) | Popup de detalhes do alimento (NOVO): os 6 valores por 100g do `Food` (energia, proteína, CHO, gordura, fibra, sódio — `None` vira `"—"`, dado indisponível ≠ zero), campo de quantidade com **preview recalculado ao vivo** (`"150 g ≈ CHO 55,5 g · Gordura 1,8 g · 473 kcal"` — regra de três só de apresentação; o cálculo do registro passa pelo use case) e botão Adicionar. Validações de quantidade com mensagem inline (`self.message`) em vez de crash. Contrato `on_use_food(food, grams)` — o mesmo evento que a busca usava antes da lista. Detalhe de Kivy descoberto: setar a property `food` via kwarg do `super().__init__` engole o evento `on_food` — a property é setada explicitamente no `__init__`. |
 | `screens/graph_screen.py` (`GraphScreen`, `GraphScreenContent`) | `GraphScreen(Screen)`: executa `refresh_callback` em `on_pre_enter` — o padrão de **lazy loading por navegação** usado pelos dois gráficos (com logs de rastreio). `GraphScreenContent(BoxLayout)`: a **view dona do gráfico** — no próximo frame (`Clock.schedule_once(self._build, 0)`) constrói o `GenericMatrixGraph`, o `PinchZoom(target=graph)` e o `Sticky(target=graph, cell_cls=MatrixCell)`, liga `zoom_level → scale` de graph e sticky e `is_pinching → scroll_locked`, restaura o estado do sticky por sessão (`_STICKY_SESSION[session_key]`) e ativa/desativa o zoom conforme a screen atual (bind em `on_pre_enter`/`on_leave` da screen pai, localizada por `walk` na árvore). |
 | `graphs/decorators/zoom_decorator.py` (`Zoom`, `PinchZoom`) | **Zoom genérico**: propriedades `zoom_level`, `default_zoom`, `min_zoom 0.7`, `max_zoom 2.0`, `zoom_step 0.10`, `is_pinching`, `active`, `persist`, `session_key`; persiste o nível por sessão no dict de módulo `_ZOOM_SESSION` e oferece `zoom_in`/`zoom_out`/`reset_zoom`/`set_zoom`/`clamp_zoom`. **`PinchZoom(Zoom)`**: escuta touches **na Window inteira** (`Window.fbind("on_touch_down/move/up")`) sem exigir cooperação do target — filtra touches válidos (ignora scroll de mouse e botões que não sejam left/touch), só reage quando `active` e o toque colide com o `target`; ao detectar 2 dedos calcula a razão de distância (`Vector.distance`) e escala o zoom a partir do estado inicial do pinch; **duplo toque reseta** (janela de 0.30s e raio de `dp(26)`, configurável via `double_tap_reset_enabled`); `release()` desliga os binds da Window. |
 | `graphs/decorators/sticky_decorator.py` (`Sticky`) | **Cabeçalhos fixos por reparenting**: quando `enabled`, monta um "composto" (`BoxLayout` vertical = faixa superior [canto + `RecycleView` de headers de coluna] sobre faixa inferior [`RecycleView` de headers de linha + o próprio gráfico]) — o gráfico é **removido do host original e reinserido no composto**; as faixas sincronizam scroll via binds `scroll_x`/`scroll_y` do target e os dados dos headers vêm do cache `header_parts()` do gráfico (barato: só referências). Ao desligar, desfaz com um "fix do wipe" documentado: remove o target do composto **antes** de descartá-lo e devolve ao host incondicionalmente, restaurando `headers_visible = True`. O composto vive entre toggles (nunca é destruído). Métricas das faixas derivam da classe célula + `scale` injetado. Estado por sessão em `_STICKY_SESSION[session_key]`. |
 | `graphs/controls/zoom_controls.py` (`ToolButton`, `ZoomControls`) | Toolbar de zoom/sticky: barra `- / 100% / + / 📌` (definida em `zoom_controls.kv`). Widgets independentes que **só conhecem os decorators injetados** (`zoom`, `sticky`) — nunca o gráfico. `ToolButton` adiciona estado ativo visual (usado no botão 📌 do sticky). Registrados no `Factory`. |
-| `popup/dialog.py` (`DialogButton`, `DialogMessage`, `AppDialog`, `ConfirmDialog`, `ErrorDialog`) | Sistema de diálogos genérico (NOVO). `AppDialog(ModalView)`: casca com título, área de conteúdo rolável e barra de botões — remove o fundo padrão do ModalView (`_strip_modal_background`), desenha véu escuro próprio (opacidade 0.3), recalcula tamanho ao redimensionar a Window; modo compacto (`auto_height=True`) ajusta a altura ao conteúdo com teto de `dialog_content_max_height`; API fluida: `set_content(widget)` e `set_buttons([(texto, color_name, callback), ...])`. `DialogButton(Button)` escurece 20% no pressed. `ConfirmDialog` e `ErrorDialog` são especializações prontas (o Confirm dispara eventos `on_confirm`/`on_cancel`). |
+| `popup/dialog.py` (`DialogButton`, `DialogMessage`, `AppDialog`, `ConfirmDialog`, `ErrorDialog`) | Sistema de diálogos genérico (NOVO). `AppDialog(ModalView)`: casca com título, área de conteúdo rolável e barra de botões — remove o fundo padrão do ModalView (`_strip_modal_background`), desenha véu escuro próprio (opacidade 0.3), recalcula tamanho ao redimensionar a Window; modo compacto (`auto_height=True`) ajusta a altura ao conteúdo com teto de `dialog_content_max_height`; API fluida: `set_content(widget)`, `set_buttons([(texto, color_name, callback), ...])` e **`set_footer(widget)`** — rodapé fixo fora da área de scroll (descoberto em screenshot: status que deve ficar sempre visível, como o total acumulado da busca TACO, ficava sob a dobra do scroll; `set_footer` faz reparenting e o modo compacto do card de detalhes inclui a altura do footer). `DialogButton(Button)` escurece 20% no pressed. `ConfirmDialog` e `ErrorDialog` são especializações prontas (o Confirm dispara eventos `on_confirm`/`on_cancel`). |
 
-#### Arquivos `.kv` (9 arquivos, 1.004 linhas)
+#### Arquivos `.kv` (11 arquivos, 1.418 linhas)
 
 | Arquivo | Linhas | Papel |
 |---|---|---|
-| `main_scene.kv` | 346 | Árvore da `MainView`: navbar lateral retrátil (`nav_toggle` "≡"/"×", `nav_rail` com `NavButton`s "Adicionar Novo Registro", "Dia x Hora", "Dia x Refeição"), appbar (`appbar_title` "Anotar Dextro"), `ScreenManager` (`id: screens`) com as telas `add_card` (formulário: `data_input`, `date_button`, `horario_spinner`, `dextro_input`, `lenta_input`, `rapida_input`, `exercicio_input`, `meal_value`, `observacao_input`), `chart` e `meal_date_chart` (ambas `GraphScreen` com `chart_content`/`meal_date_content`). Layouts condicionais via `app_theme.is_desktop(width)`. |
-| `ui_components.kv` | 243 | 12 componentes reutilizáveis: `ScreenHeader`, `SectionTitle`, `FieldLabel`, `ReadOnlyField`, `AppTextInput`, `AppSpinner`, `PrimaryButton`, `SecondaryButton`, `NavButton`, `Card`, `Panel`, `GraphScreenContent`. |
-| `widgets/Card.kv` | 179 | Visual do `CardWidget` (grade de rótulos/valores do popup de detalhes). |
-| `widgets/popup/dialog.kv` | 104 | Casca do `AppDialog` (título, separadores, `content_holder`, `buttons_holder`). |
+| `main_scene.kv` | ~410 | Árvore da `MainView`: navbar lateral retrátil (`nav_toggle` "≡"/"×", `nav_rail` com `NavButton`s "Adicionar Novo Registro", "Dia x Hora", "Dia x Refeição"), appbar (`appbar_title` "Anotar Dextro"), `ScreenManager` (`id: screens`) com as telas `add_card` (formulário: `data_input`, `date_button`, `horario_spinner`, `dextro_input`, `lenta_input`, `rapida_input`, `exercicio_input`, `observacao_input` + seção **Refeição** com picker dedicado `meal_value` e seção Nutrição opt-in: toggle "Ativar", campos de gramas e botão "Buscar Alimento"), `chart` e `meal_date_chart` (ambas `GraphScreen` com `chart_content`/`meal_date_content`). Layouts condicionais via `app_theme.is_desktop(width)`. |
+| `ui_components.kv` | ~270 | 12 componentes reutilizáveis: `ScreenHeader`, `SectionTitle`, `FieldLabel`, `ReadOnlyField`, `AppTextInput`, `AppSpinner`, `PrimaryButton`, `SecondaryButton`, `NavButton`, `Card`, `Panel`, `GraphScreenContent`. |
+| `widgets/Card.kv` | ~240 | Visual do `CardWidget` (grade de rótulos/valores do popup de detalhes, com a linha de nutrição CHO/Gordura). |
+| `widgets/popup/dialog.kv` | ~110 | Casca do `AppDialog` (título, separadores, `content_holder`, `footer_holder`, `buttons_holder`). |
+| `widgets/pickers/food_search_popup.kv` | ~95 | Busca TACO: input, spinner de categorias, RecycleView de resultados, estado vazio e linha de total. |
+| `widgets/pickers/food_detail_popup.kv` | ~160 | Detalhes do alimento: grid dos 6 valores por 100g, quantidade e preview da porção. |
 | `widgets/graphs/controls/zoom_controls.kv` | 55 | Toolbar `- / 100% / + / 📌` (bind de `zoom.zoom_level` no label percentual). |
 | `widgets/graphs/screens/graph_screen.kv` | 22 | `GraphScreenContent`: header da tela + `ZoomControls` + `Panel > Border (id: container)` onde o gráfico é inserido. |
 | `widgets/graphs/generic_matrix_graph.kv` | 27 | `RecycleGridLayout` da matriz com `cols` ligado a `layout_cols`. |
@@ -729,11 +802,21 @@ Abstrai a resolução de caminhos de arquivo entre três ambientes de execução
 
 Essa abstração é o que permite ao mesmo código-fonte funcionar tanto rodando via `python main.py` quanto empacotado como `.exe`/`.app` ou como `.apk` Android (via python-for-android, indicado pelas variáveis `P4A_BOOTSTRAP`).
 
+### 9.3 `DatabaseMigrationService` (`db_migration_service.py`, ~200 linhas, NOVO)
+
+Migração de esquema do banco de cards do usuário — roda no **startup**, no composition root, ANTES da construção do `JsonHandler`/repositório, de modo que quem lê o banco depois sempre vê o formato canônico.
+
+- **Formato canônico do campo `meal`** (espelho do VO `MealPeriod`): `{"meal_period": str | None, "meal": {"carbohydrate_g": int | None, "fat_g": int | None} | None}`. Formato legado (pré nutrição): `meal` como string simples.
+- **Propriedades**: *idempotente* (nada a migrar → NENHUMA escrita — o arquivo fica byte a byte igual, por isso pode rodar todo início de app), *atômico* (`.tmp` + `replace`, mesmo padrão do JsonHandler), *sem quarentena* (valor não mapeável vira `None` + `warning` — nenhum card é descartado), *container preservado* (arquivo legado em lista pura continua em lista; `{"cards": [...]}` continua em dict) e *falha honesta* (JSON corrompido propaga, não "conserta" corrupção silenciosamente).
+- Trabalha em **dicts crus** (sem VOs, sem repositório). Devolve um `MigrationReport` (`cards_checked`, `cards_migrated`, `invalid_periods_nulled`) que o `main.py` loga. Períodos legados inválidos são nulados com `warning`; floats de nutrição são arredondados para o inteiro canônico.
+
 ---
 
 ## 10. Persistência de Dados (JSON)
 
-### 10.1 Esquema atual (usado por `cards_v2.json` e `cards_populated.json`)
+### 10.1 Esquema canônico atual (após a migração do startup)
+
+> Os arquivos de seed em disco (`cards_v2.json`, `cards_populated.json`) ainda trazem o `meal` no formato legado (string simples); é o `DatabaseMigrationService` que grava o formato abaixo na cópia do usuário no primeiro startup. O `CardDataModelParser` lê os dois formatos durante a transição.
 
 ```json
 {
@@ -745,7 +828,7 @@ Essa abstração é o que permite ao mesmo código-fonte funcionar tanto rodando
       "glycemia": 324,
       "long_acting_insulin": null,
       "short_acting_insulin": null,
-      "meal": "pós café da manhã",
+      "meal": { "meal_period": "pós café da manhã", "meal": { "carbohydrate_g": 45, "fat_g": 12 } },
       "observation": "fdsfgdg",
       "exercise": {
         "exercise_name": "corrida",
@@ -756,7 +839,7 @@ Essa abstração é o que permite ao mesmo código-fonte funcionar tanto rodando
 }
 ```
 
-Tipos efetivamente gravados: `card_id` (string UUID), `card_date` (ISO `YYYY-MM-DD`), `card_time` (`HH:MM`), `glycemia` (int), insulinas (int ou `null`), `meal`/`observation` (string ou `null`), `exercise` (objeto com `exercise_name`/`intensity`, ambos string ou `null`).
+Tipos efetivamente gravados: `card_id` (string UUID), `card_date` (ISO `YYYY-MM-DD`), `card_time` (`HH:MM`), `glycemia` (int), insulinas (int ou `null`), `observation` (string ou `null`), `exercise` (objeto com `exercise_name`/`intensity`, ambos string ou `null`) e `meal` como **objeto aninhado** — espelho 1:1 do VO `MealPeriod` com o `Meal` de nutrição dentro. Card sem nutrição grava `"meal": {"meal_period": ..., "meal": null}` — nunca dict vazio nem `null` cru (o `null` cru é assinatura de legado e é migrado no startup, seção 9.3). Nutrição sem período é válida (`"meal_period": null` com `"meal"` preenchido).
 
 ### 10.2 Esquema legado (`db/cards.json`)
 
@@ -797,6 +880,22 @@ Ou seja: na primeira execução em um dispositivo, o app **copia o banco semeado
 
 > ⚠️ Isso significa que, em uso real, todo usuário novo começa com ~1000 registros de exemplo pré-existentes — comportamento pensado para desenvolvimento/demonstração que precisará ser trocado por um seed vazio (ou nenhum seed) antes de um lançamento para usuários reais. Ver seção 17.
 
+### 10.5 Tabela TACO (`db/TACO.json`, NOVA)
+
+Asset **somente-leitura** empacotado com o app (resolvido por `get_asset_path`): 597 alimentos brasileiros organizados em 15 categorias, com valores nutricionais **por 100 g**. Cada entrada carrega `id`, `description`, `category` e os nutrientes `energy_kcal`, `protein_g`, `carbohydrate_g`, `lipid_g` (gordura), `fiber_g` e `sodium_mg`.
+
+Convenções da fonte, normalizadas pelo `TacoRepository` na carga (seção 7.4):
+
+| Valor na fonte | Significado | Normalizado para |
+|---|---|---|
+| `"NA"` | não aplicável | `None` (indisponível) |
+| `"Tr"` | traço (desprezível) | `None` (indisponível) |
+| `"*"` / `""` | não medido | `None` (indisponível) |
+| negativo entre -0.045 e -0.007 (4 casos, peixes/carnes) | ruído de medição laboratorial | `0.0` |
+| negativo além de 1 g/100g | corrupção de dados | `FoodDataError` (falha a carga) |
+
+Dado indisponível ≠ zero em toda a cadeia: o VO `Food` carrega `None`, o popup de detalhes exibe `"—"`, e o `Meal.from_food` mantém o nutriente como `None` no resultado (não contribui no cálculo).
+
 ---
 
 ## 11. Composition Root (`main.py`)
@@ -807,24 +906,29 @@ Ou seja: na primeira execução em um dispositivo, o app **copia o banco semeado
 
 1. **Setup de logging** (em nível de módulo, antes do `build`): `KIVY_LOG_MODE=MIXED` e `configure_logging(DEBUG)` — console detalhado;
 2. **Resolução de paths e seed do banco** (seção 10.4);
-3. **Infraestrutura**: `JsonHandler(save_path=db_path)` → `CardDataModelParser()` → `CardCreator()` (fábrica) → `JsonRepository(handler, parser, card_creator)`;
-4. **Use Cases** (repo injetado): `GetTimeListUseCase()` e `GetMealListUseCase()` (sem dependências), `GetHourDateMatrixUseCase(card_repository)`, `CreateCardUseCase(card_repository, card_creator)`, `DeleteCardByIDUseCase(card_repository)` e `GetMealDateMatrixUseCase(get_meal_list, repository)`;
-5. **Controllers**: `TimeController`, `DateHourMatrixController`, `MealController`, `SaveRequestController`, `DeleteCardRequestController`, `DateMealMatrixController` — cada um recebe seu Use Case correspondente;
-6. **Tabela de rotas** (`Dict[str, IController]`) — o "roteador" de comandos nomeados usado por toda a UI (tabela completa na seção 7.2);
-7. **`KivyRouter(routes)`** — implementação concreta de `IRouter`;
-8. **`MainController(router=router)`** — recebe o router já pronto e constrói toda a árvore de UI a partir dele.
+3. **Migração de esquema**: `DatabaseMigrationService(save_path).run()` checa/normaliza o banco do usuário para o formato canônico do `meal` e loga o `MigrationReport` (seção 9.3);
+4. **Infraestrutura**: `JsonHandler(save_path=db_path)` → `CardDataModelParser()` → `CardCreator()` (fábrica) → `JsonRepository(handler, parser, card_creator)`; em paralelo, `TacoRepository(get_asset_path("db/TACO.json"))` carrega a tabela de alimentos;
+5. **Use Cases** (repo/dados injetados): `GetTimeListUseCase()` e `GetMealListUseCase()` (sem dependências), `GetHourDateMatrixUseCase(card_repository)`, `CreateCardUseCase(card_repository, card_creator)`, `DeleteCardByIDUseCase(card_repository)`, `GetMealDateMatrixUseCase(get_meal_list, repository)` — e as consultas TACO: `SearchFoodUseCase(foods)`, `GetFoodCategoryListUseCase(foods)` e `CalculateNutritionUseCase()`;
+6. **Controllers**: `TimeController`, `DateHourMatrixController`, `MealController`, `SaveRequestController`, `DeleteCardRequestController`, `DateMealMatrixController`, `SearchFoodController`, `FoodCategoryListController` e `CalculateNutritionController` — cada um recebe seu Use Case correspondente;
+7. **Tabela de rotas** (`Dict[str, IController]`, 9 rotas) — o "roteador" de comandos nomeados usado por toda a UI (tabela completa na seção 7.2);
+8. **`KivyRouter(routes)`** — implementação concreta de `IRouter`;
+9. **`MainController(router=router)`** — recebe o router já pronto e constrói toda a árvore de UI a partir dele.
 
 A aplicação retorna `self.controller.main_view` como *root widget* do Kivy. Há também hooks simples de ciclo de vida (`on_start`, `on_stop`) apenas para logging.
 
 ```mermaid
 flowchart TD
     A["DextroApp.build"] --> B["get_data_path + seed do banco"]
-    B --> C1["JsonHandler"]
+    B --> M["DatabaseMigrationService.run"]
+    M --> C1["JsonHandler"]
     C1 --> C2["CardDataModelParser"]
     C2 --> C3["CardCreator"]
     C3 --> C4["JsonRepository"]
+    B --> T["TacoRepository (TACO.json)"]
     C4 --> D1["Use Cases<br/>Create / Delete / Matrizes / Listas"]
-    D1 --> E1["Controllers de rota<br/>6 comandos"]
+    T --> D2["Use Cases de consulta<br/>SearchFood / Categories / CalculateNutrition"]
+    D1 --> E1["Controllers de rota<br/>9 comandos"]
+    D2 --> E1
     E1 --> F["routes dict"]
     F --> G["KivyRouter"]
     G --> H["MainController"]
@@ -933,6 +1037,43 @@ sequenceDiagram
 
 O diálogo de exclusão **reaproveita a mesma instância** de `AppDialog`, alternando conteúdo, título e botões entre os modos "Detalhes" e "Confirmar exclusão" (`auto_height` ligado no modo compacto). Qualquer exceção do repositório (ex: card já removido) vira `DomainExceptionError` no use case — e, como no fluxo de salvamento, ainda não há tratamento de UI conectado a esse caminho.
 
+### 12.4 Registrar uma refeição com alimentos da tabela TACO (NOVO)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Usuário
+    participant MV as MainView
+    participant FP as FoodSearchContent<br/>(RecycleView)
+    participant FD as FoodDetailContent
+    participant MC as MainController
+    participant KR as KivyRouter
+    participant SC as SearchFoodController
+    participant CN as CalculateNutritionController
+    participant MP as Mappers (sum_grams)
+
+    U->>MV: toca "Buscar Alimento"
+    MV->>FP: abre AppDialog com rodapé fixo<br/>(lista = TACO completa alfabética)
+    U->>FP: digita "pao"
+    FP->>MC: search_handler(query, category)
+    MC->>KR: navigate search_food
+    KR->>SC: execute(dict)
+    SC-->>FP: FoodSearchResult (ranking)
+    U->>FP: toca a linha do alimento
+    FP->>FD: abre detalhes (6 valores por 100g)
+    U->>FD: digita 150 g (preview recalcula ao vivo)
+    U->>FD: toca Adicionar
+    FD->>MC: on_use_food(food, grams)
+    MC->>KR: navigate calculate_nutrition
+    KR->>CN: execute(food, grams)
+    CN-->>MC: Meal consumido
+    MC->>MP: sum_grams_for_input(texto atual, CHO do Meal)
+    MP-->>MV: campos acumulados + total no rodapé
+    Note over FP: popup de busca PERMANECE aberto<br/>(próxima comida fecha só o detalhe)
+```
+
+Pontos-chave do fluxo: a soma acumula (não substitui) e mantém a vírgula decimal brasileira; texto inválido no campo conta como 0; nutriente ausente na tabela (`None`) não contribui — o campo mantém o valor anterior; o cálculo oficial do registro passa pela rota `calculate_nutrition` (o preview do detalhe é só apresentação); ao "Fechar" o dialog de busca, o popup de detalhes empilhado é fechado junto via `on_dismiss`.
+
 ---
 
 ## 13. Interface Gráfica (Kivy/KivyMD)
@@ -970,7 +1111,7 @@ O `GenericMatrixGraph` cacheia o resultado da `cell_factory` (`_parts`) e expõe
 
 ### 13.4 Diálogos padronizados
 
-Todo popup do sistema agora passa pelo `AppDialog` (`ModalView` customizado): detalhes do card (com `CardWidget`), confirmação de exclusão (duas etapas no mesmo diálogo), confirmação de salvamento e erro. A API (`set_content`/`set_buttons`) com botões temáticos (`DialogButton` com escurecimento no pressed) e modo compacto por altura automática dá consistência visual e comportamental; `ConfirmDialog` e `ErrorDialog` servem como especializações prontas para uso futuro em outros fluxos.
+Todo popup do sistema agora passa pelo `AppDialog` (`ModalView` customizado): detalhes do card (com `CardWidget`), confirmação de exclusão (duas etapas no mesmo diálogo), confirmação de salvamento, erro e os **dois popups de alimento** (busca TACO e detalhes empilhado). A API (`set_content`/`set_buttons`/**`set_footer`**) com botões temáticos (`DialogButton` com escurecimento no pressed) e modo compacto por altura automática dá consistência visual e comportamental; o `set_footer` garante que o total acumulado da busca fique **fixo abaixo da área de scroll** (sem ele, a linha de total ficava sob a dobra do dialog — bug capturado em screenshot real). `ConfirmDialog` e `ErrorDialog` servem como especializações prontas para uso futuro em outros fluxos.
 
 ### 13.5 Seleção de data
 
@@ -990,27 +1131,33 @@ Com a refatoração, o caminho para "fazer os erros pipocarem na view" (item ant
 - **Testes baseados em propriedade**: `hypothesis` 6.165.10 — presente em `Glycemia` (29 casos), `Card`, `CreateCardUseCase`, `DeleteCardByIDUseCase`, `CardDataModelParser` e nos templates de matriz (`test_property_*`).
 - **Mocks**: `unittest.mock.create_autospec` com **`spec_set=True`** (impede acesso a métodos/atributos fora da interface — prática rigorosa) para isolar use cases de seus repositórios/creators.
 - **Fakes**: `FakeCardRepository` (implementação in-memory de `ICardRepository` com opções de falha: `fail_on_add`, `fail_on_remove`, `strict_remove`) para testes de orquestração mais legíveis que mocks.
-- **Execução real da suíte** (nesta análise): **279 itens coletados → 275 passando, 3 falhando, 1 pulado** (~6s de execução). As 3 falhas e o pulo estão detalhados em 14.5.
+- **Execução real da suíte** (nesta análise): **481 itens coletados → 480 passando, 0 falhando, 1 pulado** (~5.5s de execução). O pulo está detalhado em 14.5; as 3 falhas conhecidas da análise anterior (desacordo `DuplicatedCellError`) foram resolvidas na própria `main` (ver 14.5).
 
-### 14.2 Distribuição dos testes (220 funções `test_*`)
+### 14.2 Distribuição dos testes (348 funções `test_*`)
 
 | Diretório | Escopo | Testes |
 |---|---|---|
-| `tests/unit/core/` | Um arquivo por Value Object (10 arquivos) | 112 |
-| `tests/unit/usecases/` (total) | Orquestração de use cases + templates de matriz | 78 |
+| `tests/unit/core/` | Um arquivo por Value Object (11 arquivos, incluindo `Food` e `Meal`/`MealPeriod`) | 153 |
+| `tests/unit/usecases/` (total) | Orquestração de use cases, consultas TACO e templates de matriz | 102 |
 | ├─ `test_create_card_use_case.py` | `CreateCardUseCase` (mocks + fakes + hypothesis) | 15 |
 | ├─ `test_delete_card_by_id_use_case.py` | `DeleteCardByIDUseCase` (mocks + fakes + hypothesis) | 12 |
-| ├─ `test_card_creator.py` | Orquestração dos `parse()` do `CardCreator` | 1 |
-| └─ `Matrix/` | `BaseColumnMatrixTemplate` (17) e `Base2DMatrixTemplate` (33) | 50 |
-| `tests/unit/adapters/` | `CardDataModelParser` (2) + `JsonRepository` com mocks (10) | 12 |
-| `tests/unit/frameworks/` | `JsonHandler` (tmp+replace, load retrocompatível, erros) | 6 |
-| `tests/integration/` | `JsonRepository` + `JsonHandler` **reais** em `tmp_path` | 12 |
+| ├─ `test_card_creator.py` | Orquestração dos `parse()` do `CardCreator` (inclui nutrição aninhada) | 2 |
+| ├─ `test_search_food.py` | `SearchFoodUseCase`: normalização, ranking, categoria, limite, tabela vazia | 17 |
+| ├─ `test_calculate_nutrition.py` | Conversão `(Food, gramas) -> Meal` | 5 |
+| ├─ `test_get_food_category_list.py` | Categorias alfabéticas, cópia defensiva | 4 |
+| └─ `Matrix/` | `BaseColumnMatrixTemplate` (17) e `Base2DMatrixTemplate` (30) | 47 |
+| `tests/unit/adapters/` | `CardDataModelParser` retrocompatível (6), `JsonRepository` com mocks (10), `TacoRepository` (13), mappers de nutrição (25) | 54 |
+| `tests/unit/frameworks/` | `JsonHandler` (6) + `DatabaseMigrationService` (17: idempotência, container legado, valores inválidos) | 23 |
+| `tests/integration/` | `JsonRepository` + `JsonHandler` **reais** em `tmp_path` | 16 |
 
 Destaques da suíte nova (não existia na documentação anterior):
 
-- **`test_base_2d_matrix_template.py` (33 testes)**: cobre o pipeline completo do template 2D — ordem de execução, filtro vazio, cards com chaves `None`/desconhecidas, deduplicação de linhas, `DuplicatedColumnError` em chaves repetidas, propagação de erros de repositório/mapper, hooks não implementados e 6 testes property-based.
-- **`test_base_column_matrix_template_use_case.py` (17 testes)**: base comum — filtro padrão identidade (e não-mutação da lista original), headers, índice de colunas com detecção de duplicatas, hooks abstratos.
-- **`test_create_card_use_case.py` / `test_delete_card_by_id_use_case.py`**: verificação fina de orquestração (ordem creator→repository, nenhum método extra chamado, exceções propagadas com causa preservada, fakes de ponta a ponta em memória).
+- **`test_food.py` / `test_meal.py` (48 testes)**: os VOs novos — tipos aceitos pelo `parse`, rejeição de negativo/NaN/infinito, `Meal.parse` vazio → `None`, `Meal.from_food` com nutriente ausente (`None` preservado, desconhecido ≠ zero), grama inteira via `round`.
+- **`test_search_food.py` (17)**: busca sem acento (`"pao frances"` acha `"Pão, francês"`), ranking prefixo > palavra > contém, categoria e limite; query vazia devolve a tabela inteira alfabética.
+- **`test_taco_repo.py` (13)**: convenções da fonte ("NA"/"Tr"/"*" → `None`), ruído negativo → `0.0`, corrupção → `FoodDataError`, cacheamento.
+- **`test_mappers_nutricao.py` (25)**: vírgula decimal brasileira, soma multi-alimento (`sum_grams_for_input`), formatação de exibição, nutrição no popup do card.
+- **`test_db_migration_service.py` (17)**: banco idempotente (segunda execução não escreve), string legado → aninhado, `null` cru → objeto, períodos inválidos nulados, container preservado (lista e dict).
+- **`test_base_2d_matrix_template.py` (30 testes)**: cobre o pipeline completo do template 2D — ordem de execução, filtro vazio, cards com chaves `None`/desconhecidas, deduplicação de linhas, `DuplicatedColumnError` em chaves repetidas, propagação de erros de repositório/mapper, hooks não implementados e testes property-based.
 
 ### 14.3 Fixture central (`tests/conftest.py`, 529 linhas)
 
@@ -1040,8 +1187,8 @@ O teste de integração (`test_integration_json_repo.py`) cobre, com **arquivo r
 
 | Resultado | Quantidade | Detalhe |
 |---|---|---|
-| ✅ Passando | 275 | — |
-| ❌ Falhando | 3 | `test_base_2d_matrix_template.py`: os três testes `*_raises_duplicated_cell_error_*` esperam que `DuplicatedCellError` seja **lançada** por `_build_lookup`/`execute`, mas a implementação atual apenas faz `logger.error(...)` e sobrescreve a célula (seção 6.5). É um desacordo teste↔implementação: ou o template deve passar a lançar, ou os testes devem registrar o comportamento de log + last-wins. |
+| ✅ Passando | 480 | — |
+| ❌ Falhando | 0 | As 3 falhas da análise anterior (`DuplicatedCellError`) foram resolvidas: os testes que esperavam a exceção lançada foram **comentados na própria `main`** (commit "Zoom e Headers stick"), documentando a decisão implícita de *last-wins* + `logger.error` (seção 17, item 1). |
 | ⏭️ Pulado | 1 | `test_meal.py` — caso parametrizado desativado com a razão "Este valor na verdade é válido após normalização" (o valor testado não é inválido depois do `.lower()` do `parse`). |
 
 ### 14.6 Padrão dos testes de Value Object
@@ -1080,7 +1227,7 @@ Extraído e organizado de `Planejamento.md` (conteúdo original do repositório)
 - Simplificar o parser de card do repositório.
 - Implementar a função de **alterar** (editar) um card no `CardCreator` — *(o repositório já possui `update_card`; falta o caso de uso e a UI)*.
 - Adicionar `intensity` (intensidade de exercício) na UI — atualmente o VO já suporta, mas o formulário (`main_view.get_data()`) sempre envia `intensity: ''`.
-- Adicionar campo de **carboidratos** em `MealPeriod`.
+- Adicionar campo de **carboidratos** em `MealPeriod` — *(FEITO na branch `meal-improvements-for-real-food`: VO `Meal` com CHO/gordura consumidos aninhado ao período, tabela TACO e busca integrada à UI)*.
 - Adicionar configuração e salvamento dos **thresholds de insulina/glicemia** (o VO `Glycemia` já suporta thresholds customizáveis, mas nada na UI ainda os expõe).
 - Fazer os thresholds impactarem visualmente os gráficos atuais (ex.: colorir células fora da faixa).
 - Adicionar configuração de fórmula para cálculo de insulina rápida (bolus).
@@ -1102,7 +1249,7 @@ Extraído e organizado de `Planejamento.md` (conteúdo original do repositório)
 
 Itens abaixo foram identificados por leitura direta do código e pela execução da suíte (alguns já reconhecidos pelo próprio autor em comentários/docstrings, outros identificados nesta análise). **Itens resolvidos desde a última documentação**: ausência de `requirements.txt` (criado com pinos exatos), README vazio (agora completo, salvo o link corrigido nesta versão) e import quebrado `tests.exceptions` nos testes de repositório (agora importa corretamente de `adapters.exceptions`).
 
-1. **Desacordo teste↔implementação em `DuplicatedCellError`** (3 testes falhando). Os testes de `Base2DMatrixTemplate` esperam que a exceção seja **lançada** quando dois cards ocupam a mesma célula; a implementação (`base_2d_matrix_template.py`, `_build_lookup`) apenas loga o erro (`logger.error(DuplicatedCellError(...))`) e sobrescreve silenciosamente (last-wins). Decidir o contrato: lançar (e o app precisa tolerar) ou documentar o last-wins e ajustar os testes.
+1. **Desacordo teste↔implementação em `DuplicatedCellError` — RESOLVIDO na `main`**. Os testes de `Base2DMatrixTemplate` esperavam que a exceção fosse **lançada** quando dois cards ocupam a mesma célula; a implementação (`_build_lookup`) apenas loga o erro (`logger.error(DuplicatedCellError(...))`) e sobrescreve silenciosamente (last-wins). A resolução foi **comentar os 3 testes** na própria `main` (commit "Zoom e Headers stick", os blocos permanecem no arquivo com `#` como referência do contrato alternativo) — ou seja, o contrato vigente é log + last-wins, decisão implícita que merece ser explicitada em um dia em que a célula possa ter múltiplos registros (ex: insulina + dextro no mesmo horário).
 
 2. **Duplicações no `tests/conftest.py`** (529 linhas). `build_card_repository_mock` definido 4×, `FakeCardRepository` 2× (a segunda versão, mais rica, vale em runtime), fixtures repetidas (`valid_card`, `card_factory`, `card_repository_mock`, `card_repository_mock_factory`, `assert_repository_methods_not_called_except` ×2). Funciona porque Python aceita redefinição, mas qualquer edição pode facilmente alterar a "versão errada" do símbolo. Recomenda-se consolidar o arquivo (ou dividi-lo por suíte).
 
@@ -1133,6 +1280,12 @@ Itens abaixo foram identificados por leitura direta do código e pela execução
 15. **Atributos de classe duplicados em `MatrixCell`**: `base_width`/`base_height` são definidos duas vezes seguidas (mesmo valor `dp(152)`/`dp(44)`), resíduo de edição inofensivo em runtime, mas confuso para manutenção.
 
 16. **Constantes legadas sem uso**: `CELL_W`/`CELL_H`/`BORDER_WIDTH` no topo de `app_theme.py` não são referenciados (as métricas reais da célula vivem na classe `MatrixCell`).
+
+17. **Crash ao salvar formulário inválido — validação de save pendente (decisão de UX)**: salvar sem glicemia levanta exceção em `view_model_to_input` (`int("")`) e explode sem popup de erro; análogo para texto inválido nos campos de nutrição (`decimal_or_none` chama `float("abc")` sem proteção). O mecanismo de UI para isso já existe (`show_error`, seção 13.6) — falta decidir e conectar a validação no save. Observação: a soma multi-alimento da busca TACO é protegida (`parse_brazilian_decimal` trata inválido como ausente); o risco é só digitação manual direta no campo.
+
+18. **Fragilidade de ordem de carregamento dos `.kv`**: `main_scene.kv` registra o `#:import app_theme` globalmente (efeito colateral do `Builder.load_file`); `Card.kv` não tem import próprio e depende dele. Funciona porque a `MainView` (que carrega `main_scene.kv`) sempre é instanciada antes dos `CardWidget`, mas é uma dependência implícita — instanciar um `CardWidget` antes da `MainView` em código novo quebraria o parse.
+
+19. **Popups empilhados (busca → detalhes do alimento)**: o fluxo multi-alimento mantém dois `ModalView` abertos simultaneamente (busca + detalhes), coordenados manualmente via `bind(on_dismiss)` do pai. Funciona, mas vale vigiar o comportamento do botão de voltar no Android (Buildozer no horizonte): o padrão esperado é fechar o popup do topo.
 
 ---
 
@@ -1166,7 +1319,7 @@ pytest
 
 **Empacotamento**: o `requirements.txt` inclui `pyinstaller` (executáveis desktop) e `buildozer` (APK Android — o release V0.1 do projeto foi construído com esse fluxo).
 
-**Estado da suíte de testes**: 279 itens coletados — 275 passam, 1 é pulado (caso parametrizado em `test_meal.py`) e 3 falham por causa do desacordo `DuplicatedCellError` (seções 14.5 e 17, item 1). Ao rodar `pytest`, espere esse resultado — as falhas são conhecidas e documentadas.
+**Estado da suíte de testes**: 481 itens coletados — **480 passam, 1 é pulado** (caso parametrizado em `test_meal.py`) e **0 falham**. Ao rodar `pytest`, espere esse resultado.
 
 ---
 
@@ -1176,4 +1329,4 @@ O projeto é distribuído sob a **PolyForm Noncommercial License 1.0.0**, © bab
 
 ---
 
-*Documentação gerada por leitura completa e sistemática do código-fonte da branch `main` do repositório (setembro/2026), incluindo a execução real da suíte de testes (`pytest`: 279 coletados, 275 aprovados, 3 falhas conhecidas, 1 pulado) e a inspeção dos artefatos de dados (`db/*.json`). As referências diretas ao código estão organizadas por caminho de arquivo ao longo de todo o documento para facilitar a navegação cruzada com o repositório real.*
+*Documentação gerada por leitura completa e sistemática do código-fonte da branch `meal-improvements-for-real-food` do repositório (novembro/2026), incluindo a execução real da suíte de testes (`pytest`: 481 coletados, 480 aprovados, 0 falhas, 1 pulado) e a inspeção dos artefatos de dados (`db/*.json`). A análise anterior da `main` (setembro/2026) foi absorvida nesta versão. As referências diretas ao código estão organizadas por caminho de arquivo ao longo de todo o documento para facilitar a navegação cruzada com o repositório real.*

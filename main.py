@@ -9,8 +9,10 @@ import shutil
 # Infrastructure
 from frameworks.json_handler_service import JsonHandler
 from adapters.repositories.jsonRepo import JsonRepository
+from adapters.repositories.tacoRepo import TacoRepository
 from adapters.parsers.card_data_model_parser import CardDataModelParser
 from infrastructure.path_provider_service import get_data_path, get_asset_path
+from infrastructure.db_migration_service import DatabaseMigrationService
 
 # Use Cases
 from usecases.Factories.card_creator import CardCreator
@@ -20,6 +22,9 @@ from usecases.get_meal_list_use_case import GetMealListUseCase
 from usecases.create_card_use_case import CreateCardUseCase
 from usecases.delete_card_by_id_use_case import DeleteCardByIDUseCase
 from usecases.get_matrix_data.get_meal_date_matrix_data import GetMealDateMatrixUseCase
+from usecases.search_food_use_case import SearchFoodUseCase
+from usecases.get_food_category_list_use_case import GetFoodCategoryListUseCase
+from usecases.calculate_nutrition_use_case import CalculateNutritionUseCase
 
 # Controllers (adapters)
 from adapters.controllers.time_controller import TimeController
@@ -28,6 +33,9 @@ from adapters.controllers.meal_controller import MealController
 from adapters.controllers.save_request_controller import SaveRequestController
 from adapters.controllers.delete_card_request_controller import DeleteCardRequestController
 from adapters.controllers.date_meal_matrix_controller import DateMealMatrixController
+from adapters.controllers.search_food_controller import SearchFoodController
+from adapters.controllers.food_category_list_controller import FoodCategoryListController
+from adapters.controllers.calculate_nutrition_controller import CalculateNutritionController
 from adapters.controllers.i_controller import IController
 
 # Gateway
@@ -61,6 +69,15 @@ class DextroApp(MDApp):
         db_path = get_data_path(DB)
         logger.info(f"Save path set to: {db_path}")
 
+        # Migração do banco do usuário para o formato canônico atual (idempotente)
+        migration_report = DatabaseMigrationService(db_path).run()
+        if migration_report.cards_migrated:
+            logger.info("User database migrated to canonical meal structure: %s", migration_report)
+
+        # Tabela TACO: asset somente-leitura, carregada uma vez e injetada nos use cases
+        taco_repository = TacoRepository(get_asset_path("db/TACO.json"))
+        foods = taco_repository.get_all()
+
         # 1. Infraestrutura
         json_handler = JsonHandler(save_path=db_path)
         parser = CardDataModelParser()
@@ -81,6 +98,10 @@ class DextroApp(MDApp):
         get_date_meal_matrix_uc = GetMealDateMatrixUseCase(get_meal_list=get_meal_list_uc,
                                                            repository=card_repository)
 
+        search_food_uc = SearchFoodUseCase(foods)
+        food_category_list_uc = GetFoodCategoryListUseCase(foods)
+        calculate_nutrition_uc = CalculateNutritionUseCase()
+
         # 3. Controllers (use cases injetados)
         time_controller = TimeController(get_time_list_uc)
         date_hour_matrix_controller = DateHourMatrixController(get_matrix_uc)
@@ -88,6 +109,9 @@ class DextroApp(MDApp):
         save_request_controller = SaveRequestController(create_card_uc)
         delete_card_id_controller = DeleteCardRequestController(delete_card_by_id_uc)
         date_meal_matrix_controller = DateMealMatrixController(get_date_meal_matrix_uc)
+        search_food_controller = SearchFoodController(search_food_uc)
+        food_category_list_controller = FoodCategoryListController(food_category_list_uc)
+        calculate_nutrition_controller = CalculateNutritionController(calculate_nutrition_uc)
 
         # 4. Commands
         routes: Dict[str, IController] = {
@@ -95,7 +119,12 @@ class DextroApp(MDApp):
             "get_meal_list": meal_controller,
             "get_hour_date_matrix_data": date_hour_matrix_controller,
             "get_meal_date_matrix_data": date_meal_matrix_controller,
-            
+
+            # Tabela TACO
+            "search_food": search_food_controller,
+            "get_food_category_list": food_category_list_controller,
+            "calculate_nutrition": calculate_nutrition_controller,
+
             # Queries
             "save_card": save_request_controller,
             "delete_card": delete_card_id_controller,

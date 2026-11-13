@@ -23,5 +23,11 @@ class CardDTOInput:
 
     exercise: _ExerciseDTO = field(init=False)
 
+    # Valores nutricionais consumidos no registro (opcional). Ficam por último
+    # para não quebrar chamadas posicionais legadas: os campos acima mantêm a
+    # ordem original e os novos são sempre passados por keyword.
+    carbohydrate_g: float | int | str | None = None
+    fat_g: float | int | str | None = None
+
     def __post_init__(self, exercise_name: str | None=None, exercise_intensity: str | None=None):
         self.exercise = _ExerciseDTO(exercise_name, exercise_intensity)

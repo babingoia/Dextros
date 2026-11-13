@@ -58,11 +58,27 @@ class MainController:
         self.meals = self.router.navigate("get_meal_list")
         self.meals.meal_values.insert(0, "nenhum")
         self.main_view.available_meals = self.meals.meal_values
+        # "Nenhum" AUTOSELECIONADO: salvar sem tocar no picker não pode mandar
+        # lixo pro domínio (o crash que o usuário reportou: o default antigo era
+        # o placeholder "Escolha uma Refeição:", rejeitado pelo MealPeriod).
+        self.main_view.actual_meal = "nenhum"
+
+        # Categorias da tabela TACO + handlers de busca/cálculo de nutrição
+        self.main_view.available_food_categories = \
+            self.router.navigate("get_food_category_list").category_values
+        self.main_view.food_search_handler = self._food_search_handler
+        self.main_view.nutrition_calculator = self._nutrition_calculator
 
         # Conectando aos eventos
         self.main_view.bind(on_save_request=self._handle_save_request)
         self.main_view.date_picker.bind(on_date_selected=self._on_date_selected)
         self.main_view.date_picker.bind(on_save=self._on_date_save)
+
+    def _food_search_handler(self, query, category):
+        return self.router.navigate("search_food", {"query": query, "category": category})
+
+    def _nutrition_calculator(self, food, grams):
+        return self.router.navigate("calculate_nutrition", {"food": food, "grams": grams})
 
     def _handle_save_request(self, instance, *args):
         logger.debug("Save request received from main view.")
