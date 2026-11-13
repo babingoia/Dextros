@@ -28,7 +28,7 @@
 -> Simplificar o card parser do repositório.
 -> Criar a função do alterar card do card creator.
 -> Adicionar o intensity na UI.
--> Adicionar carboidratos em meal.
+-> Adicionar carboidratos em meal. [FEITA na branch meal-improvements-for-real-food — Meal com CHO/gordura + tabela TACO + busca na UI]
 -> Adicionar configuração e salvamento dos thresholds de insulina.
 -> Fazer com que os thresholds impactem nos gráficos atuais.
 

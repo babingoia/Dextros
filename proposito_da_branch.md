@@ -77,16 +77,44 @@ Convenções da fonte tratadas no repositório: "NA" (não aplicável), "Tr" (tr
 4 carboidratos levemente negativos (ruído de medição em peixes/carnes): viram 0.0 na
 carga; negativo além de 1g/100g é corrupção e falha com erro.
 
-### UI (opt-in)
-A seção "Nutrição da refeição" no formulário nasce DESABILITADA: o usuário destrava
-com o toggle "Ativar". Com o toggle off, `get_data()` ignora qualquer texto sobrado.
-A busca TACO (popup com debounce, categorias e gramas) preenche os campos e destrava
-o toggle sozinha. A UI nunca manipula o dict aninhado: ViewModel e DTOInput continuam
-planos; a composição acontece no `CardCreator`, na fronteira do domínio. Vírgula
-decimal brasileira é normalizada no mapper. Rotas novas: `search_food`,
-`get_food_category_list`, `calculate_nutrition`.
+### UI (opt-in, refinada em ciclos de uso real)
+A seção "Refeição" no formulário concentra o período da refeição em um picker
+dedicado (nasce com "nenhum" autoselecionado) e a nutrição em um opt-in: o
+usuário destrava com o toggle "Ativar". Com o toggle off, `get_data()` ignora
+qualquer texto sobrado. A UI nunca manipula o dict aninhado: ViewModel e
+DTOInput continuam planos; a composição acontece no `CardCreator`, na fronteira
+do domínio. Vírgula decimal brasileira é normalizada no mapper. Rotas novas:
+`search_food`, `get_food_category_list`, `calculate_nutrition`.
+
+A consulta TACO é um botão que abre um popup de busca mobile first, iterado em
+ciclos de feedback com screenshots reais:
+
+- **Lista navegável com RecycleView**: abre com a tabela COMPLETA em ordem
+  alfabética (folhear antes de digitar), busca com debounce, sem acento/pontuação
+  e com ranking por relevância, filtro por categoria. 597 itens custam ~8 widgets
+  reais na memória.
+- **Popup de detalhes do alimento**: toque na linha abre os 6 valores por 100 g
+  (energia, proteína, CHO, gordura, fibra, sódio), quantidade com preview
+  recalculado ao vivo ("150 g ≈ CHO 55,5 g · Gordura 1,8 g · 473 kcal") e botão
+  Adicionar. Dado indisponível na tabela aparece como "—", nunca zero.
+- **Um registro = vários alimentos**: Adicionar SOMA nos campos do formulário
+  (mantém a vírgula decimal; texto inválido conta como 0) e NÃO fecha o popup —
+  o botão é "Fechar", não "Cancelar". O total acumulado fica em rodapé FIXO do
+  dialog (não rola pra fora; descoberto em screenshot quando ficava sob a dobra).
+- **Popup do card**: os valores consumidos de CHO/Gordura aparecem no popup de
+  detalhes do registro, ao lado do Dextro, com largura em 1/4 cada.
+- Cor de texto digitado branca (bug de herança de canvas do Kivy, corrigido),
+  botões com altura explícita em dp e alinhamentos por `pos_hint` — decisões
+  todas pensadas para tela de celular (Buildozer no horizonte).
 
 ### Fora do escopo desta branch
 Matrizes continuam mostrando só glicemia (apresentação de nutrição fica para depois,
 a `CardOutput` intocada). Edição de registros, calculadora de bolus e alimentos
-customizados ficam para as próximas branches.
+customizados ficam para as próximas branches. Também fica pendente para a próxima
+interação a validação de save com popup de erro em vez de crash (hoje, salvar sem
+dextro levanta exceção no `view_model_to_input` — decisão de UX a alinhar).
+
+## Status de entrega
+Todas as 4 etapas concluídas, seguidas de 3 ciclos de feedback de uso real com
+correções de UI. Suíte de testes: **480 passando, 1 pulado, 0 falhas**. Entrega
+empacotada como git bundle com a história completa da branch.
