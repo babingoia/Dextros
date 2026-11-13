@@ -242,7 +242,7 @@
                                 input_type: "number"
                                 hint_text: "Ex.: 120"
 
-                        # Lenta / Rápida / Exercício / Refeição
+                        # Lenta / Rápida / Exercício
                         Card:
                             SectionTitle:
                                 text: "Insulina e rotina"
@@ -281,38 +281,88 @@
                                         input_type: "number"
                                         hint_text: "Dose"
 
-                            GridLayout:
-                                cols: app_theme.layout("pair_columns") if app_theme.is_wide_enough(root.width, "two_columns") else 1
+                            BoxLayout:
+                                orientation: "vertical"
                                 size_hint_y: None
                                 height: self.minimum_height
+                                spacing: app_theme.space("xs")
+
+                                FieldLabel:
+                                    text: "Exercício"
+
+                                AppTextInput:
+                                    id: exercicio_input
+                                    hint_text: "Opcional"
+
+                        # Refeição — período do registro + nutrição opt-in.
+                        # O picker mora aqui (era na seção de insulina): é a informação
+                        # central do registro de refeição. O picker NUNCA fica desabilitado
+                        # nem apagado — o período é dado do card, a nutrição é opt-in.
+                        Card:
+                            SectionTitle:
+                                text: "Refeição"
+
+                            AppSpinner:
+                                id: meal_value
+                                values: root.available_meals
+                                text: root.actual_meal
+
+                            # Pergunta + toggle na MESMA linha: os dois preenchem
+                            # a altura de toque (48dp), então o título e o botão
+                            # ficam alinhados verticalmente. Causa do botão
+                            # "flutuando" acima do texto: filho de altura fixa em
+                            # BoxLayout horizontal encosta no RODAPÉ da linha
+                            # (SectionTitle tem height fixo de 32dp) enquanto o
+                            # botão preenchia os 48dp inteiros — os centros não
+                            # batiam. O size_hint_y: 1 sobrepõe a altura fixa da
+                            # rule e o valign: middle do SectionTitle centra o
+                            # texto na linha.
+                            BoxLayout:
+                                size_hint_y: None
+                                height: app_theme.widget("touch_target")
                                 spacing: app_theme.space("md")
 
-                                BoxLayout:
-                                    orientation: "vertical"
+                                SectionTitle:
+                                    text: "Registrar carboidratos e gorduras?"
+                                    size_hint_y: 1
+
+                                NutritionToggleButton:
+                                    id: nutrition_toggle
+                                    size_hint_x: None
+                                    width: app_theme.widget("touch_target") * 1.2
+
+                            BoxLayout:
+                                orientation: "vertical"
+                                size_hint_y: None
+                                height: self.minimum_height
+                                spacing: app_theme.space("xs")
+                                opacity: 1 if nutrition_toggle.state == "down" else 0.4
+
+                                FieldLabel:
+                                    text: "Carboidratos (g)"
+
+                                AppTextInput:
+                                    id: carb_input
+                                    input_type: "number"
+                                    hint_text: "Ex.: 45,2 (ou buscar na tabela)"
+                                    disabled: nutrition_toggle.state != "down"
+
+                                FieldLabel:
+                                    text: "Gorduras (g)"
+
+                                AppTextInput:
+                                    id: fat_input
+                                    input_type: "number"
+                                    hint_text: "Ex.: 12,4"
+                                    disabled: nutrition_toggle.state != "down"
+
+                                SecondaryButton:
+                                    id: food_search_button
+                                    text: "Buscar alimento na Tabela TACO"
                                     size_hint_y: None
-                                    height: self.minimum_height
-                                    spacing: app_theme.space("xs")
-
-                                    FieldLabel:
-                                        text: "Exercício"
-
-                                    AppTextInput:
-                                        id: exercicio_input
-                                        hint_text: "Opcional"
-
-                                BoxLayout:
-                                    orientation: "vertical"
-                                    size_hint_y: None
-                                    height: self.minimum_height
-                                    spacing: app_theme.space("xs")
-
-                                    FieldLabel:
-                                        text: "Refeição"
-
-                                    AppSpinner:
-                                        id: meal_value
-                                        values: root.available_meals
-                                        text: root.actual_meal
+                                    height: app_theme.widget("button_height")
+                                    disabled: nutrition_toggle.state != "down"
+                                    on_release: root._open_food_search()
 
                         # Observação
                         Card:

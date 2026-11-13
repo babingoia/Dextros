@@ -21,8 +21,12 @@ class CardOutput:
     meal: str | None
     observation: str | None
 
-    exercise_name: InitVar[str | None]
-    exercise_intensity: InitVar[str | None]
+    # Nutrição consumida no período (gramas). None = não registrado.
+    carbohydrate_g: float | None = None
+    fat_g: float | None = None
+
+    exercise_name: InitVar[str | None] = None
+    exercise_intensity: InitVar[str | None] = None
 
     exercise: _ExerciseDTO = field(init=False)
 

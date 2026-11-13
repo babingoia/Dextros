@@ -239,3 +239,87 @@ def test_multiple_operations_maintain_consistency(repository):
     assert len(final_cards) == 4
     assert any(c.glycemia.glycemia == 300 for c in final_cards)
     assert not any(str(c.card_id.card_id) == str(cards[2].card_id.card_id) for c in final_cards)
+
+# ==========================================
+# NUTRIÇÃO: formato canônico aninhado + legado
+# ==========================================
+
+from core.value_objects.meal import Meal  # noqa: E402
+
+
+def make_dummy_card_com_nutricao(card_id: str = None, carb: int = 45, fat: int = 12) -> Card:
+    """Card com nutrição consumida aninhada no MealPeriod."""
+    cid = CardID.parse(card_id or str(uuid4()))
+    cdate = Date.parse(date.today())
+    ctime = Time.parse(time(14, 30))
+    cglyc = Glycemia.parse(120)
+    clong = LongActingInsulin.parse(10)
+    cshort = ShortActingInsulin.parse(5)
+    cexer = Exercise.parse("Corrida", "moderada")
+    cmeal = MealPeriod.parse("pós almoço", Meal.parse(carb, fat))
+    cobs = Observation.parse("Observação de teste")
+
+    return Card(cid, cdate, ctime, cglyc, clong, cshort, cexer, cmeal, cobs)
+
+
+def test_card_com_nutricao_persiste_estrutura_aninhada(repository, json_handler):
+    """O banco guarda o espelho 1:1 do VO: {"meal_period": ..., "meal": {...}}."""
+    card = make_dummy_card_com_nutricao(carb=45, fat=12)
+    repository.add_card(card)
+
+    with open(json_handler.save_path, "r", encoding="utf-8") as f:
+        raw_data = json.load(f)
+
+    meal_raw = raw_data["cards"][0]["meal"]
+    assert meal_raw == {"meal_period": "pós almoço", "meal": {"carbohydrate_g": 45, "fat_g": 12}}
+
+
+def test_card_com_nutricao_round_trip(repository):
+    """Salvar e recarregar preserva a nutrição consumida."""
+    card = make_dummy_card_com_nutricao(carb=39, fat=2)
+    repository.add_card(card)
+
+    repo_recarregado = JsonRepository(
+        handler=json_handler_fixture(repository),
+        card_creator=CardCreator(),
+        parser=CardDataModelParser(),
+    )
+
+    cards = repo_recarregado.get_all_cards()
+    assert len(cards) == 1
+    assert cards[0].meal.meal_period == "pós almoço"
+    assert cards[0].meal.meal == Meal(carbohydrate_g=39, fat_g=2)
+
+
+def json_handler_fixture(repository):
+    return JsonHandler(save_path=repository.handler.save_path)
+
+
+def test_card_sem_nutricao_serializa_meal_null(repository, json_handler):
+    """Card sem nutrição grava {"meal_period": ..., "meal": null} — nunca dict vazio."""
+    card = make_dummy_card()
+    repository.add_card(card)
+
+    with open(json_handler.save_path, "r", encoding="utf-8") as f:
+        raw_data = json.load(f)
+
+    assert raw_data["cards"][0]["meal"] == {"meal_period": "pré almoço", "meal": None}
+
+
+def test_formato_legado_meal_string_carrega(json_handler, parser, creator, tmp_path):
+    """Banco pré-migração (meal como string) carrega com nutrição None."""
+    legado = {
+        "card_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "card_date": "2024-01-03", "card_time": "00:00",
+        "glycemia": 156, "long_acting_insulin": 30, "short_acting_insulin": 5,
+        "meal": "jejum", "observation": "Me sentindo bem",
+        "exercise": {"exercise_name": "ciclismo", "intensity": None}
+    }
+    handler_setup = JsonHandler(save_path=tmp_path / "test_cards.json")
+    handler_setup.export([legado])
+
+    repo = JsonRepository(handler=handler_setup, card_creator=creator, parser=parser)
+
+    cards = repo.get_all_cards()
+    assert cards[0].meal.meal_period == "jejum"
+    assert cards[0].meal.meal is None

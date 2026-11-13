@@ -1,0 +1,98 @@
+#:import app_theme frameworks.kivy.ui.app_theme
+
+<FoodResultRow>:
+    size_hint_y: None
+    height: app_theme.widget("input_height") * 1.9
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    text: root.row_text
+    font_size: app_theme.font("field")
+    color: app_theme.color("text_primary")
+    text_size: self.width - app_theme.space("md") * 2, None
+    halign: "left"
+    valign: "middle"
+    padding_x: app_theme.space("md")
+    on_release: root.row_callback(root.food) if root.row_callback else None
+
+    canvas.before:
+        Color:
+            rgba: app_theme.color("surface_alt") if self.state == "down" else app_theme.color("field_bg")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [app_theme.radius("md")]
+        Color:
+            rgba: app_theme.color("border")
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, app_theme.radius("md")
+            width: app_theme.border("thin")
+
+
+<FoodSearchContent>:
+    orientation: "vertical"
+    spacing: app_theme.space("md")
+    size_hint_y: None
+    height: self.minimum_height
+
+    AppTextInput:
+        id: search_input
+        hint_text: "Buscar alimento (ex.: arroz, pão, banana...)"
+        on_text: root.schedule_search()
+
+    AppSpinner:
+        id: category_spinner
+        values: ["todas"] + root.categories
+        text: "todas"
+        on_text: root.search()
+
+    # Lista reciclada: só as linhas visíveis existem de verdade, então abrir com
+    # os 597 alimentos da TACO custa o mesmo que abrir com 8.
+    RecycleView:
+        id: results_rv
+        viewclass: "FoodResultRow"
+        do_scroll_x: False
+        bar_width: app_theme.widget("scrollbar")
+        bar_color: app_theme.color("scrollbar")
+        scroll_type: ["content", "bars"]
+        size_hint_y: None
+        height: app_theme.widget("input_height") * 6
+
+        RecycleBoxLayout:
+            default_size: None, app_theme.widget("input_height") * 1.9
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: "vertical"
+            spacing: app_theme.space("xs")
+
+    # Estado vazio: só aparece quando NENHUM resultado — colapsado (height 0) quando há dados
+    Label:
+        id: empty_state
+        size_hint_y: None
+        height: 0
+        opacity: 0
+        text: "Nenhum alimento encontrado — ajuste a busca ou a categoria"
+        font_size: app_theme.font("field")
+        color: app_theme.color("text_hint")
+        text_size: self.size
+        halign: "left"
+        valign: "middle"
+
+    # Total acumulado no registro: feedback de cada "Adicionar" — quem come
+    # mais de um alimento vê a conta crescer sem fechar o popup. Colapsado
+    # enquanto não há nada somado. A MainView move esta linha para o RODAPÉ
+    # FIXO do dialog (set_footer): o conteúdo rolável tem altura máxima e a
+    # linha ficaria embaixo da dobra, invisível.
+    Label:
+        id: total_line
+        text: root.accumulated_text
+        font_size: app_theme.font("field")
+        bold: True
+        color: app_theme.color("success")
+        size_hint_y: None
+        height: app_theme.widget("field_label_height") if root.accumulated_text else 0
+        opacity: 1 if root.accumulated_text else 0
+        text_size: self.size
+        halign: "left"
+        valign: "middle"

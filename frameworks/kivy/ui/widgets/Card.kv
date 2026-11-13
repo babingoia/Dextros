@@ -8,7 +8,9 @@
         cols: 2
         size_hint_y: None
         height: self.minimum_height
-        row_default_height: app_theme.widget("row_height")
+        # 48dp por linha (input_height): as mini-tabelas CHO/Gordura da última
+        # linha têm rótulo em cima do valor e precisam do dobro do row_height antigo.
+        row_default_height: app_theme.widget("input_height")
         row_force_default: True
         spacing: [app_theme.space("xl"), app_theme.space("row")]
 
@@ -126,33 +128,84 @@
                 text_size: self.size
                 valign: "middle"
 
-    # Dextro em destaque, mas alinhado como os demais campos
-    BoxLayout:
-        size_hint_y: None
-        height: app_theme.widget("row_height")
-        spacing: app_theme.space("sm")
+        # Última linha: Dextro na primeira coluna (era um bloco isolado embaixo do
+        # grid, desperdiçando metade da largura) e, na segunda coluna, CHO e
+        # Gordura dividem a metade direita — 1/4 do grid cada, rótulo sobre valor.
+        BoxLayout:
+            spacing: app_theme.space("sm")
+            Label:
+                text: "Dextro:"
+                bold: True
+                color: app_theme.color("text_secondary")
+                size_hint_x: None
+                width: app_theme.widget("field_label_width")
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: dextro_value
+                text: ""
+                bold: True
+                font_size: app_theme.font("title")
+                color: app_theme.color("success")
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
 
-        Label:
-            text: "Dextro:"
-            bold: True
-            color: app_theme.color("text_secondary")
-            size_hint_x: None
-            width: app_theme.widget("field_label_width")
-            halign: "right"
-            text_size: self.size
-            valign: "middle"
+        # Quantidades: rótulo SEM dois pontos — o valor fica EMBAIXO, e dois
+        # pontos sugerem valor ao lado do rótulo (reportado em uso real). O bloco
+        # tem altura por conteúdo e fica CENTRALIZADO na célula de 48dp via
+        # pos_hint (BoxLayout horizontal honra center_y no eixo cruzado), com gap
+        # curto entre rótulo e valor — antes o valor flutuava longe do rótulo.
+        BoxLayout:
+            spacing: app_theme.space("md")
 
-        Label:
-            id: dextro_value
-            text: ""
-            bold: True
-            font_size: app_theme.font("title")
-            color: app_theme.color("success")
-            halign: "left"
-            text_size: self.size
-            valign: "middle"
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                pos_hint: {"center_y": 0.5}
+                spacing: app_theme.space("xs")
 
-    # Observação em bloco full-width, altura por conteúdo
+                Label:
+                    text: "CHO"
+                    bold: True
+                    font_size: app_theme.font("caption")
+                    color: app_theme.color("text_secondary")
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                Label:
+                    id: carboidratos_value
+                    text: ""
+                    font_size: app_theme.font("field")
+                    color: app_theme.color("text_primary")
+                    size_hint_y: None
+                    height: self.texture_size[1]
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                pos_hint: {"center_y": 0.5}
+                spacing: app_theme.space("xs")
+
+                Label:
+                    text: "Gordura"
+                    bold: True
+                    font_size: app_theme.font("caption")
+                    color: app_theme.color("text_secondary")
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                Label:
+                    id: gorduras_value
+                    text: ""
+                    font_size: app_theme.font("field")
+                    color: app_theme.color("text_primary")
+                    size_hint_y: None
+                    height: self.texture_size[1]
+
+    # Observação em bloco full-width, altura por conteúdo. Rótulo sem dois
+    # pontos, pela mesma razão de CHO/Gordura: o texto fica EMBAIXO dele.
     BoxLayout:
         orientation: "vertical"
         size_hint_y: None
@@ -160,7 +213,7 @@
         spacing: app_theme.space("xs")
 
         Label:
-            text: "Observação:"
+            text: "Observação"
             bold: True
             color: app_theme.color("text_secondary")
             size_hint_y: None

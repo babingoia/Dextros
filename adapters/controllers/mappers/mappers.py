@@ -1,3 +1,12 @@
+"""Mappers de apresentação: ViewModels <-> DTOs e convenções de exibição.
+
+Aqui vive a responsabilidade de normalizar texto de campo para domínio (vírgula
+decimal brasileira, vazio -> None) e de formatar domínio para tela. Os helpers
+de soma de gramas atendem o fluxo multi-alimento da busca TACO.
+"""
+
+from logging import getLogger
+
 from usecases.dtos.matrix_data import MatrixData
 from usecases.dtos.card_output import CardOutput
 from usecases.dtos.cardDTOInput import CardDTOInput
@@ -10,6 +19,8 @@ from adapters.controllers.dtos.card_view_model import CardViewModel
 from adapters.controllers.dtos.single_row_matrix_view import SingleRowMatrixView
 
 
+logger = getLogger(__name__)
+
 
 def strip_view_model(data: CardViewModel) -> CardViewModel:
     """Recebe uma view model e aplica .strip() em todos os seus campos."""
@@ -21,8 +32,9 @@ def strip_view_model(data: CardViewModel) -> CardViewModel:
     data['glycemia'] = data['glycemia'].strip()
     data['long_acting_insulin'] = data['long_acting_insulin'].strip()
     data['meal'] = data['meal'].strip()
+    data['carbohydrate_g'] = data['carbohydrate_g'].strip()
+    data['fat_g'] = data['fat_g'].strip()
     data['observation'] = data['observation'].strip()
-    data['short_acting_insulin'] = data['short_acting_insulin'].strip()
     return data
 
 
@@ -33,6 +45,24 @@ def empty_to_none(value):
 def int_or_none(value):
     value = empty_to_none(value)
     return int(value) if value is not None and value is not 0 else None
+
+
+def normalize_decimal(value):
+    """Converte vírgula decimal brasileira em ponto ("45,2" -> "45.2").
+    Responsabilidade da camada de apresentação — o VO de domínio não lida com vírgula."""
+    if value is None:
+        return None
+    return value.replace(',', '.') if isinstance(value, str) else value
+
+
+def decimal_or_none(value):
+    """Converte texto decimal em float ou None. Segue a convenção do app
+    (int_or_none): string vazia e 0 significam "campo não preenchido"."""
+    value = empty_to_none(normalize_decimal(value))
+    if value is None:
+        return None
+    parsed = float(value)
+    return None if parsed == 0 else parsed
 
 
 def view_model_to_input(card: CardViewModel) -> CardDTOInput:
@@ -55,6 +85,9 @@ def view_model_to_input(card: CardViewModel) -> CardDTOInput:
 
         short_acting_insulin=int_or_none(card['short_acting_insulin']),
         long_acting_insulin=int_or_none(card['long_acting_insulin']),
+
+        carbohydrate_g=decimal_or_none(card['carbohydrate_g']),
+        fat_g=decimal_or_none(card['fat_g']),
 
         observation=empty_to_none(card['observation']),
     )
@@ -81,8 +114,48 @@ def matrix_to_view_model(matrix_data: MatrixData) -> MatrixDataViewModel:
     )
 
 
+def format_grams_for_display(value):
+    """Formata gramas consumidas para exibição ("45", "45,2", "" quando ausente).
+    Convenção de apresentação: vírgula decimal brasileira, sem unidade — a unidade
+    está no rótulo do campo na tela."""
+    if value is None:
+        return ""
+    text = f"{value:g}"
+    return text.replace(".", ",")
+
+
+def parse_brazilian_decimal(text):
+    """Texto de campo numérico -> float, ou None quando vazio/inválido.
+    Aceita vírgula decimal (mesma convenção de normalize_decimal): o usuário
+    digita "45,2" e o app grava "68,2" com vírgula no campo."""
+    if text is None:
+        return None
+    raw = str(text).strip().replace(",", ".")
+    if not raw:
+        return None
+    try:
+        return float(raw)
+    except ValueError:
+        logger.debug(f"Invalid grams text treated as absent: {text!r}")
+        return None
+
+
+def sum_grams_for_input(current_text, added_value):
+    """Soma o valor consumido de uma comida ao que já está no campo do
+    formulário e devolve o texto pronto para o input.
+
+    Quem registra uma refeição de verdade come MAIS DE UM alimento: adicionar
+    "Arroz, 150 g" depois de "Feijão, 100 g" tem que acumular, não substituir.
+    Texto vazio ou inválido conta como 0 — a comida buscada pode ser a primeira
+    do registro. O resultado segue a convenção de exibição (%g, vírgula decimal)."""
+    total = added_value + (parse_brazilian_decimal(current_text) or 0.0)
+    return format_grams_for_display(total)
+
+
 def card_output_to_view_model(card: CardOutput) -> CardViewModel:
-    """Mapeia um CardOutput para o CardViewModel (TypedDict)."""
+    """Mapeia um CardOutput para o CardViewModel (TypedDict) da UI.
+    A nutrição (carboidratos/gorduras consumidos) aparece no popup de detalhes
+    do card, abaixo de Refeição."""
     return {
         "card_id": card.card_id,
         "card_data": card.card_date.strftime("%d/%m/%Y"),
@@ -94,7 +167,11 @@ def card_output_to_view_model(card: CardOutput) -> CardViewModel:
             "exercise_name": card.exercise.exercise_name or "",
             "intensity": card.exercise.intensity or ""
         },
-        "meal": card.meal or "",
+        # Card sem refeição próxima (MealPeriod None) exibe "nenhum" no popup
+        # de detalhes — mesma palavra da opção de UI do picker.
+        "meal": card.meal if card.meal else "nenhum",
+        "carbohydrate_g": format_grams_for_display(card.carbohydrate_g),
+        "fat_g": format_grams_for_display(card.fat_g),
         "observation": card.observation or ""
     }
 
@@ -121,6 +198,8 @@ def empty_card_view_model() -> CardViewModel:
         "short_acting_insulin": "",
         "exercise": {"exercise_name": "", "intensity": ""},
         "meal": "",
+        "carbohydrate_g": "",
+        "fat_g": "",
         "observation": ""
     }
 

@@ -40,4 +40,12 @@ class CardWidget(BoxLayout):
         self.ids.exercicio_value.text = exercise_text
         
         self.ids.refeicao_value.text = card_data.get("meal", "")
+
+        # Nutrição consumida: o mapper já manda o número formatado ("45", "45,2")
+        # ou "" quando não registrado. A unidade entra aqui na exibição.
+        carb = card_data.get("carbohydrate_g", "")
+        fat = card_data.get("fat_g", "")
+        self.ids.carboidratos_value.text = f"{carb} g" if carb else ""
+        self.ids.gorduras_value.text = f"{fat} g" if fat else ""
+
         self.ids.observacao_value.text = card_data.get("observation", "")
