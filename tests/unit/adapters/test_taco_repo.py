@@ -51,6 +51,29 @@ class TestTacoRepository:
         assert arroz.category == "Cereais e derivados"
         assert arroz.carbohydrate_g == pytest.approx(25.80975)
         assert arroz.fat_g == pytest.approx(1.00033333333333)
+        assert arroz.energy_kcal == pytest.approx(123.5348925)
+        assert arroz.protein_g == pytest.approx(2.58825)
+        assert arroz.fiber_g == pytest.approx(2.74933333333333)
+        assert arroz.sodium_mg == pytest.approx(1.24466666666667)
+
+    def test_campos_detalhados_na_da_tabela_viram_none(self, tmp_path):
+        """Convenção da fonte aplicada também aos campos do popup de detalhes:
+        "NA"/"Tr"/"" no JSON viram None, nunca zero."""
+        import json as _json
+        arquivo = tmp_path / "taco.json"
+        arquivo.write_text(_json.dumps([
+            {"id": 1, "description": "Teste", "category": "Categoria",
+             "energy_kcal": "NA", "protein_g": "Tr", "fiber_g": "",
+             "sodium_mg": None, "carbohydrate_g": 10.0, "lipid_g": 1.0}
+        ]), encoding="utf-8")
+        repo = TacoRepository(arquivo)
+        food = repo.get_all()[0]
+        assert food.energy_kcal is None
+        assert food.protein_g is None
+        assert food.fiber_g is None
+        assert food.sodium_mg is None
+        assert food.carbohydrate_g == pytest.approx(10.0)
+        assert food.fat_g == pytest.approx(1.0)
 
     def test_valores_na_da_tabela_viram_none(self, real_repo):
         """~11 alimentos sem carboidrato e ~33 sem gordura confiáveis na TACO."""

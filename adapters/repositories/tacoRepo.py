@@ -94,6 +94,10 @@ class TacoRepository:
                     category=entry.get("category"),
                     carbohydrate_value=_normalize_taco_value(entry.get("carbohydrate_g")),
                     fat_value=_normalize_taco_value(entry.get("lipid_g")),
+                    energy_value=_normalize_taco_value(entry.get("energy_kcal")),
+                    protein_value=_normalize_taco_value(entry.get("protein_g")),
+                    fiber_value=_normalize_taco_value(entry.get("fiber_g")),
+                    sodium_value=_normalize_taco_value(entry.get("sodium_mg")),
                 ))
             except (ValueError, TypeError) as err:
                 raise FoodDataError(
