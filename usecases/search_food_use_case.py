@@ -39,6 +39,11 @@ class SearchFoodUseCase:
     pelo composition root (mesmo padrão do GetMealListUseCase, que recebe os
     dados de onde estão). A fonte de dados fica isolada no TacoRepository
     (adapters); aqui só existe lógica de consulta, 100% testável sem arquivo.
+
+    Query vazia devolve a TABELA COMPLETA em ordem alfabética — decisão de
+    produto: o popup de busca abre navegável (mobile first, o usuário folheia
+    antes de digitar) e a RecycleView na UI torna despejar 597 itens barato.
+    Query preenchida mantém ranking por relevância com limite.
     """
 
     DEFAULT_LIMIT = 25
@@ -46,8 +51,8 @@ class SearchFoodUseCase:
     def __init__(self, foods: list[Food]):
         # Pré-normaliza uma vez: cada consulta é uma varredura O(n) em memória
         # sobre 597 alimentos — barato o suficiente para o app offline.
-        self._entries: list[tuple[str, Food]] = [
-            (_normalize(food.description), food) for food in foods
+        self._entries: list[tuple[str, str, Food]] = [
+            (_normalize(food.description), _normalize(food.category), food) for food in foods
         ]
 
     def execute(self, query: str, category: str | None = None,
@@ -59,15 +64,21 @@ class SearchFoodUseCase:
             raise ValueError(f"Invalid limit: {limit!r}")
 
         normalized_query = _normalize(query)
-        if not normalized_query:
-            # Query vazia não deve despejar a tabela inteira na UI.
-            return FoodSearchResult([])
-
         normalized_category = _normalize(category) if isinstance(category, str) and category.strip() else None
 
+        if not normalized_query:
+            # Tabela inteira navegável (decisão de produto): filtra por categoria
+            # quando houver, ordem alfabética — não há ranking sem termo.
+            matches = [food
+                       for _, food_category, food in self._entries
+                       if normalized_category is None or food_category == normalized_category]
+            matches.sort(key=lambda food: food.description)
+            logger.debug(f"Food search empty query (category={category!r}): {len(matches)} foods")
+            return FoodSearchResult(matches)
+
         ranked: list[tuple[int, str, Food]] = []
-        for normalized_description, food in self._entries:
-            if normalized_category and _normalize(food.category) != normalized_category:
+        for normalized_description, food_category, food in self._entries:
+            if normalized_category is not None and food_category != normalized_category:
                 continue
 
             rank = _match_rank(normalized_description, normalized_query)

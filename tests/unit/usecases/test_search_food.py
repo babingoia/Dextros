@@ -37,7 +37,8 @@ def test_maiusculas_e_espacos_sao_normalizados(use_case):
 
 
 def test_prefixo_ranqueia_acima_de_contem(use_case):
-    """'arroz' começa o nome de dois alimentos — ambos vêm antes de 'queijo'... não contém arroz."""
+    """'arroz' começa o nome de dois alimentos — ambos vêm antes de 'queijo'... não contém arroz.
+    Entre os dois, ordem alfabética como critério de desempate do mesmo rank."""
     resultado = use_case.execute("arroz")
     descriptions = [f.description for f in resultado.foods]
     assert descriptions == ["Arroz, integral, cozido", "Arroz, integral, cru"]
@@ -51,10 +52,30 @@ def test_ranking_prefixo_de_palavra_acima_de_substring(use_case):
     assert com_rank_palavra.foods[0].description == "Bolo simples"
 
 
-def test_busca_vazia_nao_despeja_a_tabela(use_case):
-    """Query vazia/whitespace devolve [] — nunca os 597 alimentos."""
-    assert use_case.execute("").foods == []
-    assert use_case.execute("   ").foods == []
+def test_busca_vazia_devolve_a_tabela_completa_em_ordem_alfabetica(use_case):
+    """Decisão de produto (mobile first): o popup abre navegável — query vazia
+    devolve TODOS os alimentos, alfabética. A RecycleView na UI torna isso barato."""
+    resultado = use_case.execute("")
+    descriptions = [f.description for f in resultado.foods]
+    assert len(descriptions) == 6
+    assert descriptions == sorted(descriptions)
+    assert use_case.execute("   ").foods == resultado.foods
+
+
+def test_busca_vazia_ignora_o_limite(use_case):
+    """Sem termo não há ranking pra cortar: limit não se aplica à tabela completa."""
+    assert len(use_case.execute("", limit=1).foods) == 6
+
+
+def test_busca_vazia_com_categoria_filtra_e_Ordena(use_case):
+    resultado = use_case.execute("", category="Cereais e derivados")
+    descriptions = [f.description for f in resultado.foods]
+    assert descriptions == ["Arroz, integral, cozido", "Arroz, integral, cru",
+                            "Macarrão, instantâneo", "Pão, francês"]
+
+
+def test_busca_vazia_com_categoria_inexistente_retorna_vazia(use_case):
+    assert use_case.execute("", category="Marca insexa").foods == []
 
 
 def test_limite_respeitado(foods):
