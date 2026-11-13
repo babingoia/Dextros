@@ -8,6 +8,8 @@ from adapters.controllers.mappers.mappers import (
     view_model_to_input,
     card_output_to_view_model,
     empty_card_view_model,
+    parse_brazilian_decimal,
+    sum_grams_for_input,
 )
 
 
@@ -156,3 +158,55 @@ class TestFormatGramsForDisplay:
         """Vírgula decimal e sem 'g' — a unidade fica no rótulo da tela."""
         from adapters.controllers.mappers.mappers import format_grams_for_display
         assert format_grams_for_display(raw) == expected
+
+
+class TestParseBrazilianDecimal:
+    @pytest.mark.parametrize("raw,expected", [
+        ("45,2", 45.2),
+        ("45.2", 45.2),
+        ("45", 45.0),
+        ("  12,4  ", 12.4),
+        ("", None),
+        ("   ", None),
+        (None, None),
+        ("abc", None),
+        ("1,2.3", None),
+    ])
+    def test_texto_do_campo_vira_float_ou_none(self, raw, expected):
+        """Vazio e lixo de digitação viram None — quem decide o que fazer
+        com None é o chamador (a soma trata como 0)."""
+        assert parse_brazilian_decimal(raw) == expected
+
+
+class TestSumGramsForInput:
+    """O registro de refeição acumula VÁRIOS alimentos da TACO: adicionar
+    comida em campo já preenchido soma, não substitui."""
+
+    def test_primeira_comida_campo_vazio(self):
+        assert sum_grams_for_input("", 23) == "23"
+
+    def test_soma_com_texto_ja_presente(self):
+        assert sum_grams_for_input("45,2", 23) == "68,2"
+
+    def test_soma_com_ponto_tambem_acumula(self):
+        assert sum_grams_for_input("45.2", 23) == "68,2"
+
+    def test_resultado_inteiro_nao_tem_virgula(self):
+        assert sum_grams_for_input("23", 24) == "47"
+
+    def test_decimal_com_virgula_no_resultado(self):
+        assert sum_grams_for_input("12,4", 1) == "13,4"
+
+    @pytest.mark.parametrize("garbage", ["abc", " ", None])
+    def test_texto_invalido_conta_como_zero(self, garbage):
+        """Lixo de digitação não soma nem estoura: o valor da comida entra limpo."""
+        assert sum_grams_for_input(garbage, 23) == "23"
+
+    def test_zero_somado_mantem_convencao_de_exibicao(self):
+        """Meal.from_food nunca devolve negativo; 0 somado a campo vazio é '0'."""
+        assert sum_grams_for_input("", 0) == "0"
+
+    def test_precisao_flutuante_nao_vaza_no_texto(self):
+        """45,2 + 23 em float binário é 68.200000000000003 — %g do formatador
+        tem que esconder isso do usuário."""
+        assert sum_grams_for_input("45,2", 23) == "68,2"

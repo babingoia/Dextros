@@ -107,6 +107,33 @@ def format_grams_for_display(value):
     return text.replace(".", ",")
 
 
+def parse_brazilian_decimal(text):
+    """Texto de campo numérico -> float, ou None quando vazio/inválido.
+    Aceita vírgula decimal (mesma convenção de normalize_decimal): o usuário
+    digita "45,2" e o app grava "68,2" com vírgula no campo."""
+    if text is None:
+        return None
+    raw = str(text).strip().replace(",", ".")
+    if not raw:
+        return None
+    try:
+        return float(raw)
+    except ValueError:
+        return None
+
+
+def sum_grams_for_input(current_text, added_value):
+    """Soma o valor consumido de uma comida ao que já está no campo do
+    formulário e devolve o texto pronto para o input.
+
+    Quem registra uma refeição de verdade come MAIS DE UM alimento: adicionar
+    "Arroz, 150 g" depois de "Feijão, 100 g" tem que acumular, não substituir.
+    Texto vazio ou inválido conta como 0 — a comida buscada pode ser a primeira
+    do registro. O resultado segue a convenção de exibição (%g, vírgula decimal)."""
+    total = added_value + (parse_brazilian_decimal(current_text) or 0.0)
+    return format_grams_for_display(total)
+
+
 def card_output_to_view_model(card: CardOutput) -> CardViewModel:
     """Mapeia um CardOutput para o CardViewModel (TypedDict) da UI.
     A nutrição (carboidratos/gorduras consumidos) aparece no popup de detalhes
