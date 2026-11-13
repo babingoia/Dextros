@@ -122,7 +122,9 @@ def card_output_to_view_model(card: CardOutput) -> CardViewModel:
             "exercise_name": card.exercise.exercise_name or "",
             "intensity": card.exercise.intensity or ""
         },
-        "meal": card.meal or "",
+        # Card sem refeição próxima (MealPeriod None) exibe "nenhum" no popup
+        # de detalhes — mesma palavra da opção de UI do picker.
+        "meal": card.meal if card.meal else "nenhum",
         "carbohydrate_g": format_grams_for_display(card.carbohydrate_g),
         "fat_g": format_grams_for_display(card.fat_g),
         "observation": card.observation or ""

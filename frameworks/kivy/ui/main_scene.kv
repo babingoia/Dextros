@@ -236,7 +236,7 @@
                                 input_type: "number"
                                 hint_text: "Ex.: 120"
 
-                        # Lenta / Rápida / Exercício / Refeição
+                        # Lenta / Rápida / Exercício
                         Card:
                             SectionTitle:
                                 text: "Insulina e rotina"
@@ -275,43 +275,31 @@
                                         input_type: "number"
                                         hint_text: "Dose"
 
-                            GridLayout:
-                                cols: app_theme.layout("pair_columns") if app_theme.is_wide_enough(root.width, "two_columns") else 1
+                            BoxLayout:
+                                orientation: "vertical"
                                 size_hint_y: None
                                 height: self.minimum_height
-                                spacing: app_theme.space("md")
+                                spacing: app_theme.space("xs")
 
-                                BoxLayout:
-                                    orientation: "vertical"
-                                    size_hint_y: None
-                                    height: self.minimum_height
-                                    spacing: app_theme.space("xs")
+                                FieldLabel:
+                                    text: "Exercício"
 
-                                    FieldLabel:
-                                        text: "Exercício"
+                                AppTextInput:
+                                    id: exercicio_input
+                                    hint_text: "Opcional"
 
-                                    AppTextInput:
-                                        id: exercicio_input
-                                        hint_text: "Opcional"
-
-                                BoxLayout:
-                                    orientation: "vertical"
-                                    size_hint_y: None
-                                    height: self.minimum_height
-                                    spacing: app_theme.space("xs")
-
-                                    FieldLabel:
-                                        text: "Refeição"
-
-                                    AppSpinner:
-                                        id: meal_value
-                                        values: root.available_meals
-                                        text: root.actual_meal
-
-                        # Nutrição da refeição (opcional — habilitada pelo usuário)
+                        # Refeição — período do registro + nutrição opt-in.
+                        # O picker mora aqui (era na seção de insulina): é a informação
+                        # central do registro de refeição. O picker NUNCA fica desabilitado
+                        # nem apagado — o período é dado do card, a nutrição é opt-in.
                         Card:
                             SectionTitle:
-                                text: "Nutrição da refeição"
+                                text: "Refeição"
+
+                            AppSpinner:
+                                id: meal_value
+                                values: root.available_meals
+                                text: root.actual_meal
 
                             BoxLayout:
                                 size_hint_y: None

@@ -29,7 +29,9 @@ class MainView(BoxLayout):
     available_meals = ListProperty([])
     available_time = ListProperty([])
     available_food_categories = ListProperty([])
-    actual_meal = StringProperty("Escolha uma Refeição:")
+    # Default = "nenhum" (opção de UI, não de domínio): o card nasce salvo-sem-refeição
+    # em vez de nascer com placeholder inválido (causa do crash ao salvar sem tocar).
+    actual_meal = StringProperty("nenhum")
     actual_time = StringProperty("Horário:")
     date_display = StringProperty()
 

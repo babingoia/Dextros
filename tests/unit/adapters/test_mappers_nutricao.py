@@ -123,6 +123,21 @@ class TestViewModelMatrizes:
         assert vm['fat_g'] == '12'
         assert vm['meal'] == 'pós almoço'
 
+    def test_card_sem_refeicao_exibe_nenhum(self):
+        """MealPeriod None (dextro sem refeição próxima) exibe 'nenhum' no popup
+        de detalhes — mesma palavra da opção de UI do picker. Célula VAZIA da
+        matriz continua com string vazia (empty_card_view_model), pois ali não
+        existe card nenhum."""
+        from datetime import date, time as dtime
+        from usecases.dtos.card_output import CardOutput
+        output = CardOutput(
+            card_id="x", card_date=date(2024, 1, 3), card_time=dtime(9, 30),
+            glycemia=120, long_acting_insulin=None, short_acting_insulin=None,
+            meal=None, observation=None,
+        )
+        vm = card_output_to_view_model(output)
+        assert vm['meal'] == 'nenhum'
+
     def test_empty_card_view_model_tem_campos_de_nutricao(self):
         vm = empty_card_view_model()
         assert vm['carbohydrate_g'] == ''

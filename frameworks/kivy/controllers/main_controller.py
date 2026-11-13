@@ -58,6 +58,10 @@ class MainController:
         self.meals = self.router.navigate("get_meal_list")
         self.meals.meal_values.insert(0, "nenhum")
         self.main_view.available_meals = self.meals.meal_values
+        # "Nenhum" AUTOSELECIONADO: salvar sem tocar no picker não pode mandar
+        # lixo pro domínio (o crash que o usuário reportou: o default antigo era
+        # o placeholder "Escolha uma Refeição:", rejeitado pelo MealPeriod).
+        self.main_view.actual_meal = "nenhum"
 
         # Categorias da tabela TACO + handlers de busca/cálculo de nutrição
         self.main_view.available_food_categories = \
