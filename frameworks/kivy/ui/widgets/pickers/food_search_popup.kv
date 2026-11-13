@@ -13,6 +13,7 @@
     halign: "left"
     valign: "middle"
     padding_x: app_theme.space("md")
+    on_release: root.row_callback(root.food) if root.row_callback else None
 
     canvas.before:
         Color:
@@ -45,7 +46,11 @@
         text: "todas"
         on_text: root.search()
 
-    ScrollView:
+    # Lista reciclada: só as linhas visíveis existem de verdade, então abrir com
+    # os 597 alimentos da TACO custa o mesmo que abrir com 8.
+    RecycleView:
+        id: results_rv
+        viewclass: "FoodResultRow"
         do_scroll_x: False
         bar_width: app_theme.widget("scrollbar")
         bar_color: app_theme.color("scrollbar")
@@ -53,41 +58,23 @@
         size_hint_y: None
         height: app_theme.widget("input_height") * 6
 
-        BoxLayout:
-            id: results_holder
-            orientation: "vertical"
+        RecycleBoxLayout:
+            default_size: None, app_theme.widget("input_height") * 1.9
+            default_size_hint: 1, None
             size_hint_y: None
             height: self.minimum_height
+            orientation: "vertical"
             spacing: app_theme.space("xs")
 
-            Label:
-                id: empty_state
-                size_hint_y: None
-                height: app_theme.widget("input_height")
-                text: "Nenhum alimento encontrado — digite para buscar"
-                font_size: app_theme.font("field")
-                color: app_theme.color("text_hint")
-                text_size: self.size
-                halign: "left"
-                valign: "middle"
-
-    ReadOnlyField:
-        id: selected_label
-        text: root.selected_summary
-        color: app_theme.color("text_secondary")
-
-    BoxLayout:
+    # Estado vazio: só aparece quando NENHUM resultado — colapsado (height 0) quando há dados
+    Label:
+        id: empty_state
         size_hint_y: None
-        height: app_theme.widget("input_height")
-        spacing: app_theme.space("md")
-
-        AppTextInput:
-            id: grams_input
-            input_type: "number"
-            hint_text: "Quantidade em gramas (ex.: 150)"
-
-        PrimaryButton:
-            text: "Usar"
-            size_hint_x: None
-            width: app_theme.widget("touch_target") * 1.4
-            on_release: root.confirm()
+        height: 0
+        opacity: 0
+        text: "Nenhum alimento encontrado — ajuste a busca ou a categoria"
+        font_size: app_theme.font("field")
+        color: app_theme.color("text_hint")
+        text_size: self.size
+        halign: "left"
+        valign: "middle"

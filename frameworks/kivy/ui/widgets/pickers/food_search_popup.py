@@ -5,24 +5,26 @@ from kivy.properties import ListProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 
+import frameworks.kivy.ui.app_theme as app_theme
 from infrastructure.path_provider_service import get_asset_path
+from frameworks.kivy.ui.widgets.popup.dialog import AppDialog
+from frameworks.kivy.ui.widgets.pickers.food_detail_popup import (
+    FoodDetailContent,
+    format_nutrient_value,
+)
 
 Builder.load_file(get_asset_path('frameworks/kivy/ui/widgets/pickers/food_search_popup.kv'))
 
 logger = getLogger(__name__)
 
 
-def _format_grams(value) -> str:
-    """Formata um valor por 100g para exibição brasileira (vírgula decimal).
-    None vira "—" — dado indisponível na tabela é diferente de zero."""
-    if value is None:
-        return "—"
-    return f"{value:.1f}".replace(".", ",")
-
-
 class FoodResultRow(Button):
-    """Linha de resultado da busca: descrição + categoria + valores por 100g."""
+    """Linha de resultado da busca: descrição + categoria + valores por 100g.
+    Viewclass da RecycleView — as instâncias são recicladas, então o estado
+    mora nos dados (dict por linha) e não no widget. O toque abre o popup de
+    detalhes do alimento via row_callback(food)."""
     food = ObjectProperty(None)
+    row_callback = ObjectProperty(None)
     row_text = StringProperty("")
 
     def on_food(self, instance, value):
@@ -38,21 +40,21 @@ class FoodResultRow(Button):
             return
         self.row_text = (
             f"{food.description}\n"
-            f"{food.category} · CHO {_format_grams(food.carbohydrate_g)} g · "
-            f"Gord {_format_grams(food.fat_g)} g (por 100 g)"
+            f"{food.category} · CHO {format_nutrient_value(food.carbohydrate_g)} g · "
+            f"Gord {format_nutrient_value(food.fat_g)} g (por 100 g)"
         )
 
 
 class FoodSearchContent(BoxLayout):
-    """Conteúdo do popup de busca na Tabela TACO. A fonte de dados é injetada
-    (search_handler callable) — o widget não conhece router nem use case."""
+    """Conteúdo do popup de busca na Tabela TACO: busca + categoria + lista
+    RecycleView. A lista abre com a tabela COMPLETA (decisão de produto, mobile
+    first) e filtra conforme o usuário digita; o toque numa linha abre o popup
+    de detalhes, onde ficam a quantidade e o botão Adicionar. A fonte de dados é
+    injetada (search_handler callable) — o widget não conhece router nem use case."""
 
     __events__ = ("on_use_food",)
 
     categories = ListProperty([])
-    selected_food = ObjectProperty(None, allownone=True)
-    selected_summary = StringProperty("Selecione um alimento na lista")
-    has_results = ListProperty([])
 
     SEARCH_DEBOUNCE_SECONDS = 0.3
 
@@ -61,6 +63,9 @@ class FoodSearchContent(BoxLayout):
         self.categories = categories or []
         self.search_handler = search_handler
         self._search_scheduled = None
+        self._detail_dialog = None
+        # Primeira população na próxima frame: abre com a tabela inteira navegável
+        Clock.schedule_once(lambda dt: self.search(), 0)
 
     def schedule_search(self, *args):
         """Debounce da digitação: uma busca por rajada de teclas, não uma por caractere."""
@@ -81,49 +86,45 @@ class FoodSearchContent(BoxLayout):
         self._populate(result.foods)
 
     def _populate(self, foods):
-        holder = self.ids.results_holder
-        holder.clear_widgets()
-        self.has_results = foods
+        """Alimenta a RecycleView. RecycleView recicla as views fora da tela:
+        597 linhas custam o mesmo que as ~8 visíveis. Cada linha carrega o Food
+        e o callback — o estado é dos dados, não do widget reciclado."""
+        self.ids.results_rv.data = [
+            {"food": food, "row_callback": self._open_food_detail}
+            for food in foods
+        ]
 
-        if not foods:
-            label = self.ids.empty_state
-            holder.add_widget(label)
-            return
+        empty = self.ids.empty_state
+        empty.height = 0 if foods else app_theme.widget("input_height")
+        empty.opacity = 0 if foods else 1
 
-        for food in foods:
-            holder.add_widget(FoodResultRow(food=food, on_release=lambda btn: self.select_food(btn.food)))
-
-    def select_food(self, food):
+    def _open_food_detail(self, food):
+        """Toque na linha: abre o popup de detalhes empilhado sobre a busca."""
         if food is None:
             return
-        self.selected_food = food
-        self.selected_summary = (
-            f"{food.description} · CHO {_format_grams(food.carbohydrate_g)} g / "
-            f"Gord {_format_grams(food.fat_g)} g por 100 g"
+        detail = FoodDetailContent(food=food)
+        detail.bind(on_use_food=self._on_detail_confirm)
+        self._detail_dialog = AppDialog(
+            title="Detalhes do alimento",
+            auto_height=True,
+            content=detail,
+            buttons=[("Fechar", "primary", lambda *a: self._close_detail())],
         )
+        self._detail_dialog.open()
 
-    def confirm(self):
-        if self.selected_food is None:
-            self.selected_summary = "Selecione um alimento na lista primeiro"
-            return
+    def _close_detail(self, *args):
+        if self._detail_dialog is not None:
+            self._detail_dialog.dismiss()
+            self._detail_dialog = None
 
-        grams_raw = self.ids.grams_input.text.strip().replace(",", ".")
-        if not grams_raw:
-            self.selected_summary = "Informe a quantidade consumida em gramas"
-            return
+    def close_detail(self):
+        """Chamado quando o dialog de busca fecha (Cancelar) — o detalhe
+        empilhado não pode sobreviver sem o pai."""
+        self._close_detail()
 
-        try:
-            grams = float(grams_raw)
-        except ValueError:
-            self.selected_summary = "Quantidade inválida — informe um número (ex.: 150)"
-            return
-
-        if grams < 0:
-            self.selected_summary = "Quantidade negativa não existe — informe um valor válido"
-            return
-
-        logger.debug(f"Food search popup confirmed: {self.selected_food.description} x {grams}g")
-        self.dispatch("on_use_food", self.selected_food, grams)
+    def _on_detail_confirm(self, content, food, grams):
+        self._close_detail()
+        self.dispatch("on_use_food", food, grams)
 
     def on_use_food(self, food, grams):
         """Evento disparado ao confirmar; a MainView cuida do cálculo e do preenchimento."""

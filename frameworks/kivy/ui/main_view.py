@@ -131,6 +131,9 @@ class MainView(BoxLayout):
                 ("Cancelar", "primary", lambda *a: self._active_food_search_dialog.dismiss()),
             ],
         )
+        # O toque na linha abre um popup de detalhes EMPILHADO sobre este dialog.
+        # Se a busca fechar (Cancelar), o detalhe não pode sobreviver sem o pai.
+        self._active_food_search_dialog.bind(on_dismiss=lambda *a: content.close_detail())
         self._active_food_search_dialog.open()
 
     def _on_food_selected(self, content, food, grams):
