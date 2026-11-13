@@ -1,3 +1,12 @@
+"""Popup de busca na tabela TACO: campo de busca + filtro por categoria +
+lista RecycleView de alimentos, com rodapé fixo de total acumulado.
+
+Fluxo multi-alimento: Adicionar no popup de detalhes fecha SÓ o detalhe, o
+dialog de busca fica aberto e o usuário soma quantos alimentos quiser antes
+de Fechar. O handler de busca (search_handler) é injetado pela MainView —
+o widget não conhece router nem use case.
+"""
+
 from logging import getLogger
 from kivy.clock import Clock
 from kivy.lang import Builder
@@ -34,6 +43,9 @@ class FoodResultRow(Button):
         self._update_text(value)
 
     def _update_text(self, *args):
+        """Monta o texto de duas linhas da row (descrição; categoria · CHO ·
+        Gordura por 100g). Roda via on_food — widget reciclado não guarda estado.
+        """
         food = self.food
         if food is None:
             self.row_text = ""
@@ -79,6 +91,9 @@ class FoodSearchContent(BoxLayout):
         self._search_scheduled = Clock.schedule_once(lambda dt: self.search(), self.SEARCH_DEBOUNCE_SECONDS)
 
     def search(self, *args):
+        """Executa a busca via handler injetado e repovoa a lista. Chamado no
+        debounce da digitação, na troca de categoria e na abertura do popup.
+        """
         if self.search_handler is None:
             logger.warning("FoodSearchContent without search_handler — nothing to do")
             return
@@ -118,6 +133,7 @@ class FoodSearchContent(BoxLayout):
         self._detail_dialog.open()
 
     def _close_detail(self, *args):
+        """Fecha o popup de detalhes empilhado, se estiver aberto."""
         if self._detail_dialog is not None:
             self._detail_dialog.dismiss()
             self._detail_dialog = None
@@ -139,6 +155,9 @@ class FoodSearchContent(BoxLayout):
         self.accumulated_text = ("No registro: " + " · ".join(parts)) if parts else ""
 
     def _on_detail_confirm(self, content, food, grams):
+        """Confirmação do detalhe: fecha o detalhe e reemite on_use_food para a
+        MainView (que soma nos campos e atualiza o total do rodapé).
+        """
         self._close_detail()
         self.dispatch("on_use_food", food, grams)
 

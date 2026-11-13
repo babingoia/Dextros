@@ -1,3 +1,9 @@
+"""Controller da rota search_food: valida o request e delega ao use case.
+
+Mapeia a convenção de UI "todas" (spinner sem filtro) para None (sem filtro
+de verdade no use case).
+"""
+
 from logging import getLogger
 from usecases.search_food_use_case import SearchFoodUseCase
 from usecases.dtos.food_search import FoodSearchResult
@@ -16,6 +22,9 @@ class SearchFoodController(IController[dict, FoodSearchResult]):
         self.search_food_use_case = search_food_use_case
 
     def execute(self, request: dict) -> FoodSearchResult:
+        """Extrai "query" (obrigatório), "category" e "limit" do request e
+        devolve o FoodSearchResult. Request sem "query" vira TypeError.
+        """
         logger.debug(f"Search food request got: {request}")
 
         try:

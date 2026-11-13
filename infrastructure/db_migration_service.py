@@ -1,3 +1,11 @@
+"""Migração de esquema do banco de cards do usuário (startup do app).
+
+Atualiza o arquivo para o formato canônico do campo meal (aninhado, espelho do
+VO MealPeriod). Idempotente e atômico: pode rodar em todo início de app sem
+custo quando nada mudou. Trabalha em dicts crus, ANTES do JsonHandler/
+repositório existirem — quem lê o banco depois sempre vê o formato canônico.
+"""
+
 import json
 from dataclasses import dataclass
 from logging import getLogger
@@ -45,6 +53,10 @@ class DatabaseMigrationService:
         self.save_path = Path(save_path)
 
     def run(self) -> MigrationReport:
+        """Executa a checagem/migração completa e devolve o MigrationReport.
+        Nenhum card é descartado: valor não mapeável vira None + warning.
+        JSON corrompido propaga (mesma política do JsonHandler).
+        """
         report = MigrationReport()
 
         loaded = self._load()
@@ -86,6 +98,10 @@ class DatabaseMigrationService:
     # -------------------------------------------------------------------
 
     def _load(self) -> tuple[list[dict], str] | None:
+        """Lê o banco cru e devolve (cards, container). Container "list" é o
+        legado (lista pura) e "dict" é o atual ({"cards": [...]}); arquivo
+        inexistente devolve None (nada a migrar).
+        """
         try:
             with open(self.save_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -105,6 +121,9 @@ class DatabaseMigrationService:
         )
 
     def _write(self, cards: list[dict], container: str) -> None:
+        """Reescreve o banco preservando o container original, com escrita
+        atômica (.tmp + replace) — mesmo padrão do JsonHandler.
+        """
         payload = cards if container == "list" else {"cards": cards}
 
         self.save_path.parent.mkdir(parents=True, exist_ok=True)

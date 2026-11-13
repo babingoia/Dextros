@@ -1,3 +1,11 @@
+"""Parser da fronteira banco -> domínio: CardDataModel (TypedDict do JSON) ->
+CardDTOInput (entrada do CardCreator).
+
+Leitura retrocompatível do campo meal: entende o formato canônico aninhado e o
+legado (string simples) — a normalização em disco é do DatabaseMigrationService;
+a tolerância aqui é cinto e suspensório durante a transição.
+"""
+
 from logging import getLogger
 
 from adapters.repositories.DTOs.card_data_model import CardDataModel
@@ -19,6 +27,10 @@ class CardDataModelParser(ICardParser):
     aqui a tolerância é cinto e suspensório durante a transição.
     """
     def parse(self, data_model: CardDataModel) -> CardDTOInput:
+        """Mapeia o dict cru do banco no DTO plano do CardCreator. Meal em dict
+        é lido aninhado (período + nutrição); meal em string é legado — período
+        vira a string e nutrição fica None.
+        """
         meal_raw = data_model['meal']
 
         if isinstance(meal_raw, dict):

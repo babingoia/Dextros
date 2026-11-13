@@ -1,3 +1,12 @@
+"""Popup de detalhes do alimento da TACO: 6 valores por 100g, campo de
+quantidade com preview recalculado ao vivo e botão Adicionar.
+
+Empilhado sobre o popup de busca pelo FoodSearchContent; o contrato
+on_use_food(food, grams) é o mesmo evento que a busca usava antes da lista.
+A regra de três do preview é só apresentação — o cálculo oficial do registro
+passa pelo CalculateNutritionUseCase.
+"""
+
 from logging import getLogger
 
 from kivy.lang import Builder
@@ -58,6 +67,9 @@ class FoodDetailContent(BoxLayout):
         self._apply_food(value)
 
     def _apply_food(self, food):
+        """Preenche os 6 textos por 100g e zera o preview. None (dado
+        indisponível na tabela) vira "—" em todos os campos.
+        """
         if food is None:
             self.energy_text = self.protein_text = self.carb_text = "—"
             self.fat_text = self.fiber_text = self.sodium_text = "—"
@@ -101,6 +113,9 @@ class FoodDetailContent(BoxLayout):
         )
 
     def confirm(self):
+        """Valida alimento e quantidade (não informada, não numérica ou
+        negativa mostram mensagem em self.message) e dispara on_use_food.
+        """
         if self.food is None:
             self.message = "Nenhum alimento selecionado"
             return

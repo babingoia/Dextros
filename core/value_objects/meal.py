@@ -1,3 +1,12 @@
+"""VOs de nutrição consumida no registro: Meal (CHO/gordura em gramas) e
+MealPeriod (período da refeição + Meal opcional aninhado).
+
+Diferença central para o Food: Meal representa o QUE FOI COMIDO (gramas
+inteiras, round no parse) e Food é a referência POR 100 G da tabela (float).
+A conversão entre os dois é o Meal.from_food. MealPeriod preserva o
+meal_period original para as matrizes Dia x Refeição seguirem funcionando.
+"""
+
 import math
 from dataclasses import dataclass
 
@@ -142,6 +151,10 @@ class MealPeriod:
     @classmethod
     def parse(cls, meal_period_value: str | None = None,
               meal: Meal | None = None) -> "MealPeriod":
+        """Entry point do VO. Normaliza o período (strip + lower) e aceita None
+        tanto para o período (registro sem refeição próxima) quanto para a
+        nutrição aninhada (refeição sem CHO/gordura registrados).
+        """
         if not isinstance(meal_period_value, str | None):
             raise TypeError(f"Invalid time for MealPeriod: {type(meal_period_value)}")
 

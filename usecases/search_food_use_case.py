@@ -1,3 +1,11 @@
+"""Use case de busca de alimentos da tabela TACO.
+
+Puro e sem porta nova: recebe a lista de Foods já carregada pelo composition
+root (mesmo padrão do GetMealListUseCase). Toda a regra de matching (sem
+acento/pontuação, ranking por relevância) vive aqui; a fonte de dados fica
+isolada no TacoRepository, na camada de adapters.
+"""
+
 import unicodedata
 from logging import getLogger
 
@@ -57,6 +65,11 @@ class SearchFoodUseCase:
 
     def execute(self, query: str, category: str | None = None,
                 limit: int = DEFAULT_LIMIT) -> FoodSearchResult:
+        """Executa a busca. Query vazia devolve a tabela completa (ou a
+        categoria filtrada) em ordem alfabética — o popup abre navegável.
+        Query preenchida devolve os melhores matches por ranking (prefixo >
+        início de palavra > contém), com empate resolvido alfabeticamente.
+        """
         if not isinstance(query, str):
             raise TypeError(f"Invalid type for query: {type(query)}")
 

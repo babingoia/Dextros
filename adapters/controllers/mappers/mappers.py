@@ -1,8 +1,19 @@
+"""Mappers de apresentação: ViewModels <-> DTOs e convenções de exibição.
+
+Aqui vive a responsabilidade de normalizar texto de campo para domínio (vírgula
+decimal brasileira, vazio -> None) e de formatar domínio para tela. Os helpers
+de soma de gramas atendem o fluxo multi-alimento da busca TACO.
+"""
+
+from logging import getLogger
+
 from usecases.dtos.matrix_data import MatrixData
 from usecases.dtos.card_output import CardOutput
 from usecases.dtos.cardDTOInput import CardDTOInput
 from adapters.controllers.dtos.matrix_data_view_model import MatrixDataViewModel
 from adapters.controllers.dtos.card_view_model import CardViewModel
+
+logger = getLogger(__name__)
 
 
 def strip_view_model(data: CardViewModel) -> CardViewModel:
@@ -119,6 +130,7 @@ def parse_brazilian_decimal(text):
     try:
         return float(raw)
     except ValueError:
+        logger.debug(f"Invalid grams text treated as absent: {text!r}")
         return None
 
 

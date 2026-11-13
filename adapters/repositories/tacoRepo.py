@@ -1,3 +1,11 @@
+"""Repositório read-only da tabela TACO (db/TACO.json, asset da app).
+
+Responsabilidades deste módulo: carregar o JSON uma vez e cachear, normalizar
+as convenções da fonte ("NA"/"Tr"/"*"/"" -> None, ruído negativo pequeno ->
+0.0) e entregar Foods prontos para o composition root injetar nos use cases de
+busca. Erros de dados corruptos sobem como FoodDataError.
+"""
+
 import json
 from logging import getLogger
 from pathlib import Path
@@ -75,6 +83,10 @@ class TacoRepository:
         return list(self._foods)
 
     def _load(self) -> list[Food]:
+        """Carrega e parseia o JSON inteiro. Falha de arquivo/JSON ou de
+        qualquer entrada individual levanta FoodDataError — dado corrompido
+        não entra no app como 'melhor esforço'.
+        """
         logger.info(f"Loading TACO table from {self._path}")
 
         try:

@@ -1,3 +1,12 @@
+"""VO Food: referência nutricional de um alimento da tabela TACO.
+
+Carrega os valores POR 100 G na precisão original da tabela (float, sem
+arredondamento — arredondar é regra do Meal, que representa o consumido).
+Campos nutricionais podem ser None (dado indisponível na fonte); a conversão
+de "NA"/"Tr"/"" para None acontece na fonte de dados (TacoRepository), não
+aqui.
+"""
+
 import math
 from dataclasses import dataclass
 

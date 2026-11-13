@@ -1,3 +1,9 @@
+"""Controller da rota calculate_nutrition: repassa (Food, gramas) ao use case.
+
+Mantém o padrão rota -> controller -> use case do app inteiro, inclusive para
+cálculos puros sem IO.
+"""
+
 from logging import getLogger
 from usecases.calculate_nutrition_use_case import CalculateNutritionUseCase
 from core.value_objects.meal import Meal
@@ -14,6 +20,9 @@ class CalculateNutritionController(IController[dict, Meal | None]):
         self.calculate_nutrition_use_case = calculate_nutrition_use_case
 
     def execute(self, request: dict) -> Meal | None:
+        """Extrai "food" e "grams" do request e devolve o Meal consumido
+        (ou None quando o alimento não tem CHO nem gordura na tabela).
+        """
         logger.debug(f"Calculate nutrition request got: {request}")
 
         try:

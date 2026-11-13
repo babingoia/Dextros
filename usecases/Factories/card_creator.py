@@ -1,3 +1,10 @@
+"""Factory concreta de Card: monta o agregado de VOs a partir do CardDTOInput.
+
+É AQUI, na fronteira do domínio, que a nutrição consumida (Meal) nasce e entra
+aninhada no MealPeriod — a UI e os DTOs continuam planos e nunca manipulam o
+dict aninhado. Qualquer VO inválido vira CardCreationError.
+"""
+
 from datetime import datetime, timedelta
 from logging import getLogger
 
@@ -22,6 +29,10 @@ logger = getLogger(__name__)
 class CardCreator(ICardCreator):
     """Classe concreta que cria Cards á partir de um CardDTOInput."""
     def create_card(self, data: CardDTOInput) -> Card:
+        """Faz o parse de cada campo do DTO no seu VO e devolve o Card montado.
+        A nutrição (Meal.parse) é composta dentro do MealPeriod.parse neste
+        ponto único; levanta CardCreationError se qualquer VO rejeitar o dado.
+        """
         try:
             new_card_id = CardID.parse(data.card_id)
             new_card_date = Date.parse(data.card_date)
