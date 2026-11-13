@@ -81,8 +81,11 @@
 
     # Total acumulado no registro: feedback de cada "Adicionar" — quem come
     # mais de um alimento vê a conta crescer sem fechar o popup. Colapsado
-    # enquanto não há nada somado.
+    # enquanto não há nada somado. A MainView move esta linha para o RODAPÉ
+    # FIXO do dialog (set_footer): o conteúdo rolável tem altura máxima e a
+    # linha ficaria embaixo da dobra, invisível.
     Label:
+        id: total_line
         text: root.accumulated_text
         font_size: app_theme.font("field")
         bold: True

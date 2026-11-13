@@ -100,6 +100,13 @@
                         pos: self.pos
                         size: self.size
 
+            # Rodapé fixo: status que NÃO pode rolar pra fora da vista (ex.: o
+            # total acumulado da busca TACO). Vazio em dialogs que não o usam.
+            BoxLayout:
+                id: footer_holder
+                size_hint_y: None
+                height: self.minimum_height
+
             BoxLayout:
                 id: buttons_holder
                 size_hint_y: None

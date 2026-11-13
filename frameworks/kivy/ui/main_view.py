@@ -140,6 +140,10 @@ class MainView(BoxLayout):
         # O toque na linha abre um popup de detalhes EMPILHADO sobre este dialog.
         # Se a busca fechar, o detalhe não pode sobreviver sem o pai.
         self._active_food_search_dialog.bind(on_dismiss=lambda *a: content.close_detail())
+        # Total acumulado vai para o RODAPÉ FIXO do dialog: o conteúdo rolável
+        # tem altura máxima e a linha ficaria escondida embaixo da dobra. O
+        # kv da linha fica no FoodSearchContent (property accumulated_text).
+        self._active_food_search_dialog.set_footer(content.ids.total_line)
         # Contexto inicial do total: se o registro já tem valores digitados ou buscados,
         # a linha de total nasce mostrando-os (a nutrição é opt-in — com o toggle
         # desligado os campos são ignorados e a linha começa vazia).

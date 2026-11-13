@@ -51,6 +51,9 @@ class AppDialog(ModalView):
         Window.bind(size=self._on_window_size)
         self.bind(auto_height=lambda *a: self._compute_size())
         self.ids.content_holder.bind(minimum_height=self._update_scroll_height)
+        # O rodapé muda de altura quando o status aparece/some (linha colapsável)
+        # — a altura do card precisa acompanhar.
+        self.ids.footer_holder.bind(height=self._update_scroll_height)
         self._compute_size()
         if content:
             self.set_content(content)
@@ -62,6 +65,20 @@ class AppDialog(ModalView):
         holder = self.ids.content_holder
         holder.clear_widgets()
         holder.add_widget(widget)
+        return self
+
+    def set_footer(self, widget):
+        """Área fixa entre o conteúdo rolável e a barra de botões: status que
+        não pode rolar para fora da vista (o conteúdo rolável tem altura
+        máxima, e o que passa do limite fica embaixo da dobra). O widget pode
+        vir atachado a outro layout (ex.: declarado no kv do conteúdo) — o
+        reparenting aqui faz o remove_widget antes do add_widget."""
+        holder = self.ids.footer_holder
+        holder.clear_widgets()
+        if widget.parent is not None:
+            widget.parent.remove_widget(widget)
+        holder.add_widget(widget)
+        self._update_scroll_height()
         return self
 
     def set_buttons(self, buttons):
@@ -116,6 +133,7 @@ class AppDialog(ModalView):
                 app_theme.space("lg") * 2                        # padding vertical
                 + app_theme.widget("section_title_height")       # título
                 + app_theme.border("separator") * 2              # separadores
+                + self.ids.footer_holder.height                  # rodapé fixo
                 + app_theme.widget("button_height")              # barra de botões
                 + app_theme.space("md") * 3                      # spacing entre seções
             )
