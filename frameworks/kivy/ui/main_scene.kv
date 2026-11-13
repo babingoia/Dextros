@@ -301,14 +301,24 @@
                                 values: root.available_meals
                                 text: root.actual_meal
 
+                            # Pergunta + toggle na MESMA linha: os dois preenchem
+                            # a altura de toque (48dp), então o título e o botão
+                            # ficam alinhados verticalmente. Causa do botão
+                            # "flutuando" acima do texto: filho de altura fixa em
+                            # BoxLayout horizontal encosta no RODAPÉ da linha
+                            # (SectionTitle tem height fixo de 32dp) enquanto o
+                            # botão preenchia os 48dp inteiros — os centros não
+                            # batiam. O size_hint_y: 1 sobrepõe a altura fixa da
+                            # rule e o valign: middle do SectionTitle centra o
+                            # texto na linha.
                             BoxLayout:
                                 size_hint_y: None
-                                height: app_theme.widget("input_height")
+                                height: app_theme.widget("touch_target")
                                 spacing: app_theme.space("md")
 
-                                FieldLabel:
+                                SectionTitle:
                                     text: "Registrar carboidratos e gorduras?"
-                                    size_hint_x: 1
+                                    size_hint_y: 1
 
                                 NutritionToggleButton:
                                     id: nutrition_toggle
