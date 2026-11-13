@@ -8,7 +8,9 @@
         cols: 2
         size_hint_y: None
         height: self.minimum_height
-        row_default_height: app_theme.widget("row_height")
+        # 48dp por linha (input_height): as mini-tabelas CHO/Gordura da última
+        # linha têm rótulo em cima do valor e precisam do dobro do row_height antigo.
+        row_default_height: app_theme.widget("input_height")
         row_force_default: True
         spacing: [app_theme.space("xl"), app_theme.space("row")]
 
@@ -126,12 +128,13 @@
                 text_size: self.size
                 valign: "middle"
 
-        # Nutrição consumida no período — lado a lado, na linha abaixo de Refeição.
-        # Valores vazios = nutrição não registrada nesse card.
+        # Última linha: Dextro na primeira coluna (era um bloco isolado embaixo do
+        # grid, desperdiçando metade da largura) e, na segunda coluna, CHO e
+        # Gordura dividem a metade direita — 1/4 do grid cada, rótulo sobre valor.
         BoxLayout:
             spacing: app_theme.space("sm")
             Label:
-                text: "CHO:"
+                text: "Dextro:"
                 bold: True
                 color: app_theme.color("text_secondary")
                 size_hint_x: None
@@ -140,57 +143,57 @@
                 text_size: self.size
                 valign: "middle"
             Label:
-                id: carboidratos_value
+                id: dextro_value
                 text: ""
-                color: app_theme.color("text_primary")
+                bold: True
+                font_size: app_theme.font("title")
+                color: app_theme.color("success")
                 halign: "left"
                 text_size: self.size
                 valign: "middle"
 
         BoxLayout:
-            spacing: app_theme.space("sm")
-            Label:
-                text: "Gordura:"
-                bold: True
-                color: app_theme.color("text_secondary")
-                size_hint_x: None
-                width: app_theme.widget("field_label_width")
-                halign: "right"
-                text_size: self.size
-                valign: "middle"
-            Label:
-                id: gorduras_value
-                text: ""
-                color: app_theme.color("text_primary")
-                halign: "left"
-                text_size: self.size
-                valign: "middle"
+            spacing: app_theme.space("md")
 
-    # Dextro em destaque, mas alinhado como os demais campos
-    BoxLayout:
-        size_hint_y: None
-        height: app_theme.widget("row_height")
-        spacing: app_theme.space("sm")
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    text: "CHO:"
+                    bold: True
+                    font_size: app_theme.font("caption")
+                    color: app_theme.color("text_secondary")
+                    size_hint_y: None
+                    height: app_theme.widget("field_label_height")
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                Label:
+                    id: carboidratos_value
+                    text: ""
+                    color: app_theme.color("text_primary")
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
 
-        Label:
-            text: "Dextro:"
-            bold: True
-            color: app_theme.color("text_secondary")
-            size_hint_x: None
-            width: app_theme.widget("field_label_width")
-            halign: "right"
-            text_size: self.size
-            valign: "middle"
-
-        Label:
-            id: dextro_value
-            text: ""
-            bold: True
-            font_size: app_theme.font("title")
-            color: app_theme.color("success")
-            halign: "left"
-            text_size: self.size
-            valign: "middle"
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    text: "Gordura:"
+                    bold: True
+                    font_size: app_theme.font("caption")
+                    color: app_theme.color("text_secondary")
+                    size_hint_y: None
+                    height: app_theme.widget("field_label_height")
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                Label:
+                    id: gorduras_value
+                    text: ""
+                    color: app_theme.color("text_primary")
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
 
     # Observação em bloco full-width, altura por conteúdo
     BoxLayout:
