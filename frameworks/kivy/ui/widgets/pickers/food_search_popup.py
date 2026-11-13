@@ -50,11 +50,16 @@ class FoodSearchContent(BoxLayout):
     RecycleView. A lista abre com a tabela COMPLETA (decisão de produto, mobile
     first) e filtra conforme o usuário digita; o toque numa linha abre o popup
     de detalhes, onde ficam a quantidade e o botão Adicionar. A fonte de dados é
-    injetada (search_handler callable) — o widget não conhece router nem use case."""
+    injetada (search_handler callable) — o widget não conhece router nem use case.
+
+    Adicionar FECHA só o popup de detalhes: quem come mais de um alimento volta
+    pra lista e adiciona o próximo. A linha de total no rodapé (accumulated_text)
+    mostra o que já foi somado ao registro a cada Adicionar."""
 
     __events__ = ("on_use_food",)
 
     categories = ListProperty([])
+    accumulated_text = StringProperty("")
 
     SEARCH_DEBOUNCE_SECONDS = 0.3
 
@@ -118,9 +123,20 @@ class FoodSearchContent(BoxLayout):
             self._detail_dialog = None
 
     def close_detail(self):
-        """Chamado quando o dialog de busca fecha (Cancelar) — o detalhe
+        """Chamado quando o dialog de busca fecha (Fechar) — o detalhe
         empilhado não pode sobreviver sem o pai."""
         self._close_detail()
+
+    def set_accumulated(self, carb_text, fat_text):
+        """Atualiza a linha de total do registro (rodapé do popup). Recebe os
+        textos crus dos campos do formulário — o mesmo que o usuário vê lá.
+        Sem nada acumulado, a linha some."""
+        parts = []
+        if carb_text and carb_text.strip():
+            parts.append(f"CHO {carb_text.strip()} g")
+        if fat_text and fat_text.strip():
+            parts.append(f"Gordura {fat_text.strip()} g")
+        self.accumulated_text = ("No registro: " + " · ".join(parts)) if parts else ""
 
     def _on_detail_confirm(self, content, food, grams):
         self._close_detail()

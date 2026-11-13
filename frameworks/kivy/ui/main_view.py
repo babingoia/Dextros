@@ -15,6 +15,7 @@ from frameworks.kivy.ui.widgets.graphs.screens.graph_screen import GraphScreen
 from frameworks.kivy.ui.widgets.pickers.food_search_popup import FoodSearchContent
 from infrastructure.path_provider_service import get_asset_path
 from adapters.controllers.dtos.card_view_model import CardViewModel
+from adapters.controllers.mappers.mappers import sum_grams_for_input
 from frameworks.kivy.ui.widgets.popup.dialog import AppDialog, DialogMessage
 
 Builder.load_file(get_asset_path('frameworks/kivy/ui/main_scene.kv'))
@@ -130,12 +131,20 @@ class MainView(BoxLayout):
             title="Buscar alimento — Tabela TACO",
             content=content,
             buttons=[
-                ("Cancelar", "primary", lambda *a: self._active_food_search_dialog.dismiss()),
+                # "Fechar" e não "Cancelar": o popup é um seletor de alimentos e
+                # NÃO fecha quando um alimento é adicionado — cada Adicionar já
+                # somou no formulário, não há nada a cancelar.
+                ("Fechar", "primary", lambda *a: self._active_food_search_dialog.dismiss()),
             ],
         )
         # O toque na linha abre um popup de detalhes EMPILHADO sobre este dialog.
-        # Se a busca fechar (Cancelar), o detalhe não pode sobreviver sem o pai.
+        # Se a busca fechar, o detalhe não pode sobreviver sem o pai.
         self._active_food_search_dialog.bind(on_dismiss=lambda *a: content.close_detail())
+        # Contexto inicial do total: se o registro já tem valores digitados ou buscados,
+        # a linha de total nasce mostrando-os (a nutrição é opt-in — com o toggle
+        # desligado os campos são ignorados e a linha começa vazia).
+        if self.ids.nutrition_toggle.state == "down":
+            content.set_accumulated(self.ids.carb_input.text, self.ids.fat_input.text)
         self._active_food_search_dialog.open()
 
     def _on_food_selected(self, content, food, grams):
@@ -150,21 +159,32 @@ class MainView(BoxLayout):
 
         if result is None:
             # Alimento sem nenhum dos dois nutrientes na tabela (NA/Tr) —
-            # popup continua aberto para o usuário escolher outro alimento.
+            # o popup de busca continua aberto para escolher outro alimento.
             self.show_error(
                 f"\"{food.description}\" não tem dados de carboidratos ou gorduras "
                 "na tabela TACO. Escolha outro alimento ou digite os valores manualmente."
             )
             return
 
-        if self._active_food_search_dialog is not None:
-            self._active_food_search_dialog.dismiss()
-            self._active_food_search_dialog = None
-
         # A busca destrava a seção sozinha ao preencher
         self.ids.nutrition_toggle.state = "down"
-        self.ids.carb_input.text = "" if result.carbohydrate_g is None else str(result.carbohydrate_g)
-        self.ids.fat_input.text = "" if result.fat_g is None else str(result.fat_g)
+
+        # UMA refeição é MAIS DE UM alimento: somar ao que já está no campo,
+        # nunca substituir. Nutriente ausente na tabela (None) não contribui —
+        # o campo mantém o valor que já tinha.
+        if result.carbohydrate_g is not None:
+            self.ids.carb_input.text = sum_grams_for_input(
+                self.ids.carb_input.text, result.carbohydrate_g
+            )
+        if result.fat_g is not None:
+            self.ids.fat_input.text = sum_grams_for_input(
+                self.ids.fat_input.text, result.fat_g
+            )
+
+        # O popup de busca PERMANECE aberto (só o detalhe fecha, lá no
+        # FoodSearchContent): o usuário volta pra lista e adiciona o próximo
+        # alimento. A linha de total dá o feedback da soma.
+        content.set_accumulated(self.ids.carb_input.text, self.ids.fat_input.text)
 
     def add_graph_screen(self, name, title, graph_widget, refresh_callback=None):
         """

@@ -78,3 +78,18 @@
         text_size: self.size
         halign: "left"
         valign: "middle"
+
+    # Total acumulado no registro: feedback de cada "Adicionar" — quem come
+    # mais de um alimento vê a conta crescer sem fechar o popup. Colapsado
+    # enquanto não há nada somado.
+    Label:
+        text: root.accumulated_text
+        font_size: app_theme.font("field")
+        bold: True
+        color: app_theme.color("success")
+        size_hint_y: None
+        height: app_theme.widget("field_label_height") if root.accumulated_text else 0
+        opacity: 1 if root.accumulated_text else 0
+        text_size: self.size
+        halign: "left"
+        valign: "middle"
